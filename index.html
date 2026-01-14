@@ -111,11 +111,13 @@
           const [newItem, setNewItem] = useState('');
           const [newQuantity, setNewQuantity] = useState('1');
           const [newPrice, setNewPrice] = useState('');
+          const [newAisle, setNewAisle] = useState('');
           const [selectedStore, setSelectedStore] = useState('Walmart');
           const [editingId, setEditingId] = useState(null);
           const [editText, setEditText] = useState('');
           const [editQuantity, setEditQuantity] = useState('');
           const [editPrice, setEditPrice] = useState('');
+          const [editAisle, setEditAisle] = useState('');
           const [editStore, setEditStore] = useState('');
           const [showMenu, setShowMenu] = useState(false);
           const [searchQuery, setSearchQuery] = useState('');
@@ -127,16 +129,27 @@
             const saved = localStorage.getItem('groceryItems');
             const savedPantry = localStorage.getItem('pantryItems');
             if (saved) {
-              const loadedItems = JSON.parse(saved);
-              const updatedItems = loadedItems.map(item => ({
-                ...item,
-                store: item.store || 'Walmart',
-                price: item.price || ''
-              }));
-              setItems(updatedItems);
+              try {
+                const loadedItems = JSON.parse(saved);
+                const updatedItems = loadedItems.map(item => ({
+                  ...item,
+                  store: item.store || 'Walmart',
+                  price: item.price || '',
+                  aisle: item.aisle || ''
+                }));
+                setItems(updatedItems);
+              } catch (e) {
+                console.error('Error loading items:', e);
+              }
             }
             if (savedPantry) {
-              setPantryItems(JSON.parse(savedPantry));
+              try {
+                const loadedPantry = JSON.parse(savedPantry);
+                console.log('Loaded pantry from storage:', loadedPantry);
+                setPantryItems(loadedPantry);
+              } catch (e) {
+                console.error('Error loading pantry:', e);
+              }
             }
           }, []);
 
@@ -145,6 +158,7 @@
           }, [items]);
 
           useEffect(() => {
+            console.log('Saving pantry to storage:', pantryItems);
             localStorage.setItem('pantryItems', JSON.stringify(pantryItems));
           }, [pantryItems]);
 
@@ -160,31 +174,78 @@
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet);
                 
-                const newPantryItems = jsonData.map((row, index) => ({
-                  id: Date.now() + index,
-                  name: row.Item || row.item || row.Name || row.name || '',
-                  price: row.Price || row.price || ''
-                })).filter(item => item.name);
+                console.log('Raw imported data:', jsonData);
+                console.log('Number of rows:', jsonData.length);
+                
+                if (jsonData.length === 0) {
+                  alert('No data found in Excel file. Please make sure your file has data.');
+                  return;
+                }
 
-                setPantryItems([...pantryItems, ...newPantryItems]);
-                alert('Successfully imported ' + newPantryItems.length + ' items!');
+                const newPantryItems = [];
+                jsonData.forEach((row, index) => {
+                  const itemName = String(row.Item || row.item || row.Name || row.name || '').trim();
+                  const itemPrice = String(row.Price || row.price || '').trim();
+                  const itemAisle = String(row.Aisle || row.aisle || '').trim();
+                  
+                  if (itemName) {
+                    const item = {
+                      id: Date.now() + index,
+                      name: itemName,
+                      price: itemPrice,
+                      aisle: itemAisle
+                    };
+                    console.log('Adding pantry item:', item);
+                    newPantryItems.push(item);
+                  }
+                });
+
+                console.log('Processed pantry items:', newPantryItems);
+                
+                if (newPantryItems.length === 0) {
+                  alert('No valid items found. Please make sure your Excel has:\n- A column named "Item" or "Name"\n- Optional columns: "Price" and "Aisle"');
+                  return;
+                }
+
+                const updatedPantry = [...pantryItems, ...newPantryItems];
+                setPantryItems(updatedPantry);
+                
+                let message = 'Successfully imported ' + newPantryItems.length + ' items!\n\n';
+                message += 'Sample items:\n';
+                newPantryItems.slice(0, 3).forEach(item => {
+                  message += '- ' + item.name;
+                  if (item.price) message += ' ($' + item.price + ')';
+                  if (item.aisle) message += ' [Aisle ' + item.aisle + ']';
+                  message += '\n';
+                });
+                
+                alert(message);
+                e.target.value = '';
               } catch (error) {
-                alert('Error reading file. Please make sure it is a valid Excel file with Item and Price columns.');
+                console.error('Import error:', error);
+                alert('Error reading file: ' + error.message + '\n\nPlease make sure your Excel file has columns named:\n- Item (or Name)\n- Price (optional)\n- Aisle (optional)');
               }
+            };
+            reader.onerror = (error) => {
+              console.error('File read error:', error);
+              alert('Error reading file. Please try again.');
             };
             reader.readAsArrayBuffer(file);
           };
 
           const addItemFromPantry = (pantryItem) => {
+            console.log('Adding item from pantry:', pantryItem);
             const item = {
               id: Date.now(),
               name: pantryItem.name,
               quantity: '1',
               price: pantryItem.price || '',
+              aisle: pantryItem.aisle || '',
               store: selectedStore,
               checked: false,
               timestamp: new Date().toISOString()
             };
+            console.log('Created item:', item);
             setItems([item, ...items]);
             setSearchQuery('');
           };
@@ -196,14 +257,17 @@
                 name: newItem.trim(),
                 quantity: newQuantity,
                 price: newPrice,
+                aisle: newAisle,
                 store: selectedStore,
                 checked: false,
                 timestamp: new Date().toISOString()
               };
+              console.log('Adding manual item:', item);
               setItems([item, ...items]);
               setNewItem('');
               setNewQuantity('1');
               setNewPrice('');
+              setNewAisle('');
             }
           };
 
@@ -228,6 +292,7 @@
             setEditText(item.name);
             setEditQuantity(item.quantity);
             setEditPrice(item.price || '');
+            setEditAisle(item.aisle || '');
             setEditStore(item.store);
           };
 
@@ -235,7 +300,7 @@
             if (editText.trim()) {
               setItems(items.map(item =>
                 item.id === editingId
-                  ? { ...item, name: editText.trim(), quantity: editQuantity, price: editPrice, store: editStore }
+                  ? { ...item, name: editText.trim(), quantity: editQuantity, price: editPrice, aisle: editAisle, store: editStore }
                   : item
               ));
             }
@@ -265,9 +330,19 @@
             return sum + (price * qty);
           }, 0);
 
-          const filteredPantry = pantryItems.filter(item =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase())
-          );
+          const filteredPantry = searchQuery.length >= 3 
+            ? pantryItems.filter(item => {
+                const searchLower = searchQuery.toLowerCase();
+                const nameLower = item.name.toLowerCase();
+                const matches = nameLower.includes(searchLower);
+                console.log('Searching:', searchLower, 'in', nameLower, '=', matches);
+                return matches;
+              })
+            : [];
+
+          console.log('Current pantry items:', pantryItems.length);
+          console.log('Search query:', searchQuery);
+          console.log('Filtered results:', filteredPantry.length);
 
           return (
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
@@ -292,7 +367,7 @@
                               clearChecked();
                               setShowMenu(false);
                             }}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700"
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 rounded-t-lg"
                           >
                             Clear Purchased
                           </button>
@@ -310,7 +385,7 @@
                               setShowPantry(!showPantry);
                               setShowMenu(false);
                             }}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700"
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 rounded-b-lg"
                           >
                             {showPantry ? 'Hide Pantry' : 'Show Pantry'}
                           </button>
@@ -324,7 +399,9 @@
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <Package className="w-5 h-5 text-blue-600" />
-                          <h2 className="text-lg font-semibold text-gray-800">Pantry</h2>
+                          <h2 className="text-lg font-semibold text-gray-800">
+                            Pantry ({pantryItems.length} items)
+                          </h2>
                         </div>
                         <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm">
                           <Upload className="w-4 h-4" />
@@ -337,43 +414,68 @@
                           />
                         </label>
                       </div>
-                      <div className="relative mb-3">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search pantry items..."
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="max-h-60 overflow-y-auto space-y-2">
-                        {filteredPantry.length === 0 ? (
-                          <p className="text-gray-500 text-sm text-center py-4">
-                            {searchQuery ? 'No items found' : 'No pantry items. Import an Excel file to get started!'}
-                          </p>
-                        ) : (
-                          filteredPantry.map(item => (
-                            <div
-                              key={item.id}
-                              className="flex items-center justify-between p-2 bg-white rounded border border-gray-200 hover:border-blue-300 transition-colors"
-                            >
-                              <div className="flex-1">
-                                <span className="text-gray-800">{item.name}</span>
-                                {item.price && (
-                                  <span className="ml-2 text-sm text-gray-500">${item.price}</span>
-                                )}
-                              </div>
-                              <button
-                                onClick={() => addItemFromPantry(item)}
-                                className="text-blue-600 hover:text-blue-700 p-1"
-                              >
-                                <Plus className="w-5 h-5" />
-                              </button>
+                      
+                      {pantryItems.length === 0 && (
+                        <div className="text-center py-6 text-gray-500">
+                          <p className="mb-2">No pantry items yet.</p>
+                          <p className="text-sm">Import an Excel file with columns: Item, Price, Aisle</p>
+                        </div>
+                      )}
+                      
+                      {pantryItems.length > 0 && (
+                        <>
+                          <div className="relative mb-3">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder="Search pantry items (type 3+ letters)..."
+                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          {searchQuery.length >= 3 && (
+                            <div className="max-h-60 overflow-y-auto space-y-2">
+                              {filteredPantry.length === 0 ? (
+                                <p className="text-gray-500 text-sm text-center py-4">
+                                  No items found matching "{searchQuery}"
+                                </p>
+                              ) : (
+                                filteredPantry.map(item => (
+                                  <div
+                                    key={item.id}
+                                    className="flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:border-blue-300 transition-colors"
+                                  >
+                                    <div className="flex-1">
+                                      <span className="text-gray-800 font-medium">{item.name}</span>
+                                      <div className="flex gap-3 text-sm text-gray-500 mt-1">
+                                        {item.price && <span className="font-semibold text-green-600">${item.price}</span>}
+                                        {item.aisle && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Aisle {item.aisle}</span>}
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => addItemFromPantry(item)}
+                                      className="text-blue-600 hover:text-blue-700 p-2 hover:bg-blue-50 rounded transition-colors"
+                                    >
+                                      <Plus className="w-5 h-5" />
+                                    </button>
+                                  </div>
+                                ))
+                              )}
                             </div>
-                          ))
-                        )}
-                      </div>
+                          )}
+                          {searchQuery.length > 0 && searchQuery.length < 3 && (
+                            <p className="text-gray-500 text-sm text-center py-4">
+                              Type at least 3 letters to search...
+                            </p>
+                          )}
+                          {searchQuery.length === 0 && (
+                            <p className="text-gray-500 text-sm text-center py-4">
+                              Start typing to search your {pantryItems.length} pantry items
+                            </p>
+                          )}
+                        </>
+                      )}
                     </div>
                   )}
 
@@ -403,6 +505,14 @@
                         onKeyPress={handleKeyPress}
                         placeholder="Price"
                         className="w-24 px-3 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      />
+                      <input
+                        type="text"
+                        value={newAisle}
+                        onChange={(e) => setNewAisle(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Aisle"
+                        className="w-20 px-3 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
                       <select
                         value={selectedStore}
@@ -437,9 +547,7 @@
                               <button
                                 onClick={() => toggleCheck(item.id)}
                                 className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-gray-300 hover:border-green-500 flex items-center justify-center transition-all"
-                              >
-                                <Check className="w-4 h-4 text-white opacity-0" />
-                              </button>
+                              ></button>
 
                               {editingId === item.id ? (
                                 <>
@@ -462,6 +570,13 @@
                                     onChange={(e) => setEditPrice(e.target.value)}
                                     className="w-20 px-2 py-1 border border-gray-300 rounded"
                                   />
+                                  <input
+                                    type="text"
+                                    value={editAisle}
+                                    onChange={(e) => setEditAisle(e.target.value)}
+                                    className="w-16 px-2 py-1 border border-gray-300 rounded"
+                                    placeholder="Aisle"
+                                  />
                                   <select
                                     value={editStore}
                                     onChange={(e) => setEditStore(e.target.value)}
@@ -481,7 +596,7 @@
                               ) : (
                                 <>
                                   <div className="flex-1">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 flex-wrap">
                                       <span className="text-lg text-gray-800">{item.name}</span>
                                       <span className="text-sm text-gray-500">× {item.quantity}</span>
                                       {item.price && (
@@ -490,95 +605,23 @@
                                         </span>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-1 mt-1">
-                                      <span className={
-                                        item.store === 'Walmart' ? 'text-blue-600' :
-                                        item.store === "Sam's Club" ? 'text-blue-700' :
-                                        item.store === 'Coquito' ? 'text-orange-600' :
-                                        'text-red-600'
-                                      }>
-                                        <StoreIcon store={item.store} />
-                                      </span>
-                                      <span className="text-xs text-gray-500">{item.store}</span>
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                      <div className="flex items-center gap-1">
+                                        <span className={
+                                          item.store === 'Walmart' ? 'text-blue-600' :
+                                          item.store === "Sam's Club" ? 'text-blue-700' :
+                                          item.store === 'Coquito' ? 'text-orange-600' :
+                                          'text-red-600'
+                                        }>
+                                          <StoreIcon store={item.store} />
+                                        </span>
+                                        <span className="text-xs text-gray-500">{item.store}</span>
+                                      </div>
+                                      {item.aisle && (
+                                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">
+                                          Aisle {item.aisle}
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
-                                  <button onClick={() => startEdit(item)} className="text-blue-600 hover:text-blue-700 p-1">
-                                    <Edit2 className="w-5 h-5" />
-                                  </button>
-                                  <button onClick={() => deleteItem(item.id)} className="text-red-600 hover:text-red-700 p-1">
-                                    <Trash2 className="w-5 h-5" />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {purchasedItems.length > 0 && (
-                      <div>
-                        <h2 className="text-lg font-semibold text-gray-700 mb-2">Purchased Items</h2>
-                        <div className="space-y-2">
-                          {purchasedItems.map(item => (
-                            <div
-                              key={item.id}
-                              className="flex items-center gap-3 p-4 rounded-lg border-2 bg-gray-50 border-gray-200"
-                            >
-                              <button
-                                onClick={() => toggleCheck(item.id)}
-                                className="flex-shrink-0 w-6 h-6 rounded-full border-2 bg-green-600 border-green-600 flex items-center justify-center"
-                              >
-                                <Check className="w-4 h-4 text-white" />
-                              </button>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg line-through text-gray-400">{item.name}</span>
-                                  <span className="text-sm text-gray-400">× {item.quantity}</span>
-                                  {item.price && (
-                                    <span className="text-sm font-semibold text-gray-400">
-                                      ${(parseFloat(item.price) * parseInt(item.quantity)).toFixed(2)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <button onClick={() => deleteItem(item.id)} className="text-red-600 hover:text-red-700 p-1">
-                                <Trash2 className="w-5 h-5" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {items.length === 0 && (
-                      <div className="text-center py-12 text-gray-400">
-                        <ShoppingCart className="w-16 h-16 mx-auto mb-3 opacity-50" />
-                        <p className="text-lg">Your grocery list is empty</p>
-                        <p className="text-sm">Add items to get started!</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {items.length > 0 && (
-                    <div className="mt-6 pt-4 border-t border-gray-200">
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold text-gray-700">Cart Total:</span>
-                        <span className="text-2xl font-bold text-green-600">${cartTotal.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="text-center text-sm text-gray-500">
-                  <p>Built with React • Data saved locally</p>
-                </div>
-              </div>
-            </div>
-          );
-        }
-
-        ReactDOM.render(<GroceryListApp />, document.getElementById('root'));
-    </script>
-</body>
-</html>
+                                  <button onClick={() => startEdit(item)} className="text-blue-600 hover:text-blue-700​​​​​​​​​​​​​​​​
