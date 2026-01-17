@@ -9,7 +9,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
@@ -17,7 +17,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* Custom profound soft shadow */
         .soft-depth {
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
         }
@@ -53,6 +52,7 @@
                 Menu: (<><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></>),
                 Search: (<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>),
                 Upload: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></>),
+                Download: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>),
                 Package: (<><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12"/></>),
             };
             return (
@@ -126,6 +126,23 @@
                 reader.readAsArrayBuffer(file);
             };
 
+            const exportToExcel = () => {
+                if (items.length === 0) return alert("List is empty!");
+                const dataToExport = items.map(item => ({
+                    Item: item.name,
+                    Quantity: item.quantity,
+                    Price: item.price || 0,
+                    Total: (parseFloat(item.price || 0) * item.quantity).toFixed(2),
+                    Aisle: item.aisle.replace(/[^a-zA-Z ]/g, "").trim(), // Remove emojis for cleaner excel
+                    Status: item.checked ? 'Purchased' : 'Pending'
+                }));
+                const ws = XLSX.utils.json_to_sheet(dataToExport);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Grocery List");
+                XLSX.writeFile(wb, "Mi_Lista_Grocery.xlsx");
+                setShowMenu(false);
+            };
+
             const addItem = () => {
                 if (!newItem.trim()) return;
                 const item = { id: Date.now(), name: newItem.trim(), quantity: parseFloat(newQuantity) || 1, price: newPrice, aisle: getAisleForItem(newItem), checked: false };
@@ -146,7 +163,7 @@
                 <div className="min-h-screen pb-32">
                     <div className="max-w-xl mx-auto p-4">
                         
-                        {/* Header: Profound Shadow */}
+                        {/* Header */}
                         <header className="rounded-3xl profound-shadow px-5 py-5 mb-8 text-white bg-gradient-to-br from-emerald-600 to-teal-800">
                             <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-3">
@@ -183,10 +200,14 @@
                             </div>
                         </header>
 
+                        {/* Menu Choice */}
                         {showMenu && (
                             <div className="mb-6 bg-white rounded-2xl profound-shadow border border-slate-50 overflow-hidden scale-in">
                                 <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
                                     <Icon name="Package" className="w-5 h-5 text-emerald-500" /> {showPantry ? 'Hide' : 'Show'} Pantry Manager
+                                </button>
+                                <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
+                                    <Icon name="Download" className="w-5 h-5 text-emerald-500" /> Export List to Excel
                                 </button>
                                 <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
                                     <Icon name="Check" className="w-5 h-5 text-emerald-500" /> Clear Checked Items
@@ -229,7 +250,7 @@
                             </div>
                         )}
 
-                        {/* Quick Input: Soft Depth */}
+                        {/* Quick Input Area - Shadow Removed from Button */}
                         <div className="bg-white rounded-3xl soft-depth p-4 mb-8 grid grid-cols-12 gap-3 border border-slate-100/50">
                             <input type="text" placeholder="Add an item..." value={newItem} onChange={e => setNewItem(e.target.value)} onKeyPress={e => e.key === 'Enter' && addItem()} className="col-span-12 sm:col-span-6 p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none transition-all"/>
                             <div className="col-span-6 sm:col-span-3 flex items-center bg-slate-50 rounded-2xl border border-slate-100 px-2">
@@ -237,10 +258,10 @@
                                 <span className="flex-1 text-center font-black text-xs">{newQuantity}</span>
                                 <button onClick={() => setNewQuantity(newQuantity + 1)} className="p-2 text-slate-400"><Icon name="Plus" className="w-4 h-4"/></button>
                             </div>
-                            <button onClick={addItem} className="col-span-6 sm:col-span-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl py-4 transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-lg shadow-emerald-200">Add Item</button>
+                            <button onClick={addItem} className="col-span-6 sm:col-span-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl py-4 transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-none">Add Item</button>
                         </div>
 
-                        {/* Main List Categories */}
+                        {/* List Categories */}
                         <div className="space-y-8">
                             {Object.entries(groupedByAisle).sort().map(([aisle, aisleItems]) => (
                                 <div key={aisle} className="scale-in">
@@ -263,7 +284,7 @@
                             ))}
                         </div>
 
-                        {/* Completed Section */}
+                        {/* Purchased */}
                         {items.some(i => i.checked) && (
                             <div className="mt-12 opacity-50">
                                 <h3 className="text-[10px] font-black mb-4 uppercase text-slate-300 tracking-[0.3em] px-2">Purchased</h3>
@@ -280,7 +301,7 @@
                         )}
                     </div>
 
-                    {/* Footer: Profound Shadow & Smaller Total */}
+                    {/* Footer Progress */}
                     {items.length > 0 && (
                         <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 py-4 px-8 z-40 shadow-[0_-15px_30px_-10px_rgba(0,0,0,0.08)]">
                             <div className="max-w-xl mx-auto flex justify-between items-center">
@@ -300,7 +321,7 @@
                         </div>
                     )}
 
-                    {/* Edit Modal: Profound Depth */}
+                    {/* Edit Modal - Shadow Removed from Save Button */}
                     {editingItem && (
                         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6">
                             <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm profound-shadow border border-slate-100 scale-in">
@@ -325,8 +346,8 @@
                                         </div>
                                     </div>
                                     <div className="flex gap-3 pt-4">
-                                        <button onClick={() => {setItems(items.map(i => i.id === editingItem.id ? {...editingItem, aisle: getAisleForItem(editingItem.name)} : i)); setEditingItem(null);}} className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-emerald-200 uppercase text-[10px] tracking-[0.2em] active:scale-95 transition-all">Save</button>
-                                        <button onClick={() => setEditingItem(null)} className="flex-1 bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all">Cancel</button>
+                                        <button onClick={() => {setItems(items.map(i => i.id === editingItem.id ? {...editingItem, aisle: getAisleForItem(editingItem.name)} : i)); setEditingItem(null);}} className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-[0.2em] active:scale-95 transition-all shadow-none">Save</button>
+                                        <button onClick={() => setEditingItem(null)} className="flex-1 bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all shadow-none">Cancel</button>
                                     </div>
                                     <button onClick={() => {setItems(items.filter(i => i.id !== editingItem.id)); setEditingItem(null);}} className="w-full py-2 text-red-400 text-[10px] font-black uppercase tracking-widest opacity-50 hover:opacity-100">Delete Item</button>
                                 </div>
