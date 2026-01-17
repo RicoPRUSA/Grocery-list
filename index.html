@@ -176,10 +176,11 @@
 
             return (
                 <div className="min-h-screen pb-32">
-                    <div className="max-w-xl mx-auto p-4">
+                    {/* Stretched container: px-2 on mobile, px-4 on sm+ */}
+                    <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4">
                         
-                        {/* Merged Header Search/Add */}
-                        <header className="rounded-3xl profound-shadow px-5 py-5 mb-8 text-white bg-gradient-to-br from-emerald-600 to-teal-800 sticky top-4 z-50">
+                        {/* Header: sticky and wider gutters */}
+                        <header className="rounded-[2rem] profound-shadow px-4 sm:px-6 py-5 mb-8 text-white bg-gradient-to-br from-emerald-600 to-teal-800 sticky top-2 z-50">
                             <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-3">
                                     <div className="bg-white/20 p-2 rounded-xl"><Icon name="ShoppingCart" className="w-5 h-5" /></div>
@@ -204,7 +205,6 @@
                                 
                                 {searchQuery.length > 0 && (
                                     <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 max-h-[70vh] overflow-y-auto scale-in">
-                                        {/* Option to add custom item */}
                                         <button 
                                             onClick={() => addItemManually(searchQuery)}
                                             className="w-full flex items-center gap-4 p-4 hover:bg-emerald-50 border-b border-slate-50 text-emerald-600 font-black text-sm text-left"
@@ -213,7 +213,6 @@
                                             <span>Add "{searchQuery}" to list</span>
                                         </button>
 
-                                        {/* Pantry results */}
                                         {pantryResults.map(p => (
                                             <button 
                                                 key={p.id} 
@@ -237,7 +236,7 @@
 
                         {/* Menu Choice */}
                         {showMenu && (
-                            <div className="mb-6 bg-white rounded-2xl profound-shadow border border-slate-50 overflow-hidden scale-in">
+                            <div className="mb-6 bg-white rounded-2xl profound-shadow border border-slate-50 overflow-hidden scale-in mx-1">
                                 <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
                                     <Icon name="Package" className="w-5 h-5 text-emerald-500" /> {showPantry ? 'Hide' : 'Show'} Pantry Manager
                                 </button>
@@ -253,9 +252,8 @@
                             </div>
                         )}
 
-                        {/* Pantry Database Section */}
                         {showPantry && (
-                            <div className="bg-white rounded-3xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in">
+                            <div className="bg-white rounded-3xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in mx-1">
                                 <div className="flex justify-between items-center mb-5">
                                     <h2 className="font-black text-slate-700 text-[10px] uppercase tracking-[0.2em]">Pantry Database</h2>
                                     <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer flex items-center gap-2 transition-all active:scale-95">
@@ -311,7 +309,7 @@
 
                         {/* Purchased */}
                         {items.some(i => i.checked) && (
-                            <div className="mt-12 opacity-50">
+                            <div className="mt-12 opacity-50 mb-10">
                                 <h3 className="text-[10px] font-black mb-4 uppercase text-slate-300 tracking-[0.3em] px-2">Purchased</h3>
                                 <div className="bg-white rounded-3xl border border-dashed border-slate-200 divide-y divide-slate-50 overflow-hidden">
                                     {items.filter(i => i.checked).map(item => (
@@ -326,10 +324,10 @@
                         )}
                     </div>
 
-                    {/* Footer Progress */}
+                    {/* Footer: px-4 for stretching out */}
                     {items.length > 0 && (
-                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 py-4 px-8 z-40 shadow-[0_-15px_30px_-10px_rgba(0,0,0,0.08)]">
-                            <div className="max-w-xl mx-auto flex justify-between items-center">
+                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 py-4 px-4 sm:px-8 z-40 shadow-[0_-15px_30px_-10px_rgba(0,0,0,0.08)]">
+                            <div className="max-w-2xl mx-auto flex justify-between items-center">
                                 <div>
                                     <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Estimated Total</p>
                                     <p className="text-xl font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p>
@@ -339,7 +337,7 @@
                                         <div className="h-full bg-emerald-500 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(items.filter(i => i.checked).length / items.length) * 100}%`}}></div>
                                     </div>
                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                        {items.filter(i => i.checked).length}/{items.length} Items Done
+                                        {items.filter(i => i.checked).length}/{items.length} Done
                                     </p>
                                 </div>
                             </div>
@@ -348,7 +346,7 @@
 
                     {/* Edit Modal */}
                     {editingItem && (
-                        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+                        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                             <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm profound-shadow border border-slate-100 scale-in">
                                 <h2 className="text-sm font-black text-slate-800 mb-6 uppercase tracking-widest">Edit Details</h2>
                                 <div className="space-y-6">
