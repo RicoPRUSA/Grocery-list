@@ -218,7 +218,7 @@ function render(){
     shoppingDiv.appendChild(aisleDiv);
   });
 
-  // --- Purchased Section ---
+  // --- Purchased Section (collapsed by default) ---
   const purchasedDiv = document.createElement('div');
   const purchasedHeader = document.createElement('div');
   purchasedHeader.className='bg-[#27395F] text-white px-2 py-1 cursor-pointer rounded-t mt-2';
@@ -248,7 +248,7 @@ function render(){
     jumpDiv.appendChild(btn);
   });
 
-  // --- Pantry List ---
+  // --- Pantry List (collapsed by default) ---
   pantryAisles.forEach(a=>{
     const aisleDiv = document.createElement('div'); aisleDiv.id='pantry-aisle-'+a;
     const header = document.createElement('div'); header.className='bg-blue-400 text-white px-2 py-1 cursor-pointer rounded-t mt-2'; header.textContent=a; aisleDiv.appendChild(header);
@@ -278,3 +278,4 @@ render();
 </script>
 </body>
 </html>
+
