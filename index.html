@@ -53,8 +53,8 @@
   <div class="flex-1 overflow-y-auto space-y-4 mb-24" id="lists-container">
     <div id="shopping-list"></div>
 
-    <!-- Pantry Quick-Jump Buttons -->
-    <div id="pantry-jump-buttons" class="flex gap-2 overflow-x-auto p-2 bg-gray-100 rounded mb-2 scrollbar-thin"></div>
+    <!-- Pantry Quick-Jump Buttons (pill style) -->
+    <div id="pantry-jump-buttons" class="flex gap-2 overflow-x-auto p-2 mb-2 scrollbar-thin"></div>
 
     <div id="pantry-list"></div>
   </div>
@@ -202,7 +202,7 @@ function render(){
     container.className='flex flex-col space-y-1 p-2';
     items.filter(i=>i.aisle===a).forEach(i=>{
       const row = document.createElement('div');
-      row.className='flex justify-between items-center p-1 bg-white rounded shadow-xl text-sm';
+      row.className='flex justify-between items-center p-2 bg-white rounded-lg shadow-xl text-sm';
       const name = document.createElement('span'); name.textContent=i.name; name.className='text-gray-900';
       const price = document.createElement('span'); price.textContent='$'+((parseFloat(i.price)||0)*parseInt(i.quantity||1)).toFixed(2); price.className='text-green-600';
       const qtyDiv = document.createElement('div'); 
@@ -228,7 +228,7 @@ function render(){
   purchasedHeader.onclick = ()=>purchasedItems.classList.toggle('hidden');
   items.filter(i=>i.checked).forEach(i=>{
     const row = document.createElement('div');
-    row.className='flex justify-between items-center p-1 bg-white rounded shadow-xl text-sm';
+    row.className='flex justify-between items-center p-2 bg-white rounded-lg shadow-xl text-sm';
     const name = document.createElement('span'); name.textContent=i.name; name.className='line-through text-gray-400';
     const price = document.createElement('span'); price.textContent='$'+((parseFloat(i.price)||0)*parseInt(i.quantity||1)).toFixed(2); price.className='line-through text-gray-400';
     const del = document.createElement('button'); del.textContent='✖'; del.className='text-red-600'; del.onclick=()=>deleteItem(i.id);
@@ -238,12 +238,12 @@ function render(){
   purchasedDiv.appendChild(purchasedHeader); purchasedDiv.appendChild(purchasedItems);
   shoppingDiv.appendChild(purchasedDiv);
 
-  // --- Pantry Quick-Jump Buttons ---
+  // --- Pantry Quick-Jump Buttons (pill style) ---
   const pantryAisles = [...new Set(pantry.map(p=>p.aisle||'Other'))];
   pantryAisles.forEach(a=>{
     const btn = document.createElement('button');
     btn.textContent=a;
-    btn.className='px-2 py-1 rounded bg-blue-300 text-white text-xs whitespace-nowrap';
+    btn.className='px-3 py-1 rounded-full bg-blue-300 text-white text-xs whitespace-nowrap';
     btn.onclick=()=>document.getElementById('pantry-aisle-'+a).scrollIntoView({behavior:'smooth',block:'start'});
     jumpDiv.appendChild(btn);
   });
@@ -252,10 +252,11 @@ function render(){
   pantryAisles.forEach(a=>{
     const aisleDiv = document.createElement('div'); aisleDiv.id='pantry-aisle-'+a;
     const header = document.createElement('div'); header.className='bg-blue-400 text-white px-2 py-1 cursor-pointer rounded-t mt-2'; header.textContent=a; aisleDiv.appendChild(header);
-    const container = document.createElement('div'); container.className='flex flex-col space-y-1 p-2';
+    const container = document.createElement('div'); container.className='flex flex-col space-y-1 p-2 hidden';
+    header.onclick=()=>container.classList.toggle('hidden');
     pantry.filter(p=>p.aisle===a).forEach(p=>{
       const row = document.createElement('div');
-      row.className='flex justify-between items-center p-1 bg-white rounded shadow-xl text-sm';
+      row.className='flex justify-between items-center p-2 bg-white rounded-lg shadow-xl text-sm';
       const name = document.createElement('span'); name.textContent=p.name; name.className='flex-1 text-gray-900';
       const priceInput = document.createElement('input'); 
       priceInput.type='number'; priceInput.step='0.01'; priceInput.value=p.price||''; 
