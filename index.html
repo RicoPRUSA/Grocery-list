@@ -5,91 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mission Groceries</title>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-<style>
-  body { font-family: sans-serif; margin:0; padding:0; background:#D7DBE2; }
-  .container { max-width: 800px; margin: 1rem auto; padding:1rem; }
-  h1,h3 { margin:0; }
-  .header, .add-item, .group { background:#fff; border:1px solid #27395F; border-radius:6px; margin-bottom:1rem; padding:0.5rem; }
-  .header { display:flex; justify-content:space-between; align-items:center; }
-  .header .cart-info { text-align:right; }
-  input, select, button { padding:0.3rem; margin:0.2rem; }
-  button { cursor:pointer; }
-  .item-row { display:flex; align-items:center; gap:0.5rem; padding:0.2rem; border-bottom:1px solid #ccc; }
-  .item-row button { padding:0.2rem; }
-  .checked { text-decoration: line-through; color: gray; }
-  .aisle-header { background:#27395F; color:white; padding:0.3rem; margin-top:0.5rem; }
-  .purchased { background:#e0e0e0; padding:0.3rem; border-radius:4px; }
-</style>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-slate-200 min-h-screen p-4">
 
-<div class="container">
+<div class="max-w-5xl mx-auto">
 
-  <div class="header">
-    <h1>Mission Groceries</h1>
-    <div class="cart-info">
-      <div id="cart-total">$0.00</div>
-      <div id="cart-count">0 items</div>
-      <button onclick="clearPurchased()">Clear Purchased</button>
-      <button onclick="clearAll()">Clear All</button>
-      <label style="cursor:pointer;">Import Pantry <input type="file" id="import-file" style="display:none;"></label>
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white">
+    <h1 class="text-2xl font-bold flex items-center gap-2">🛒 Mission Groceries</h1>
+    <div class="text-right">
+      <div id="cart-total" class="text-xl font-bold text-blue-300">$0.00</div>
+      <div id="cart-count" class="text-sm text-blue-200">0 items</div>
+      <div class="flex gap-2 mt-1">
+        <button onclick="clearPurchased()" class="px-2 py-1 text-sm bg-gray-700 rounded hover:bg-gray-600">Clear Purchased</button>
+        <button onclick="clearAll()" class="px-2 py-1 text-sm bg-red-600 rounded hover:bg-red-500">Clear All</button>
+        <label class="px-2 py-1 text-sm bg-gray-700 rounded hover:bg-gray-600 cursor-pointer">Import Pantry
+          <input type="file" id="import-file" style="display:none;">
+        </label>
+      </div>
     </div>
   </div>
 
-  <div class="add-item">
-    <input type="text" id="new-item" placeholder="Item name">
-    <input type="text" id="new-quantity" placeholder="Qty" value="1" style="width:50px">
-    <input type="number" id="new-price" placeholder="Price" style="width:70px">
-    <select id="new-store">
-      <option value="Walmart">Walmart</option>
-      <option value="Sam's Club">Sam's Club</option>
-      <option value="Coquito">Coquito</option>
-      <option value="Talin Market">Talin Market</option>
-    </select>
-    <button onclick="addItem()">Add</button>
-    <br>
-    <input type="text" id="search-pantry" placeholder="Search pantry (3+ letters)">
-    <div id="search-results" style="background:white; border:1px solid #27395F; max-height:150px; overflow-y:auto;"></div>
+  <!-- Add Item -->
+  <div class="mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white">
+    <div class="flex flex-wrap gap-2 mb-2">
+      <input type="text" id="new-item" placeholder="Item name" class="flex-1 px-3 py-2 rounded text-black">
+      <input type="text" id="new-quantity" value="1" class="w-16 px-2 py-2 rounded text-black">
+      <input type="number" id="new-price" placeholder="Price" class="w-20 px-2 py-2 rounded text-black">
+      <select id="new-store" class="px-2 py-2 rounded text-black">
+        <option value="Walmart">🛒 Walmart</option>
+        <option value="Sam's Club">📦 Sam's</option>
+        <option value="Coquito">🥥 Coquito</option>
+        <option value="Talin Market">🇨🇺 Talin</option>
+      </select>
+      <button onclick="addItem()" class="flex items-center gap-1 px-4 py-2 bg-blue-500 hover:bg-blue-400 rounded">➕ Add</button>
+    </div>
+    <input type="text" id="search-pantry" placeholder="Search pantry (3+ letters)" class="w-full px-3 py-2 rounded text-black">
+    <div id="search-results" class="absolute bg-white border border-[#27395F] max-h-60 overflow-y-auto mt-1 w-full rounded shadow hidden z-50"></div>
   </div>
 
+  <!-- Items List -->
   <div id="items-container"></div>
 
-  <div id="purchased-container" class="group"></div>
+  <!-- Purchased List -->
+  <div id="purchased-container" class="mb-4"></div>
 
 </div>
 
 <script>
-let items = [];
-let pantry = [];
+// ===== Data =====
+let items = JSON.parse(localStorage.getItem('groceryItems')||'[]');
+let pantry = JSON.parse(localStorage.getItem('pantryItems')||'[]');
 let editingId = null;
 
-// Aisle map
 const aisleMap = {
-  'Dairy': ['milk','eggs','cheese','butter','yogurt','cream','sour cream'],
-  'Produce': ['apple','banana','orange','lettuce','tomato','onion','potato','carrot','broccoli'],
-  'Meat': ['chicken','beef','pork','turkey','fish','salmon','steak','ground beef'],
-  'Bakery': ['bread','bagel','muffin','croissant','donut','cake','roll'],
-  'Frozen': ['ice cream','frozen','pizza','fries'],
-  'Pantry': ['rice','pasta','cereal','oatmeal','flour','sugar','salt'],
-  'Beverages': ['water','juice','soda','coffee','tea','beer','wine'],
-  'Snacks': ['chips','crackers','cookies','candy','popcorn'],
-  'Canned': ['soup','beans','corn','tuna','sauce'],
-  'Pharmacy': ['aspirin','bandage','vitamin','shaving cream','razor','medicine','toothpaste','shampoo']
+  'Dairy':['milk','eggs','cheese','butter','yogurt','cream','sour cream'],
+  'Produce':['apple','banana','orange','lettuce','tomato','onion','potato','carrot','broccoli'],
+  'Meat':['chicken','beef','pork','turkey','fish','salmon','steak','ground beef'],
+  'Bakery':['bread','bagel','muffin','croissant','donut','cake','roll'],
+  'Frozen':['ice cream','frozen','pizza','fries'],
+  'Pantry':['rice','pasta','cereal','oatmeal','flour','sugar','salt'],
+  'Beverages':['water','juice','soda','coffee','tea','beer','wine'],
+  'Snacks':['chips','crackers','cookies','candy','popcorn'],
+  'Canned':['soup','beans','corn','tuna','sauce'],
+  'Pharmacy':['aspirin','bandage','vitamin','shaving cream','razor','medicine','toothpaste','shampoo']
 };
 
-function getAisle(name){
+function getAisle(name){ 
   name = name.toLowerCase();
-  for(const [aisle, arr] of Object.entries(aisleMap)){
-    if(arr.some(a=>name.includes(a))) return aisle;
-  }
+  for(const [aisle, arr] of Object.entries(aisleMap)) if(arr.some(a=>name.includes(a))) return aisle;
   return 'Other';
 }
 
-// Load localStorage
-if(localStorage.getItem('groceryItems')) items = JSON.parse(localStorage.getItem('groceryItems'));
-if(localStorage.getItem('pantryItems')) pantry = JSON.parse(localStorage.getItem('pantryItems'));
-render();
-
+// ===== Import Pantry =====
 document.getElementById('import-file').addEventListener('change', function(e){
   const file = e.target.files[0];
   if(!file) return;
@@ -107,165 +96,117 @@ document.getElementById('import-file').addEventListener('change', function(e){
   reader.readAsArrayBuffer(file);
 });
 
-document.getElementById('search-pantry').addEventListener('input', function(e){
-  const q = e.target.value.trim().toLowerCase();
-  const resultsDiv = document.getElementById('search-results');
-  resultsDiv.innerHTML='';
-  if(q.length<3) return;
+// ===== Search Pantry =====
+const searchInput = document.getElementById('search-pantry');
+const searchResults = document.getElementById('search-results');
+
+searchInput.addEventListener('input', function(){
+  const q = searchInput.value.trim().toLowerCase();
+  searchResults.innerHTML='';
+  if(q.length<3){ searchResults.classList.add('hidden'); return; }
   const matches = pantry.filter(p=>p.name.toLowerCase().includes(q));
-  if(matches.length===0){ resultsDiv.innerHTML='<div style="padding:4px;">No matches</div>'; return;}
+  if(matches.length===0){ searchResults.innerHTML='<div class="p-2 text-sm text-gray-500">No matches</div>'; searchResults.classList.remove('hidden'); return;}
   matches.forEach(p=>{
     const div = document.createElement('div');
-    div.textContent = p.name+(p.price? ' $'+p.price:'');
-    div.style.padding='2px 4px';
-    div.style.cursor='pointer';
-    div.onclick = ()=>{ addPantryItem(p); document.getElementById('search-pantry').value=''; resultsDiv.innerHTML=''; };
-    resultsDiv.appendChild(div);
+    div.className='p-2 border-b cursor-pointer hover:bg-gray-100';
+    div.textContent = p.name+(p.price? ` $${p.price}`:'');
+    div.onclick = ()=>{ addPantryItem(p); searchInput.value=''; searchResults.classList.add('hidden'); };
+    searchResults.appendChild(div);
   });
+  searchResults.classList.remove('hidden');
 });
 
-function addPantryItem(p){
-  items.unshift({id:Date.now(), name:p.name, quantity:'1', price:p.price||'', aisle:getAisle(p.name), store:'Walmart', checked:false});
-  saveRender();
-}
+function addPantryItem(p){ items.unshift({id:Date.now(), name:p.name, quantity:'1', price:p.price||'', aisle:getAisle(p.name), store:'Walmart', checked:false}); saveRender(); }
 
+// ===== CRUD =====
 function addItem(){
-  const name = document.getElementById('new-item').value.trim();
-  const qty = document.getElementById('new-quantity').value.trim()||'1';
-  const price = document.getElementById('new-price').value.trim();
-  const store = document.getElementById('new-store').value;
+  const name=document.getElementById('new-item').value.trim();
+  const qty=document.getElementById('new-quantity').value.trim()||'1';
+  const price=document.getElementById('new-price').value.trim();
+  const store=document.getElementById('new-store').value;
   if(!name) return;
-  items.unshift({id:Date.now(), name:name, quantity:qty, price:price, aisle:getAisle(name), store:store, checked:false});
-  document.getElementById('new-item').value='';
-  document.getElementById('new-quantity').value='1';
-  document.getElementById('new-price').value='';
+  items.unshift({id:Date.now(), name, quantity:qty, price, aisle:getAisle(name), store, checked:false});
+  document.getElementById('new-item').value=''; document.getElementById('new-quantity').value='1'; document.getElementById('new-price').value='';
   saveRender();
 }
 
-function toggleCheck(id){
-  items = items.map(i=>i.id===id?{...i, checked:!i.checked}:i);
-  saveRender();
-}
-
-function deleteItem(id){
-  items = items.filter(i=>i.id!==id);
-  saveRender();
-}
-
+function toggleCheck(id){ items = items.map(i=>i.id===id?{...i,checked:!i.checked}:i); saveRender(); }
+function deleteItem(id){ items=items.filter(i=>i.id!==id); saveRender(); }
 function startEdit(item){
-  editingId = item.id;
+  editingId=item.id;
   const row = document.getElementById('item-'+item.id);
-  row.innerHTML = `
-    <input type="text" value="${item.name}" id="edit-name">
-    <input type="text" value="${item.quantity}" id="edit-qty" style="width:50px">
-    <input type="number" value="${item.price}" id="edit-price" style="width:70px">
-    <select id="edit-store">
-      <option value="Walmart">Walmart</option>
-      <option value="Sam's Club">Sam's Club</option>
-      <option value="Coquito">Coquito</option>
-      <option value="Talin Market">Talin Market</option>
-    </select>
-    <button onclick="saveEdit(${item.id})">Save</button>
-    <button onclick="cancelEdit()">Cancel</button>
-  `;
+  row.innerHTML=`<input type="text" id="edit-name" value="${item.name}" class="px-2 py-1">
+  <input type="text" id="edit-qty" value="${item.quantity}" class="w-16 px-2 py-1">
+  <input type="number" id="edit-price" value="${item.price}" class="w-20 px-2 py-1">
+  <select id="edit-store" class="px-2 py-1">
+    <option value="Walmart">🛒 Walmart</option>
+    <option value="Sam's Club">📦 Sam's</option>
+    <option value="Coquito">🥥 Coquito</option>
+    <option value="Talin Market">🇨🇺 Talin</option>
+  </select>
+  <button onclick="saveEdit(${item.id})">Save</button>
+  <button onclick="cancelEdit()">Cancel</button>`;
   document.getElementById('edit-store').value=item.store;
 }
-
 function saveEdit(id){
-  const name = document.getElementById('edit-name').value.trim();
-  const qty = document.getElementById('edit-qty').value.trim();
-  const price = document.getElementById('edit-price').value.trim();
-  const store = document.getElementById('edit-store').value;
-  items = items.map(i=>i.id===id?{...i,name:name,quantity:qty,price:price,aisle:getAisle(name),store:store}:i);
-  editingId=null;
-  saveRender();
+  const name=document.getElementById('edit-name').value.trim();
+  const qty=document.getElementById('edit-qty').value.trim();
+  const price=document.getElementById('edit-price').value.trim();
+  const store=document.getElementById('edit-store').value;
+  items = items.map(i=>i.id===id?{...i,name,quantity:qty,price,aisle:getAisle(name),store}:i);
+  editingId=null; saveRender();
 }
-
 function cancelEdit(){ editingId=null; saveRender(); }
-
 function clearPurchased(){ items=items.filter(i=>!i.checked); saveRender(); }
 function clearAll(){ if(confirm('Clear all items?')){items=[]; saveRender();} }
 
-function saveRender(){
-  localStorage.setItem('groceryItems', JSON.stringify(items));
-  render();
-}
+function saveRender(){ localStorage.setItem('groceryItems',JSON.stringify(items)); render(); }
 
+// ===== Render =====
 function render(){
-  const container = document.getElementById('items-container');
-  const purchasedContainer = document.getElementById('purchased-container');
-  container.innerHTML='';
-  purchasedContainer.innerHTML='';
-  const active = items.filter(i=>!i.checked);
-  const purchased = items.filter(i=>i.checked);
-
-  // Group by aisle
-  const grouped = {};
-  active.forEach(i=>{
-    if(!grouped[i.aisle]) grouped[i.aisle]=[];
-    grouped[i.aisle].push(i);
-  });
+  const container=document.getElementById('items-container');
+  const purchasedContainer=document.getElementById('purchased-container');
+  container.innerHTML=''; purchasedContainer.innerHTML='';
+  const active=items.filter(i=>!i.checked);
+  const purchased=items.filter(i=>i.checked);
 
   let total=0;
-  active.forEach(i=>{ total+= (parseFloat(i.price)||0)*(parseInt(i.quantity)||1); });
-  purchased.forEach(i=>{ total+= (parseFloat(i.price)||0)*(parseInt(i.quantity)||1); });
+  items.forEach(i=>total+= (parseFloat(i.price)||0)*(parseInt(i.quantity)||1));
   document.getElementById('cart-total').textContent='$'+total.toFixed(2);
   document.getElementById('cart-count').textContent=items.length+' items';
 
+  const grouped={};
+  active.forEach(i=>{ if(!grouped[i.aisle]) grouped[i.aisle]=[]; grouped[i.aisle].push(i); });
+
   Object.keys(grouped).sort().forEach(a=>{
-    const div = document.createElement('div');
-    div.className='group';
-    const header = document.createElement('div');
-    header.className='aisle-header';
-    header.textContent=a;
-    div.appendChild(header);
+    const div=document.createElement('div'); div.className='mb-2 rounded-xl shadow border bg-white';
+    const header=document.createElement('div'); header.className='aisle-header'; header.textContent=a; div.appendChild(header);
     grouped[a].forEach(i=>{
-      const row = document.createElement('div');
-      row.className='item-row';
-      row.id='item-'+i.id;
-      const chk = document.createElement('button');
-      chk.onclick=()=>toggleCheck(i.id);
-      chk.textContent=i.checked?'✓':'';
-      row.appendChild(chk);
-      const text = document.createElement('span');
-      text.textContent=i.name+' ×'+i.quantity+(i.price? ' $'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2):'')+' ('+i.store+')';
-      row.appendChild(text);
-      const editBtn = document.createElement('button');
-      editBtn.textContent='Edit';
-      editBtn.onclick=()=>startEdit(i);
-      row.appendChild(editBtn);
-      const delBtn = document.createElement('button');
-      delBtn.textContent='Delete';
-      delBtn.onclick=()=>deleteItem(i.id);
-      row.appendChild(delBtn);
+      const row=document.createElement('div'); row.className='flex items-center gap-2 p-2 hover:bg-gray-100'; row.id='item-'+i.id;
+      const chk=document.createElement('button'); chk.textContent=i.checked?'✓':''; chk.onclick=()=>toggleCheck(i.id);
+      const text=document.createElement('span'); text.textContent=i.name+' ×'+i.quantity+(i.price? ' $'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2):'')+' ('+i.store+')';
+      const editBtn=document.createElement('button'); editBtn.textContent='✎'; editBtn.onclick=()=>startEdit(i);
+      const delBtn=document.createElement('button'); delBtn.textContent='🗑'; delBtn.onclick=()=>deleteItem(i.id);
+      row.appendChild(chk); row.appendChild(text); row.appendChild(editBtn); row.appendChild(delBtn);
       div.appendChild(row);
     });
     container.appendChild(div);
   });
 
   if(purchased.length>0){
-    const header = document.createElement('div');
-    header.className='aisle-header';
-    header.textContent='Purchased';
-    purchasedContainer.appendChild(header);
+    const header=document.createElement('div'); header.className='aisle-header'; header.textContent='Purchased'; purchasedContainer.appendChild(header);
     purchased.forEach(i=>{
-      const row = document.createElement('div');
-      row.className='item-row purchased';
-      const chk = document.createElement('button');
-      chk.onclick=()=>toggleCheck(i.id);
-      chk.textContent='✓';
-      row.appendChild(chk);
-      const text = document.createElement('span');
-      text.textContent=i.name+' ×'+i.quantity+(i.price? ' $'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2):'')+' ('+i.store+')';
-      row.appendChild(text);
-      const delBtn = document.createElement('button');
-      delBtn.textContent='Delete';
-      delBtn.onclick=()=>deleteItem(i.id);
-      row.appendChild(delBtn);
+      const row=document.createElement('div'); row.className='flex items-center gap-2 p-2 rounded-xl bg-gray-200'; row.id='item-'+i.id;
+      const chk=document.createElement('button'); chk.textContent='✓'; chk.onclick=()=>toggleCheck(i.id);
+      const text=document.createElement('span'); text.textContent=i.name+' ×'+i.quantity+(i.price? ' $'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2):'')+' ('+i.store+')';
+      const delBtn=document.createElement('button'); delBtn.textContent='🗑'; delBtn.onclick=()=>deleteItem(i.id);
+      row.appendChild(chk); row.appendChild(text); row.appendChild(delBtn);
       purchasedContainer.appendChild(row);
     });
   }
 }
+
+render();
 </script>
 
 </body>
