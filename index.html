@@ -8,20 +8,18 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   html { scroll-behavior: smooth; }
-  .price-input {
-    min-width: 3rem;
-    max-width: 5rem;
-  }
+  body { background-color: #D7DBE2; font-family: sans-serif; }
+  .price-input { min-width: 3rem; max-width: 5rem; }
   .scrollbar-thin::-webkit-scrollbar { width: 6px; }
   .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #888; border-radius: 3px; }
 </style>
 </head>
-<body class="bg-slate-200 min-h-screen flex flex-col">
+<body class="flex flex-col min-h-screen">
 
-<div class="w-full max-w-3xl mx-auto flex-1 flex flex-col px-4 py-4 sm:px-6 sm:py-6">
+<div class="flex-1 max-w-3xl mx-auto flex flex-col px-4 py-4 sm:px-6 sm:py-6">
 
   <!-- Header -->
-  <div class="flex justify-between items-center mb-2 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white">
+  <div class="flex justify-between items-center mb-3 p-4 rounded-xl shadow-xl bg-[#27395F] border border-[#1a2438] text-white">
     <h1 class="text-2xl font-bold flex items-center gap-2">🛒 Grocery List</h1>
     <div class="relative flex items-center">
       <button id="menu-btn" class="text-3xl font-bold p-1 hover:text-blue-300 bg-transparent">☰</button>
@@ -37,7 +35,7 @@
   </div>
 
   <!-- Add Item & Search -->
-  <div class="mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white flex flex-col gap-2 relative">
+  <div class="mb-4 p-4 rounded-xl shadow-xl bg-[#27395F] border border-[#1a2438] text-white flex flex-col gap-2 relative">
     <div class="flex flex-wrap gap-2">
       <input type="text" id="new-item" placeholder="Item name" class="flex-1 px-3 py-2 rounded text-black min-w-[120px]">
       <input type="number" id="new-quantity" value="1" class="w-16 px-2 py-2 rounded text-black">
@@ -204,9 +202,9 @@ function render(){
     container.className='flex flex-col space-y-1 p-2';
     items.filter(i=>i.aisle===a).forEach(i=>{
       const row = document.createElement('div');
-      row.className='flex justify-between items-center p-1 bg-white rounded shadow text-sm';
-      const name = document.createElement('span'); name.textContent=i.name;
-      const price = document.createElement('span'); price.textContent='$'+((parseFloat(i.price)||0)*parseInt(i.quantity||1)).toFixed(2);
+      row.className='flex justify-between items-center p-1 bg-white rounded shadow-xl text-sm';
+      const name = document.createElement('span'); name.textContent=i.name; name.className='text-gray-900';
+      const price = document.createElement('span'); price.textContent='$'+((parseFloat(i.price)||0)*parseInt(i.quantity||1)).toFixed(2); price.className='text-green-600';
       const qtyDiv = document.createElement('div'); 
       qtyDiv.className='flex gap-1';
       const plus = document.createElement('button'); plus.textContent='+'; plus.className='bg-[#22C55E] text-white px-2 rounded'; plus.onclick=()=>increaseQty(i.id);
@@ -230,7 +228,7 @@ function render(){
   purchasedHeader.onclick = ()=>purchasedItems.classList.toggle('hidden');
   items.filter(i=>i.checked).forEach(i=>{
     const row = document.createElement('div');
-    row.className='flex justify-between items-center p-1 bg-white rounded shadow text-sm';
+    row.className='flex justify-between items-center p-1 bg-white rounded shadow-xl text-sm';
     const name = document.createElement('span'); name.textContent=i.name; name.className='line-through text-gray-400';
     const price = document.createElement('span'); price.textContent='$'+((parseFloat(i.price)||0)*parseInt(i.quantity||1)).toFixed(2); price.className='line-through text-gray-400';
     const del = document.createElement('button'); del.textContent='✖'; del.className='text-red-600'; del.onclick=()=>deleteItem(i.id);
@@ -257,9 +255,12 @@ function render(){
     const container = document.createElement('div'); container.className='flex flex-col space-y-1 p-2';
     pantry.filter(p=>p.aisle===a).forEach(p=>{
       const row = document.createElement('div');
-      row.className='flex justify-between items-center p-1 bg-white rounded shadow text-sm';
-      const name = document.createElement('span'); name.textContent=p.name; name.className='flex-1';
-      const priceInput = document.createElement('input'); priceInput.type='number'; priceInput.step='0.01'; priceInput.value=p.price||''; priceInput.className='price-input px-1 py-1 text-sm border rounded text-black'; priceInput.oninput=()=>{p.price=priceInput.value; saveRender();};
+      row.className='flex justify-between items-center p-1 bg-white rounded shadow-xl text-sm';
+      const name = document.createElement('span'); name.textContent=p.name; name.className='flex-1 text-gray-900';
+      const priceInput = document.createElement('input'); 
+      priceInput.type='number'; priceInput.step='0.01'; priceInput.value=p.price||''; 
+      priceInput.className='price-input px-1 py-1 text-sm border rounded text-black';
+      priceInput.oninput=()=>{p.price=priceInput.value; saveRender();};
       const addBtn = document.createElement('button'); addBtn.textContent='+'; addBtn.className='w-7 h-7 rounded-full bg-[#22C55E] text-white flex items-center justify-center'; addBtn.onclick=()=>addPantryItemToList(p);
       row.appendChild(name); row.appendChild(priceInput); row.appendChild(addBtn);
       container.appendChild(row);
