@@ -22,8 +22,14 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
         .scale-in { animation: scaleIn 0.2s ease-out; }
         @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.98); }
+            from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
+        }
+        .check-pop { animation: checkPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes checkPop {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -31,11 +37,12 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
         const Icon = ({ name, className = "w-5 h-5" }) => {
             const icons = {
                 Plus: <path d="M12 5v14M5 12h14" />,
+                Minus: <path d="M5 12h14" />,
                 Trash2: (<><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></>),
                 Check: <path d="M20 6 9 17l-5-5" />,
                 X: (<><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>),
@@ -43,8 +50,9 @@
                 Edit2: <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
                 Menu: (<><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></>),
                 Search: (<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>),
-                Upload: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></>),
+                Share: (<><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></>),
                 Package: (<><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12"/></>),
+                Copy: (<><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></>),
             };
             return (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -57,40 +65,36 @@
             const [items, setItems] = useState([]);
             const [pantryItems, setPantryItems] = useState([]);
             const [newItem, setNewItem] = useState('');
-            const [newQuantity, setNewQuantity] = useState('1');
+            const [newQuantity, setNewQuantity] = useState(1);
             const [newPrice, setNewPrice] = useState('');
             const [selectedStore, setSelectedStore] = useState('Walmart');
-            const [editingId, setEditingId] = useState(null);
-            const [editText, setEditText] = useState('');
-            const [editQuantity, setEditQuantity] = useState('');
-            const [editPrice, setEditPrice] = useState('');
-            const [editStore, setEditStore] = useState('');
+            const [editingItem, setEditingItem] = useState(null);
             const [showMenu, setShowMenu] = useState(false);
             const [showPantry, setShowPantry] = useState(false);
             const [searchQuery, setSearchQuery] = useState('');
 
-            const stores = ['Walmart', "Sam's Club", 'Coquito', 'Talin Market'];
+            const stores = ['Walmart', "Sam's Club", 'Coquito', 'Talin Market', 'Econo', 'Pueblo'];
 
             const aisleMap = {
-                'Dairy': ['milk', 'egg', 'cheese', 'butter', 'yogurt', 'cream', 'half', 'sour cream'],
-                'Produce': ['apple', 'banana', 'orange', 'lettuce', 'tomato', 'onion', 'potato', 'carrot', 'cilantro', 'lime', 'lemon', 'garlic', 'pepper', 'fruit', 'veggie'],
-                'Meat': ['chicken', 'beef', 'pork', 'turkey', 'fish', 'steak', 'bacon', 'ham', 'chorizo', 'sausage', 'ground'],
-                'Bakery': ['bread', 'bagel', 'muffin', 'cake', 'tortilla', 'pan', 'roll'],
-                'Frozen': ['ice cream', 'frozen', 'pizza', 'fries', 'nugget'],
-                'Pantry': ['rice', 'pasta', 'cereal', 'flour', 'sugar', 'oil', 'salt', 'pepper', 'spices', 'honey', 'vinegar', 'adobo', 'sazon'],
-                'Beverages': ['water', 'juice', 'soda', 'coffee', 'beer', 'wine', 'malta', 'drink'],
-                'Snacks': ['chips', 'crackers', 'cookies', 'candy', 'popcorn', 'nuts'],
-                'Canned': ['soup', 'beans', 'corn', 'tuna', 'sauce', 'tomato paste', 'habichuela'],
-                'Pharmacy': ['shampoo', 'soap', 'medicine', 'vitamin', 'toothpaste', 'aspirin', 'deodorant']
+                '🥦 Produce': ['apple', 'banana', 'orange', 'lettuce', 'tomato', 'onion', 'potato', 'carrot', 'cilantro', 'lime', 'lemon', 'garlic', 'pepper', 'fruit', 'veggie', 'recao', 'aguacate', 'plátano', 'guineo'],
+                '🥩 Meat': ['chicken', 'beef', 'pork', 'turkey', 'fish', 'steak', 'bacon', 'ham', 'chorizo', 'sausage', 'ground', 'pollo', 'carne', 'jamón', 'chuleta', 'pavo'],
+                '🥛 Dairy': ['milk', 'egg', 'cheese', 'butter', 'yogurt', 'cream', 'half', 'sour cream', 'leche', 'huevo', 'queso', 'mantequilla'],
+                '🍞 Bakery': ['bread', 'bagel', 'muffin', 'cake', 'tortilla', 'pan', 'roll', 'bizcocho', 'sobao'],
+                '🥫 Canned': ['soup', 'beans', 'corn', 'tuna', 'sauce', 'tomato paste', 'habichuela', 'salsa', 'gandules', 'salchicha'],
+                '🍝 Pantry': ['rice', 'pasta', 'cereal', 'flour', 'sugar', 'oil', 'salt', 'pepper', 'spices', 'honey', 'vinegar', 'adobo', 'sazon', 'arroz', 'aceite', 'azúcar', 'avena', 'café', 'coffee'],
+                '🥤 Beverages': ['water', 'juice', 'soda', 'coffee', 'beer', 'wine', 'malta', 'drink', 'agua', 'jugo', 'refresco', 'cerveza'],
+                '❄️ Frozen': ['ice cream', 'frozen', 'pizza', 'fries', 'nugget', 'helado', 'congelado'],
+                '🥨 Snacks': ['chips', 'crackers', 'cookies', 'candy', 'popcorn', 'nuts', 'galletas', 'papas'],
+                '🧼 Pharmacy': ['shampoo', 'soap', 'medicine', 'vitamin', 'toothpaste', 'aspirin', 'deodorant', 'jabón', 'pasta de dientes']
             };
 
             const getAisleForItem = (itemName) => {
-                if (!itemName) return 'Other';
+                if (!itemName) return '📦 Other';
                 const lowerName = itemName.toLowerCase();
                 for (const [aisle, keywords] of Object.entries(aisleMap)) {
                     if (keywords.some(keyword => lowerName.includes(keyword))) return aisle;
                 }
-                return 'Other';
+                return '📦 Other';
             };
 
             useEffect(() => {
@@ -103,170 +107,132 @@
             useEffect(() => { localStorage.setItem('groceryItems', JSON.stringify(items)); }, [items]);
             useEffect(() => { localStorage.setItem('pantryItems', JSON.stringify(pantryItems)); }, [pantryItems]);
 
-            const handleFileUpload = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const data = new Uint8Array(event.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-                        const newItems = jsonData.map((row, index) => {
-                            const name = String(row.Item || row.Name || '').trim();
-                            return { id: Date.now() + index, name, price: String(row.Price || '').trim(), aisle: row.Aisle || getAisleForItem(name) };
-                        }).filter(item => item.name);
-                        setPantryItems(prev => [...prev, ...newItems]);
-                    } catch (err) { alert("Error reading file."); }
-                };
-                reader.readAsArrayBuffer(file);
-            };
-
             const addItem = () => {
                 if (!newItem.trim()) return;
-                const item = { id: Date.now(), name: newItem.trim(), quantity: newQuantity || '1', price: newPrice, aisle: getAisleForItem(newItem), store: selectedStore, checked: false };
+                const item = { 
+                    id: Date.now(), 
+                    name: newItem.trim(), 
+                    quantity: parseFloat(newQuantity) || 1, 
+                    price: newPrice, 
+                    aisle: getAisleForItem(newItem), 
+                    store: selectedStore, 
+                    checked: false 
+                };
                 setItems([item, ...items]);
-                setNewItem(''); setNewQuantity('1'); setNewPrice('');
+                setNewItem(''); setNewQuantity(1); setNewPrice('');
             };
 
-            const addItemFromPantry = (p) => {
-                const item = { id: Date.now(), name: p.name, quantity: '1', price: p.price || '', aisle: p.aisle || getAisleForItem(p.name), store: selectedStore, checked: false };
-                setItems([item, ...items]);
-                setSearchQuery('');
+            const shareList = () => {
+                const text = items
+                    .filter(i => !i.checked)
+                    .map(i => `• ${i.name} (${i.quantity})`)
+                    .join('\n');
+                const message = `🛒 *Mi Lista de Compras:*\n\n${text || 'La lista está vacía.'}`;
+                
+                if (navigator.share) {
+                    navigator.share({ title: 'Mi Lista', text: message });
+                } else {
+                    navigator.clipboard.writeText(message);
+                    alert('List copied to clipboard!');
+                }
             };
 
             const toggleCheck = (id) => setItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i));
             const deleteItem = (id) => setItems(items.filter(i => i.id !== id));
             
-            const saveEdit = () => {
-                setItems(items.map(i => i.id === editingId ? { ...i, name: editText, quantity: editQuantity, price: editPrice, store: editStore, aisle: getAisleForItem(editText) } : i));
-                setEditingId(null);
-            };
-
             const cartTotal = items.reduce((sum, i) => sum + (parseFloat(i.price || 0) * parseFloat(i.quantity || 1)), 0);
-            const filteredPantry = searchQuery.length >= 2 ? pantryItems.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())) : [];
-            const groupedByAisle = items.filter(i => !i.checked).reduce((acc, i) => { (acc[i.aisle || 'Other'] = acc[i.aisle || 'Other'] || []).push(i); return acc; }, {});
+            const groupedByAisle = items.filter(i => !i.checked).reduce((acc, i) => { (acc[i.aisle] = acc[i.aisle] || []).push(i); return acc; }, {});
 
             return (
-                <div className="min-h-screen pb-24">
+                <div className="min-h-screen pb-32">
                     <div className="max-w-xl mx-auto p-4">
                         
-                        {/* Slim Header: Emerald Gradient */}
-                        <header className="rounded-xl shadow-md px-4 py-2.5 mb-4 text-white bg-gradient-to-br from-emerald-500 to-teal-700">
-                            <div className="flex items-center justify-between mb-2">
+                        <header className="rounded-2xl shadow-lg px-4 pt-4 pb-4 mb-6 text-white bg-gradient-to-br from-emerald-600 to-teal-800 sticky top-2 z-50">
+                            <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
-                                    <Icon name="ShoppingCart" className="w-5 h-5" />
-                                    <h1 className="text-base font-black uppercase tracking-tight">Mi Lista 🇵🇷</h1>
+                                    <div className="p-2 bg-white/20 rounded-lg"><Icon name="ShoppingCart" className="w-5 h-5" /></div>
+                                    <h1 className="text-lg font-black uppercase tracking-tighter">Mi Lista 🇵🇷</h1>
                                 </div>
-                                <button onClick={() => setShowMenu(!showMenu)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
-                                    <Icon name="Menu" className="w-5 h-5" />
-                                </button>
+                                <div className="flex gap-2">
+                                    <button onClick={shareList} className="p-2 hover:bg-white/10 rounded-full transition-colors"><Icon name="Share" className="w-5 h-5" /></button>
+                                    <button onClick={() => setShowMenu(!showMenu)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><Icon name="Menu" className="w-5 h-5" /></button>
+                                </div>
                             </div>
                             <div className="relative">
-                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60"><Icon name="Search" className="w-4 h-4" /></div>
+                                <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4" />
                                 <input
                                     type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search pantry..."
-                                    className="w-full pl-9 pr-4 py-2 bg-white/10 border border-white/20 rounded-xl text-sm placeholder-white/60 focus:outline-none focus:bg-white/20 transition-all"
+                                    placeholder="Search items or pantry..."
+                                    className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm placeholder-white/60 focus:outline-none focus:bg-white/20 transition-all"
                                 />
-                                {filteredPantry.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border z-50 max-h-52 overflow-y-auto">
-                                        {filteredPantry.map(p => (
-                                            <button key={p.id} onClick={() => addItemFromPantry(p)} className="w-full flex justify-between p-3.5 hover:bg-emerald-50 border-b last:border-0 text-slate-800 text-left">
-                                                <span className="font-semibold text-sm">{p.name}</span>
-                                                <div className="flex items-center gap-2">
-                                                    {p.price && <span className="text-xs text-emerald-600 font-bold">${p.price}</span>}
-                                                    <Icon name="Plus" className="w-4 h-4 text-emerald-600" />
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                         </header>
 
                         {showMenu && (
                             <div className="mb-4 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden scale-in">
-                                <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 border-b text-slate-700 font-medium text-sm">
-                                    <Icon name="Package" className="w-5 h-5 text-emerald-500" /> {showPantry ? 'Hide' : 'Show'} Pantry Manager
+                                <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
+                                    <Icon name="Package" className="w-5 h-5 text-emerald-500" /> {showPantry ? 'Hide' : 'Show'} Pantry Database
                                 </button>
-                                <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 border-b text-slate-700 font-medium text-sm">
+                                <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
                                     <Icon name="Check" className="w-5 h-5 text-emerald-500" /> Clear Checked Items
                                 </button>
-                                <button onClick={() => {if(confirm('Reset list?')) setItems([]); setShowMenu(false)}} className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-red-50 text-red-600 font-medium text-sm">
-                                    <Icon name="Trash2" className="w-5 h-5" /> Reset App
+                                <button onClick={() => {if(confirm('Reset list?')) setItems([]); setShowMenu(false)}} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-red-50 text-red-600 font-bold text-sm">
+                                    <Icon name="Trash2" className="w-5 h-5" /> Reset All Data
                                 </button>
                             </div>
                         )}
 
-                        {showPantry && (
-                            <div className="bg-white rounded-xl shadow-md p-4 mb-4 border border-emerald-100 scale-in">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="font-bold text-slate-700 text-sm uppercase">Pantry Database</h2>
-                                    <label className="bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-bold cursor-pointer">
-                                        Import Excel <input type="file" className="hidden" onChange={handleFileUpload} />
-                                    </label>
+                        {/* Quick Input */}
+                        <div className="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-slate-200">
+                            <div className="flex gap-2 mb-3">
+                                <input type="text" placeholder="What do you need?" value={newItem} onChange={e => setNewItem(e.target.value)} onKeyPress={e => e.key === 'Enter' && addItem()} className="flex-1 p-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 outline-none transition-all"/>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center bg-slate-100 rounded-xl px-2">
+                                    <button onClick={() => setNewQuantity(Math.max(1, newQuantity - 1))} className="p-2 text-slate-500"><Icon name="Minus" className="w-4 h-4"/></button>
+                                    <span className="w-8 text-center font-bold text-sm">{newQuantity}</span>
+                                    <button onClick={() => setNewQuantity(newQuantity + 1)} className="p-2 text-slate-500"><Icon name="Plus" className="w-4 h-4"/></button>
                                 </div>
-                                <div className="max-h-52 overflow-y-auto space-y-2 custom-scrollbar pr-1">
-                                    {pantryItems.map(p => (
-                                        <div key={p.id} className="flex justify-between items-center p-2.5 bg-slate-50 rounded border border-slate-100">
-                                            <div className="flex-1 min-w-0 mr-2">
-                                                <p className="text-xs font-semibold text-slate-700 truncate">{p.name}</p>
-                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{p.aisle}</p>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <div className="relative">
-                                                    <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold">$</span>
-                                                    <input 
-                                                        type="number" step="0.01" value={p.price} placeholder="0.00"
-                                                        onChange={(e) => setPantryItems(pantryItems.map(x => x.id === p.id ? {...x, price: e.target.value} : x))}
-                                                        className="w-14 pl-4 pr-1 py-1 text-[11px] font-bold border border-slate-200 rounded bg-white focus:ring-1 focus:ring-emerald-400 outline-none"
-                                                    />
-                                                </div>
-                                                <button onClick={() => addItemFromPantry(p)} className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded transition-colors"><Icon name="Plus" className="w-4 h-4"/></button>
-                                                <button onClick={() => setPantryItems(pantryItems.filter(i => i.id !== p.id))} className="p-1.5 text-red-400 hover:bg-red-50 rounded"><Icon name="X" className="w-4 h-4"/></button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="relative flex-1">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">$</span>
+                                    <input type="number" placeholder="Price" value={newPrice} onChange={e => setNewPrice(e.target.value)} className="w-full pl-7 pr-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500"/>
                                 </div>
+                                <button onClick={addItem} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl px-6 py-2.5 transition-all text-sm shadow-md shadow-emerald-100 uppercase tracking-tight">Add</button>
+                            </div>
+                        </div>
+
+                        {/* List Empty State */}
+                        {items.length === 0 && (
+                            <div className="text-center py-20 opacity-20">
+                                <Icon name="ShoppingCart" className="w-16 h-16 mx-auto mb-4" />
+                                <p className="font-black text-xl uppercase tracking-tighter">Your list is empty</p>
                             </div>
                         )}
 
-                        {/* Quick Input Area */}
-                        <div className="bg-white rounded-xl shadow-sm p-3 mb-6 grid grid-cols-12 gap-2 border border-slate-200">
-                            <input type="text" placeholder="Item name..." value={newItem} onChange={e => setNewItem(e.target.value)} onKeyPress={e => e.key === 'Enter' && addItem()} className="col-span-12 sm:col-span-5 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 outline-none"/>
-                            <input type="number" placeholder="Qty" value={newQuantity} onChange={e => setNewQuantity(e.target.value)} className="col-span-4 sm:col-span-2 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 outline-none"/>
-                            <input type="number" placeholder="$" value={newPrice} onChange={e => setNewPrice(e.target.value)} className="col-span-8 sm:col-span-2 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 outline-none"/>
-                            <button onClick={addItem} className="col-span-12 sm:col-span-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg py-2 transition-all text-sm">Add Item</button>
-                        </div>
-
-                        {/* List: Stacked View */}
-                        <div className="space-y-4">
+                        {/* List Rendering */}
+                        <div className="space-y-6">
                             {Object.entries(groupedByAisle).sort().map(([aisle, aisleItems]) => (
-                                <div key={aisle} className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                                    <div className="px-4 py-1.5 bg-slate-50 text-[10px] font-black uppercase text-slate-400 tracking-widest">{aisle}</div>
-                                    <div className="divide-y divide-slate-50">
+                                <div key={aisle} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <h3 className="px-1 mb-2 text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">{aisle}</h3>
+                                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 divide-y divide-slate-50 overflow-hidden">
                                         {aisleItems.map(item => (
-                                            <div key={item.id} className="p-4 flex gap-4 items-start group">
-                                                <button onClick={() => toggleCheck(item.id)} className="w-6 h-6 rounded-lg border-2 border-emerald-400 shrink-0 mt-0.5" />
+                                            <div key={item.id} className="p-4 flex gap-4 items-center group">
+                                                <button 
+                                                    onClick={() => toggleCheck(item.id)} 
+                                                    className={`w-6 h-6 rounded-lg border-2 shrink-0 transition-all duration-300 flex items-center justify-center ${item.checked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-200'}`}
+                                                >
+                                                    {item.checked && <Icon name="Check" className="w-4 h-4 text-white" />}
+                                                </button>
                                                 
-                                                <div className="flex-1 min-w-0">
-                                                    {/* Top Row: Name */}
-                                                    <p className="font-medium text-slate-700 text-base mb-1 truncate">{item.name}</p>
-                                                    
-                                                    {/* Bottom Row: Metadata & Actions */}
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded tracking-wide">
-                                                            ${(parseFloat(item.price || 0) * parseFloat(item.quantity || 1)).toFixed(2)}
-                                                        </span>
-                                                        
-                                                        <div className="flex gap-4 opacity-40 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => {setEditingId(item.id); setEditText(item.name); setEditQuantity(item.quantity); setEditPrice(item.price); setEditStore(item.store)}} className="text-slate-400 hover:text-emerald-600"><Icon name="Edit2" className="w-4 h-4"/></button>
-                                                            <button onClick={() => deleteItem(item.id)} className="text-slate-400 hover:text-red-500"><Icon name="Trash2" className="w-4 h-4"/></button>
-                                                        </div>
+                                                <div className="flex-1 min-w-0" onClick={() => setEditingItem(item)}>
+                                                    <p className="font-semibold text-slate-700 text-sm truncate">{item.name}</p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Qty: {item.quantity}</span>
+                                                        {item.price && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>}
                                                     </div>
                                                 </div>
+                                                
+                                                <button onClick={() => deleteItem(item.id)} className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Icon name="Trash2" className="w-4 h-4"/></button>
                                             </div>
                                         ))}
                                     </div>
@@ -274,16 +240,16 @@
                             ))}
                         </div>
 
-                        {/* Purchased */}
+                        {/* Purchased Section */}
                         {items.some(i => i.checked) && (
-                            <div className="mt-8 opacity-60">
-                                <h3 className="text-xs font-bold mb-3 uppercase text-slate-400 tracking-widest px-1">Purchased</h3>
-                                <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
+                            <div className="mt-10 pt-6 border-t border-slate-200">
+                                <h3 className="text-[10px] font-black mb-4 uppercase text-slate-400 tracking-widest px-1">Completed</h3>
+                                <div className="bg-white/50 rounded-2xl border border-dashed border-slate-200 divide-y divide-slate-100 overflow-hidden">
                                     {items.filter(i => i.checked).map(item => (
-                                        <div key={item.id} className="flex items-center gap-3 p-3.5 bg-slate-50">
-                                            <button onClick={() => toggleCheck(item.id)} className="w-5 h-5 rounded bg-emerald-500 flex items-center justify-center text-white shrink-0"><Icon name="Check" className="w-3.5 h-3.5"/></button>
-                                            <span className="line-through text-sm font-medium text-slate-400 truncate flex-1">{item.name}</span>
-                                            <button onClick={() => deleteItem(item.id)} className="p-2 text-slate-300 hover:text-red-500"><Icon name="Trash2" className="w-4 h-4"/></button>
+                                        <div key={item.id} className="flex items-center gap-3 p-3 text-slate-400">
+                                            <button onClick={() => toggleCheck(item.id)} className="w-5 h-5 rounded-md bg-slate-200 flex items-center justify-center text-white shrink-0"><Icon name="Check" className="w-3.5 h-3.5"/></button>
+                                            <span className="line-through text-xs font-medium truncate flex-1">{item.name}</span>
+                                            <button onClick={() => deleteItem(item.id)} className="p-1 text-slate-300 hover:text-red-400"><Icon name="X" className="w-4 h-4"/></button>
                                         </div>
                                     ))}
                                 </div>
@@ -291,43 +257,67 @@
                         )}
                     </div>
 
-                    {/* Compact Footer: Emerald Style */}
+                    {/* Footer Progress & Total */}
                     {items.length > 0 && (
-                        <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 py-3 px-6 z-40 shadow-xl">
-                            <div className="max-w-xl mx-auto flex justify-between items-center">
+                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 pb-8 pt-4 px-6 z-40 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)]">
+                            <div className="max-w-xl mx-auto flex justify-between items-end">
                                 <div>
-                                    <p className="text-[9px] font-black text-emerald-600 uppercase leading-none mb-0.5">Estimated Total</p>
-                                    <p className="text-xl font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p>
-                                </div>
-                                <div className="text-right">
-                                    <div className="h-1.5 w-24 bg-slate-100 rounded-full mb-1 overflow-hidden">
-                                        <div className="h-full bg-emerald-500 transition-all duration-700" style={{width: `${(items.filter(i => i.checked).length / items.length) * 100}%`}}></div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="h-1.5 w-32 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="h-full bg-emerald-500 transition-all duration-500" style={{width: `${(items.filter(i => i.checked).length / items.length) * 100}%`}}></div>
+                                        </div>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                                            {items.filter(i => i.checked).length}/{items.length}
+                                        </span>
                                     </div>
-                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">
-                                        {items.filter(i => i.checked).length}/{items.length} Items Done
-                                    </p>
+                                    <p className="text-2xl font-black text-slate-800 tracking-tighter">${cartTotal.toFixed(2)}</p>
+                                    <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Estimated Total</p>
                                 </div>
+                                <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="bg-slate-900 text-white p-3 rounded-full shadow-lg">
+                                    <Icon name="Plus" className="w-5 h-5 rotate-45" />
+                                </button>
                             </div>
                         </div>
                     )}
 
                     {/* Edit Modal */}
-                    {editingId && (
-                        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                            <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl scale-in border">
-                                <h2 className="text-base font-black text-slate-800 mb-5 uppercase tracking-wide">Edit Item</h2>
-                                <div className="space-y-4">
-                                    <input type="text" value={editText} onChange={e => setEditText(e.target.value)} className="w-full p-3 bg-slate-50 border rounded-xl outline-none" />
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <input type="number" value={editQuantity} onChange={e => setEditQuantity(e.target.value)} className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Qty" />
-                                        <input type="number" value={editPrice} onChange={e => setEditPrice(e.target.value)} className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Price" />
+                    {editingItem && (
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                            <div className="bg-white rounded-t-3xl sm:rounded-2xl p-6 w-full max-w-sm shadow-2xl scale-in">
+                                <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-6 sm:hidden"></div>
+                                <h2 className="text-lg font-black text-slate-800 mb-6 uppercase tracking-tight">Edit Item</h2>
+                                <div className="space-y-5">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block">Item Name</label>
+                                        <input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-xl font-bold outline-none focus:ring-2 focus:ring-emerald-500" />
                                     </div>
-                                    <select value={editStore} onChange={e => setEditStore(e.target.value)} className="w-full p-3 bg-slate-50 border rounded-xl">
-                                        {stores.map(s => <option key={s} value={s}>{s}</option>)}
-                                    </select>
-                                    <div className="flex gap-2 pt-2">
-                                        <button onClick={saveEdit} className="flex-1 bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg">Save Changes</button>
-                                        <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-100 text-slate-400 py-3.5 rounded-xl font-bold">Cancel</button>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block">Quantity</label>
+                                            <div className="flex items-center justify-between bg-slate-50 rounded-xl p-1 border">
+                                                <button onClick={() => setEditingItem({...editingItem, quantity: Math.max(1, editingItem.quantity - 1)})} className="p-3 text-slate-400"><Icon name="Minus" className="w-4 h-4"/></button>
+                                                <span className="font-black">{editingItem.quantity}</span>
+                                                <button onClick={() => setEditingItem({...editingItem, quantity: editingItem.quantity + 1})} className="p-3 text-slate-400"><Icon name="Plus" className="w-4 h-4"/></button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block">Price ($)</label>
+                                            <input type="number" value={editingItem.price} onChange={e => setEditingItem({...editingItem, price: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-xl font-bold outline-none" placeholder="0.00" />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3 pt-4">
+                                        <button 
+                                            onClick={() => {
+                                                setItems(items.map(i => i.id === editingItem.id ? {...editingItem, aisle: getAisleForItem(editingItem.name)} : i));
+                                                setEditingItem(null);
+                                            }} 
+                                            className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg shadow-emerald-100 uppercase text-sm tracking-tight"
+                                        >
+                                            Save Changes
+                                        </button>
+                                        <button onClick={() => setEditingItem(null)} className="flex-1 bg-slate-100 text-slate-500 py-4 rounded-xl font-black uppercase text-sm tracking-tight">Cancel</button>
                                     </div>
                                 </div>
                             </div>
