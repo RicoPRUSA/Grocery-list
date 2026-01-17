@@ -7,7 +7,7 @@
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-200 min-h-screen flex flex-col">
+<body class="bg-slate-200 min-h-screen flex flex-col p-4 sm:p-8">
 
 <div class="max-w-3xl mx-auto flex-1 flex flex-col">
 
@@ -43,12 +43,12 @@
   </div>
 
   <!-- Scrollable Items -->
-  <div class="flex-1 overflow-y-auto space-y-2 mb-16" id="items-container"></div>
+  <div class="flex-1 overflow-y-auto space-y-2 mb-20" id="items-container"></div>
 
 </div>
 
 <!-- Sticky Cart Total -->
-<div class="fixed bottom-0 left-0 right-0 bg-[#27395F] text-white p-4 shadow flex justify-between items-center z-50">
+<div class="fixed bottom-0 left-0 right-0 bg-[#27395F] text-white p-4 shadow flex justify-between items-center z-50 rounded-t-xl">
   <div id="cart-total" class="font-bold text-lg">Total: $0.00</div>
 </div>
 
@@ -187,13 +187,14 @@ function render(){
 
       const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1';
 
+      // Quantity buttons
       const qtyDiv=document.createElement('div'); qtyDiv.className='flex items-center gap-1';
-      const minus=document.createElement('button'); minus.textContent='-'; minus.className='px-2 py-0.5 bg-gray-200 rounded text-sm'; minus.onclick=()=>decreaseQty(i.id);
-      const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-5 text-center';
-      const plus=document.createElement('button'); plus.textContent='+'; plus.className='px-2 py-0.5 bg-gray-200 rounded text-sm'; plus.onclick=()=>increaseQty(i.id);
+      const minus=document.createElement('button'); minus.textContent='-'; minus.className='w-7 h-7 rounded-full bg-red-300 text-sm flex items-center justify-center'; minus.onclick=()=>decreaseQty(i.id);
+      const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-6 text-center text-sm';
+      const plus=document.createElement('button'); plus.textContent='+'; plus.className='w-7 h-7 rounded-full bg-green-300 text-sm flex items-center justify-center'; plus.onclick=()=>increaseQty(i.id);
       qtyDiv.appendChild(minus); qtyDiv.appendChild(qtySpan); qtyDiv.appendChild(plus);
 
-      const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='w-20 text-right';
+      const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='w-20 text-right text-sm';
 
       const del=document.createElement('button'); del.textContent='🗑'; del.onclick=()=>deleteItem(i.id);
 
@@ -219,13 +220,14 @@ function render(){
 
       const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 line-through';
 
+      // Quantity buttons
       const qtyDiv=document.createElement('div'); qtyDiv.className='flex items-center gap-1';
-      const minus=document.createElement('button'); minus.textContent='-'; minus.className='px-2 py-0.5 bg-gray-300 rounded text-sm'; minus.onclick=()=>decreaseQty(i.id);
-      const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-5 text-center';
-      const plus=document.createElement('button'); plus.textContent='+'; plus.className='px-2 py-0.5 bg-gray-300 rounded text-sm'; plus.onclick=()=>increaseQty(i.id);
+      const minus=document.createElement('button'); minus.textContent='-'; minus.className='w-7 h-7 rounded-full bg-red-300 text-sm flex items-center justify-center'; minus.onclick=()=>decreaseQty(i.id);
+      const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-6 text-center text-sm';
+      const plus=document.createElement('button'); plus.textContent='+'; plus.className='w-7 h-7 rounded-full bg-green-300 text-sm flex items-center justify-center'; plus.onclick=()=>increaseQty(i.id);
       qtyDiv.appendChild(minus); qtyDiv.appendChild(qtySpan); qtyDiv.appendChild(plus);
 
-      const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='w-20 text-right';
+      const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='w-20 text-right text-sm';
 
       const del=document.createElement('button'); del.textContent='🗑'; del.onclick=()=>deleteItem(i.id);
 
