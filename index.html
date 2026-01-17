@@ -183,13 +183,13 @@ function render(){
     grouped[aisle].forEach(i=>{
       const row=document.createElement('div');
       row.className='flex items-center gap-2 p-2 hover:bg-gray-100 text-sm font-light';
-      
+
       const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=i.checked; chk.onclick=()=>toggleCheck(i.id);
 
-      const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1';
+      const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 text-gray-900 font-normal';
 
       // Right-aligned price and quantity buttons
-      const rightDiv=document.createElement('div'); rightDiv.className='flex items-center gap-1';
+      const rightDiv=document.createElement('div'); rightDiv.className='flex items-center gap-1 min-w-[140px] justify-end';
 
       const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='text-sm w-16 text-right';
 
@@ -219,13 +219,12 @@ function render(){
     purchased.forEach(i=>{
       const row=document.createElement('div');
       row.className='flex items-center gap-2 p-2 bg-gray-200 rounded-xl hover:bg-gray-300 text-sm font-light';
-      
+
       const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=i.checked; chk.onclick=()=>toggleCheck(i.id);
 
-      const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 line-through';
+      const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 line-through text-gray-900 font-normal';
 
-      // Right-aligned price and quantity buttons
-      const rightDiv=document.createElement('div'); rightDiv.className='flex items-center gap-1';
+      const rightDiv=document.createElement('div'); rightDiv.className='flex items-center gap-1 min-w-[140px] justify-end';
 
       const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='text-sm w-16 text-right';
 
