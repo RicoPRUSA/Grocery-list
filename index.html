@@ -198,7 +198,7 @@ function render(){
     header.className = 'bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center';
     header.textContent=aisle;
 
-    const itemsContainer=document.createElement('div');
+    const itemsContainer=document.createElement('div'); // all items fully visible
     grouped[aisle].forEach(i=>{
       const row=document.createElement('div');
       row.className='flex items-center gap-2 p-2 hover:bg-gray-100 text-sm font-light shadow-sm rounded-md bg-white';
@@ -229,13 +229,13 @@ function render(){
     const purchasedDiv=document.createElement('div'); purchasedDiv.className='mt-4 bg-white rounded-xl shadow-md overflow-y-auto';
 
     const header=document.createElement('div');
-    header.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center cursor-pointer';
+    header.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center cursor-pointer rounded-t-xl';
     const title=document.createElement('span'); title.textContent='Purchased';
     const arrow=document.createElement('span'); arrow.textContent='▼'; arrow.className='transition-transform duration-200';
     header.appendChild(title); header.appendChild(arrow);
 
     const itemsContainer=document.createElement('div'); 
-    itemsContainer.classList.add('hidden'); 
+    itemsContainer.classList.add('hidden'); // section collapsed by default
     arrow.style.transform='rotate(-90deg)';
 
     header.onclick=()=>{
@@ -267,19 +267,23 @@ function render(){
     shoppingListContainer.appendChild(purchasedDiv);
   }
 
-  // --- Pantry Section (pill-style tab) ---
-  const pantryDivSection = document.createElement('div'); pantryDivSection.className='mt-4 flex flex-col items-start';
+  // --- Pantry Section (collapsed by default, fully rounded!) ---
+  const pantryDivSection=document.createElement('div'); 
+  pantryDivSection.className='mt-4 bg-white rounded-xl shadow-md overflow-y-auto'; // all corners rounded
 
-  const pantryHeader = document.createElement('div'); 
-  pantryHeader.className='bg-[#27395F] text-white px-4 py-2 rounded-full text-sm font-light flex justify-between items-center cursor-pointer hover:bg-blue-700';
-  const pantryTitle = document.createElement('span'); pantryTitle.textContent='Pantry';
-  const pantryArrow = document.createElement('span'); pantryArrow.textContent='▼'; pantryArrow.className='transition-transform duration-200';
+  const pantryHeader=document.createElement('div'); 
+  pantryHeader.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center cursor-pointer rounded-xl'; // FULL rounded
+  const pantryTitle=document.createElement('span'); pantryTitle.textContent='Pantry';
+  const pantryArrow=document.createElement('span'); pantryArrow.textContent='▼'; pantryArrow.className='transition-transform duration-200';
   pantryHeader.appendChild(pantryTitle); pantryHeader.appendChild(pantryArrow);
 
-  const pantryItemsContainer=document.createElement('div'); pantryItemsContainer.classList.add('hidden'); pantryArrow.style.transform='rotate(-90deg)';
-  pantryHeader.onclick=()=>{ 
-    pantryItemsContainer.classList.toggle('hidden'); 
-    pantryArrow.style.transform=pantryItemsContainer.classList.contains('hidden')?'rotate(-90deg)':'rotate(0deg)'; 
+  const pantryItemsContainer=document.createElement('div'); 
+  pantryItemsContainer.classList.add('hidden'); 
+  pantryArrow.style.transform='rotate(-90deg)';
+
+  pantryHeader.onclick=()=>{
+    pantryItemsContainer.classList.toggle('hidden');
+    pantryArrow.style.transform = pantryItemsContainer.classList.contains('hidden')?'rotate(-90deg)':'rotate(0deg)';
   };
 
   // Group pantry by aisle
@@ -293,11 +297,12 @@ function render(){
   Object.keys(pantryGrouped).sort().forEach(aisle=>{
     const aisleDiv=document.createElement('div'); aisleDiv.className='mt-2';
     const aisleHeader=document.createElement('div'); aisleHeader.textContent=aisle; aisleHeader.className='text-sm font-bold mb-1';
-    const aisleItemsContainer=document.createElement('div');
+    const aisleItemsContainer=document.createElement('div'); // fully expanded
     pantryGrouped[aisle].forEach(i=>{
       const row=document.createElement('div'); row.className='flex items-center justify-between gap-2 p-2 hover:bg-gray-100 text-sm font-light shadow-sm rounded-md bg-white';
       const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 text-gray-900 font-normal';
-      const priceInput=document.createElement('input'); priceInput.type='number'; priceInput.step='0.01'; priceInput.value=i.price||''; 
+      const priceInput=document.createElement('input'); 
+      priceInput.type='number'; priceInput.step='0.01'; priceInput.value=i.price||''; 
       priceInput.className='w-20 px-1 py-1 text-sm border rounded text-black flex-shrink-0';
       priceInput.onchange=()=>{i.price=priceInput.value.trim(); saveRender();};
       const addBtn=document.createElement('button'); addBtn.textContent='+'; addBtn.className='w-7 h-7 rounded-full bg-[#22C55E] text-white text-sm flex items-center justify-center'; addBtn.onclick=()=>addPantryItemToList(i);
