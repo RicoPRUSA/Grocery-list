@@ -7,17 +7,19 @@
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-200 min-h-screen p-4">
+<body class="bg-slate-200 min-h-screen p-2 sm:p-4">
 
-<div class="max-w-5xl mx-auto">
+<div class="max-w-3xl mx-auto">
 
   <!-- Header -->
-  <div class="flex justify-between items-center mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white">
-    <h1 class="text-2xl font-bold flex items-center gap-2">🛒 Mission Groceries</h1>
-    <div class="text-right">
-      <div id="cart-total" class="text-xl font-bold text-blue-300">$0.00</div>
-      <div id="cart-count" class="text-sm text-blue-200">0 items</div>
-      <div class="flex gap-2 mt-1">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white">
+    <h1 class="text-2xl font-bold flex items-center gap-2 mb-2 sm:mb-0">🛒 Mission Groceries</h1>
+    <div class="text-right flex flex-col sm:flex-row sm:items-center gap-2">
+      <div class="mb-1 sm:mb-0">
+        <div id="cart-total" class="text-xl font-bold text-blue-300">$0.00</div>
+        <div id="cart-count" class="text-sm text-blue-200">0 items</div>
+      </div>
+      <div class="flex flex-wrap gap-2">
         <button onclick="clearPurchased()" class="px-2 py-1 text-sm bg-gray-700 rounded hover:bg-gray-600">Clear Purchased</button>
         <button onclick="clearAll()" class="px-2 py-1 text-sm bg-red-600 rounded hover:bg-red-500">Clear All</button>
         <label class="px-2 py-1 text-sm bg-gray-700 rounded hover:bg-gray-600 cursor-pointer">Import Pantry
@@ -28,9 +30,9 @@
   </div>
 
   <!-- Add Item -->
-  <div class="mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white">
-    <div class="flex flex-wrap gap-2 mb-2">
-      <input type="text" id="new-item" placeholder="Item name" class="flex-1 px-3 py-2 rounded text-black">
+  <div class="mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white flex flex-col gap-2">
+    <div class="flex flex-wrap gap-2">
+      <input type="text" id="new-item" placeholder="Item name" class="flex-1 px-3 py-2 rounded text-black min-w-[120px]">
       <input type="text" id="new-quantity" value="1" class="w-16 px-2 py-2 rounded text-black">
       <input type="number" id="new-price" placeholder="Price" class="w-20 px-2 py-2 rounded text-black">
       <select id="new-store" class="px-2 py-2 rounded text-black">
@@ -39,14 +41,16 @@
         <option value="Coquito">🥥 Coquito</option>
         <option value="Talin Market">🇨🇺 Talin</option>
       </select>
-      <button onclick="addItem()" class="flex items-center gap-1 px-4 py-2 bg-blue-500 hover:bg-blue-400 rounded">➕ Add</button>
+      <button onclick="addItem()" class="flex items-center gap-1 px-4 py-2 bg-blue-500 hover:bg-blue-400 rounded whitespace-nowrap">➕ Add</button>
     </div>
-    <input type="text" id="search-pantry" placeholder="Search pantry (3+ letters)" class="w-full px-3 py-2 rounded text-black">
-    <div id="search-results" class="absolute bg-white border border-[#27395F] max-h-60 overflow-y-auto mt-1 w-full rounded shadow hidden z-50"></div>
+    <div class="relative w-full">
+      <input type="text" id="search-pantry" placeholder="Search pantry (3+ letters)" class="w-full px-3 py-2 rounded text-black">
+      <div id="search-results" class="absolute top-full left-0 right-0 bg-white border border-[#27395F] max-h-60 overflow-y-auto mt-1 rounded shadow z-50 hidden text-black"></div>
+    </div>
   </div>
 
   <!-- Items List -->
-  <div id="items-container"></div>
+  <div id="items-container" class="mb-4"></div>
 
   <!-- Purchased List -->
   <div id="purchased-container" class="mb-4"></div>
@@ -108,7 +112,7 @@ searchInput.addEventListener('input', function(){
   if(matches.length===0){ searchResults.innerHTML='<div class="p-2 text-sm text-gray-500">No matches</div>'; searchResults.classList.remove('hidden'); return;}
   matches.forEach(p=>{
     const div = document.createElement('div');
-    div.className='p-2 border-b cursor-pointer hover:bg-gray-100';
+    div.className='p-2 border-b cursor-pointer hover:bg-gray-100 text-black';
     div.textContent = p.name+(p.price? ` $${p.price}`:'');
     div.onclick = ()=>{ addPantryItem(p); searchInput.value=''; searchResults.classList.add('hidden'); };
     searchResults.appendChild(div);
@@ -135,7 +139,7 @@ function deleteItem(id){ items=items.filter(i=>i.id!==id); saveRender(); }
 function startEdit(item){
   editingId=item.id;
   const row = document.getElementById('item-'+item.id);
-  row.innerHTML=`<input type="text" id="edit-name" value="${item.name}" class="px-2 py-1">
+  row.innerHTML=`<input type="text" id="edit-name" value="${item.name}" class="px-2 py-1 w-full mb-1 sm:mb-0">
   <input type="text" id="edit-qty" value="${item.quantity}" class="w-16 px-2 py-1">
   <input type="number" id="edit-price" value="${item.price}" class="w-20 px-2 py-1">
   <select id="edit-store" class="px-2 py-1">
@@ -144,8 +148,8 @@ function startEdit(item){
     <option value="Coquito">🥥 Coquito</option>
     <option value="Talin Market">🇨🇺 Talin</option>
   </select>
-  <button onclick="saveEdit(${item.id})">Save</button>
-  <button onclick="cancelEdit()">Cancel</button>`;
+  <div class="flex gap-1 mt-1"><button onclick="saveEdit(${item.id})" class="px-2 py-1 bg-green-500 rounded text-white">Save</button>
+  <button onclick="cancelEdit()" class="px-2 py-1 bg-red-500 rounded text-white">Cancel</button></div>`;
   document.getElementById('edit-store').value=item.store;
 }
 function saveEdit(id){
@@ -180,9 +184,9 @@ function render(){
 
   Object.keys(grouped).sort().forEach(a=>{
     const div=document.createElement('div'); div.className='mb-2 rounded-xl shadow border bg-white';
-    const header=document.createElement('div'); header.className='aisle-header'; header.textContent=a; div.appendChild(header);
+    const header=document.createElement('div'); header.className='bg-[#27395F] text-white px-2 py-1 rounded-t'; header.textContent=a; div.appendChild(header);
     grouped[a].forEach(i=>{
-      const row=document.createElement('div'); row.className='flex items-center gap-2 p-2 hover:bg-gray-100'; row.id='item-'+i.id;
+      const row=document.createElement('div'); row.className='flex flex-col sm:flex-row sm:items-center gap-2 p-2 hover:bg-gray-100'; row.id='item-'+i.id;
       const chk=document.createElement('button'); chk.textContent=i.checked?'✓':''; chk.onclick=()=>toggleCheck(i.id);
       const text=document.createElement('span'); text.textContent=i.name+' ×'+i.quantity+(i.price? ' $'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2):'')+' ('+i.store+')';
       const editBtn=document.createElement('button'); editBtn.textContent='✎'; editBtn.onclick=()=>startEdit(i);
@@ -194,9 +198,9 @@ function render(){
   });
 
   if(purchased.length>0){
-    const header=document.createElement('div'); header.className='aisle-header'; header.textContent='Purchased'; purchasedContainer.appendChild(header);
+    const header=document.createElement('div'); header.className='bg-[#27395F] text-white px-2 py-1 rounded-t'; header.textContent='Purchased'; purchasedContainer.appendChild(header);
     purchased.forEach(i=>{
-      const row=document.createElement('div'); row.className='flex items-center gap-2 p-2 rounded-xl bg-gray-200'; row.id='item-'+i.id;
+      const row=document.createElement('div'); row.className='flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded-xl bg-gray-200'; row.id='item-'+i.id;
       const chk=document.createElement('button'); chk.textContent='✓'; chk.onclick=()=>toggleCheck(i.id);
       const text=document.createElement('span'); text.textContent=i.name+' ×'+i.quantity+(i.price? ' $'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2):'')+' ('+i.store+')';
       const delBtn=document.createElement('button'); delBtn.textContent='🗑'; delBtn.onclick=()=>deleteItem(i.id);
