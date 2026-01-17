@@ -175,7 +175,7 @@ function render(){
   // Render active items grouped by aisle
   Object.keys(grouped).sort().forEach(aisle=>{
     const aisleDiv=document.createElement('div');
-    aisleDiv.className='bg-white rounded-xl shadow max-h-[400px] overflow-y-auto';
+    aisleDiv.className='bg-white rounded-xl shadow-md max-h-[400px] overflow-y-auto';
     const header=document.createElement('div');
     header.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light';
     header.textContent=aisle;
@@ -183,7 +183,7 @@ function render(){
 
     grouped[aisle].forEach(i=>{
       const row=document.createElement('div');
-      row.className='flex items-center gap-2 p-2 hover:bg-gray-100 text-sm font-light';
+      row.className='flex items-center gap-2 p-2 hover:bg-gray-100 text-sm font-light shadow-sm rounded-md bg-white';
 
       const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=i.checked; chk.onclick=()=>toggleCheck(i.id);
 
@@ -194,9 +194,9 @@ function render(){
 
       const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='text-sm w-16 text-right';
 
-      const minus=document.createElement('button'); minus.textContent='-'; minus.className='w-7 h-7 rounded-full bg-red-300 text-sm flex items-center justify-center'; minus.onclick=()=>decreaseQty(i.id);
+      const minus=document.createElement('button'); minus.textContent='-'; minus.className='w-7 h-7 rounded-full bg-[#FF5C5C] text-white text-sm flex items-center justify-center'; minus.onclick=()=>decreaseQty(i.id);
       const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-6 text-center text-sm';
-      const plus=document.createElement('button'); plus.textContent='+'; plus.className='w-7 h-7 rounded-full bg-green-300 text-sm flex items-center justify-center'; plus.onclick=()=>increaseQty(i.id);
+      const plus=document.createElement('button'); plus.textContent='+'; plus.className='w-7 h-7 rounded-full bg-[#4CAF50] text-white text-sm flex items-center justify-center'; plus.onclick=()=>increaseQty(i.id);
 
       rightDiv.appendChild(priceSpan); rightDiv.appendChild(minus); rightDiv.appendChild(qtySpan); rightDiv.appendChild(plus);
 
@@ -219,7 +219,7 @@ function render(){
     purchasedDiv.appendChild(header);
     purchased.forEach(i=>{
       const row=document.createElement('div');
-      row.className='flex items-center gap-2 p-2 bg-gray-200 rounded-xl hover:bg-gray-300 text-sm font-light';
+      row.className='flex items-center gap-2 p-2 bg-gray-200 rounded-xl hover:bg-gray-300 text-sm font-light shadow-sm';
 
       const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=i.checked; chk.onclick=()=>toggleCheck(i.id);
 
@@ -229,9 +229,9 @@ function render(){
 
       const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='text-sm w-16 text-right';
 
-      const minus=document.createElement('button'); minus.textContent='-'; minus.className='w-7 h-7 rounded-full bg-red-300 text-sm flex items-center justify-center'; minus.onclick=()=>decreaseQty(i.id);
+      const minus=document.createElement('button'); minus.textContent='-'; minus.className='w-7 h-7 rounded-full bg-[#FF5C5C] text-white text-sm flex items-center justify-center'; minus.onclick=()=>decreaseQty(i.id);
       const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-6 text-center text-sm';
-      const plus=document.createElement('button'); plus.textContent='+'; plus.className='w-7 h-7 rounded-full bg-green-300 text-sm flex items-center justify-center'; plus.onclick=()=>increaseQty(i.id);
+      const plus=document.createElement('button'); plus.textContent='+'; plus.className='w-7 h-7 rounded-full bg-[#4CAF50] text-white text-sm flex items-center justify-center'; plus.onclick=()=>increaseQty(i.id);
 
       rightDiv.appendChild(priceSpan); rightDiv.appendChild(minus); rightDiv.appendChild(qtySpan); rightDiv.appendChild(plus);
 
