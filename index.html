@@ -32,7 +32,7 @@
   <div class="mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white flex flex-col gap-2 relative">
     <div class="flex flex-wrap gap-2">
       <input type="text" id="new-item" placeholder="Item name" class="flex-1 px-3 py-2 rounded text-black min-w-[120px]">
-      <input type="text" id="new-quantity" value="1" class="w-16 px-2 py-2 rounded text-black">
+      <input type="number" id="new-quantity" value="1" class="w-16 px-2 py-2 rounded text-black">
       <input type="number" id="new-price" placeholder="Price" class="w-20 px-2 py-2 rounded text-black">
       <button onclick="addItem()" class="flex items-center gap-1 px-4 py-2 bg-blue-500 hover:bg-blue-400 rounded whitespace-nowrap">➕ Add</button>
     </div>
@@ -99,7 +99,7 @@ searchInput.addEventListener('input', function(){
   if(matches.length===0){ searchResults.innerHTML='<div class="p-2 text-sm text-gray-500">No matches</div>'; searchResults.classList.remove('hidden'); return;}
   matches.forEach(p=>{
     const div = document.createElement('div');
-    div.className='p-2 border-b cursor-pointer hover:bg-gray-100 text-black';
+    div.className='p-2 border-b cursor-pointer hover:bg-gray-100 text-black text-sm';
     div.textContent = p.name+(p.price? ` $${p.price}`:'');
     div.onclick = ()=>{ addPantryItem(p); searchInput.value=''; searchResults.classList.add('hidden'); };
     searchResults.appendChild(div);
@@ -129,7 +129,7 @@ function addPantryItem(p){
 // ===== CRUD =====
 function addItem(){
   const name=document.getElementById('new-item').value.trim();
-  const qty=document.getElementById('new-quantity').value.trim()||'1';
+  const qty=parseInt(document.getElementById('new-quantity').value)||1;
   const price=document.getElementById('new-price').value.trim();
   if(!name) return;
   items.unshift({id:Date.now(), name, quantity:qty, price, aisle:'Other', checked:false});
@@ -144,6 +144,15 @@ function toggleCheck(id){
 function deleteItem(id){ items=items.filter(i=>i.id!==id); saveRender(); }
 function clearPurchased(){ items=items.filter(i=>!i.checked); saveRender(); }
 function clearAll(){ if(confirm('Clear all items?')){items=[]; saveRender();} }
+
+function increaseQty(id){
+  items = items.map(i=>i.id===id?{...i,quantity:parseInt(i.quantity)+1}:i);
+  saveRender();
+}
+function decreaseQty(id){
+  items = items.map(i=>i.id===id?{...i,quantity:Math.max(1,parseInt(i.quantity)-1)}:i);
+  saveRender();
+}
 
 function saveRender(){ localStorage.setItem('groceryItems',JSON.stringify(items)); render(); }
 
@@ -167,21 +176,28 @@ function render(){
     const aisleDiv=document.createElement('div');
     aisleDiv.className='bg-white rounded-xl shadow max-h-[400px] overflow-y-auto';
     const header=document.createElement('div');
-    header.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10';
+    header.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light';
     header.textContent=aisle;
     aisleDiv.appendChild(header);
 
     grouped[aisle].forEach(i=>{
       const row=document.createElement('div');
-      row.className='flex items-center gap-2 p-2 hover:bg-gray-100';
+      row.className='flex items-center gap-2 p-2 hover:bg-gray-100 text-sm font-light';
       const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=i.checked; chk.onclick=()=>toggleCheck(i.id);
+
       const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1';
-      const qtyInput=document.createElement('input'); qtyInput.type='number'; qtyInput.min='1'; qtyInput.value=i.quantity;
-      qtyInput.className='w-16 px-1 py-1 border rounded text-sm';
-      qtyInput.onchange = () => { i.quantity=qtyInput.value; saveRender(); };
+
+      const qtyDiv=document.createElement('div'); qtyDiv.className='flex items-center gap-1';
+      const minus=document.createElement('button'); minus.textContent='-'; minus.className='px-2 py-0.5 bg-gray-200 rounded text-sm'; minus.onclick=()=>decreaseQty(i.id);
+      const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-5 text-center';
+      const plus=document.createElement('button'); plus.textContent='+'; plus.className='px-2 py-0.5 bg-gray-200 rounded text-sm'; plus.onclick=()=>increaseQty(i.id);
+      qtyDiv.appendChild(minus); qtyDiv.appendChild(qtySpan); qtyDiv.appendChild(plus);
+
       const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='w-20 text-right';
+
       const del=document.createElement('button'); del.textContent='🗑'; del.onclick=()=>deleteItem(i.id);
-      row.appendChild(chk); row.appendChild(nameSpan); row.appendChild(qtyInput); row.appendChild(priceSpan); row.appendChild(del);
+
+      row.appendChild(chk); row.appendChild(nameSpan); row.appendChild(qtyDiv); row.appendChild(priceSpan); row.appendChild(del);
       aisleDiv.appendChild(row);
     });
 
@@ -193,20 +209,27 @@ function render(){
     const purchasedDiv=document.createElement('div');
     purchasedDiv.className='mt-4';
     const header=document.createElement('div');
-    header.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 rounded-t-xl shadow';
+    header.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light';
     header.textContent='Purchased';
     purchasedDiv.appendChild(header);
     purchased.forEach(i=>{
       const row=document.createElement('div');
-      row.className='flex items-center gap-2 p-2 bg-gray-200 rounded-xl hover:bg-gray-300';
+      row.className='flex items-center gap-2 p-2 bg-gray-200 rounded-xl hover:bg-gray-300 text-sm font-light';
       const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=i.checked; chk.onclick=()=>toggleCheck(i.id);
+
       const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 line-through';
-      const qtyInput=document.createElement('input'); qtyInput.type='number'; qtyInput.min='1'; qtyInput.value=i.quantity;
-      qtyInput.className='w-16 px-1 py-1 border rounded text-sm';
-      qtyInput.onchange = () => { i.quantity=qtyInput.value; saveRender(); };
+
+      const qtyDiv=document.createElement('div'); qtyDiv.className='flex items-center gap-1';
+      const minus=document.createElement('button'); minus.textContent='-'; minus.className='px-2 py-0.5 bg-gray-300 rounded text-sm'; minus.onclick=()=>decreaseQty(i.id);
+      const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-5 text-center';
+      const plus=document.createElement('button'); plus.textContent='+'; plus.className='px-2 py-0.5 bg-gray-300 rounded text-sm'; plus.onclick=()=>increaseQty(i.id);
+      qtyDiv.appendChild(minus); qtyDiv.appendChild(qtySpan); qtyDiv.appendChild(plus);
+
       const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='w-20 text-right';
+
       const del=document.createElement('button'); del.textContent='🗑'; del.onclick=()=>deleteItem(i.id);
-      row.appendChild(chk); row.appendChild(nameSpan); row.appendChild(qtyInput); row.appendChild(priceSpan); row.appendChild(del);
+
+      row.appendChild(chk); row.appendChild(nameSpan); row.appendChild(qtyDiv); row.appendChild(priceSpan); row.appendChild(del);
       purchasedDiv.appendChild(row);
     });
     container.appendChild(purchasedDiv);
