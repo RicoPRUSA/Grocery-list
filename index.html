@@ -195,22 +195,10 @@ function render(){
     aisleDiv.className='bg-white rounded-xl shadow-md overflow-y-auto mt-2';
 
     const header = document.createElement('div');
-    header.className = 'bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center cursor-pointer';
-    const title = document.createElement('span'); title.textContent=aisle;
-    const arrow = document.createElement('span'); arrow.textContent='▼'; arrow.className='transition-transform duration-200';
-    header.appendChild(title); header.appendChild(arrow);
+    header.className = 'bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center';
+    header.textContent=aisle;
 
-    const itemsContainer=document.createElement('div'); // collapsible content
-    itemsContainer.classList.add('hidden'); // collapsed by default
-    arrow.style.transform='rotate(-90deg)';
-
-    aisleDiv.appendChild(header); aisleDiv.appendChild(itemsContainer);
-
-    header.onclick=()=>{ 
-      itemsContainer.classList.toggle('hidden');
-      arrow.style.transform = itemsContainer.classList.contains('hidden') ? 'rotate(-90deg)' : 'rotate(0deg)';
-    };
-
+    const itemsContainer=document.createElement('div'); // all items fully visible
     grouped[aisle].forEach(i=>{
       const row=document.createElement('div');
       row.className='flex items-center gap-2 p-2 hover:bg-gray-100 text-sm font-light shadow-sm rounded-md bg-white';
@@ -232,22 +220,23 @@ function render(){
       itemsContainer.appendChild(row);
     });
 
+    aisleDiv.appendChild(header); aisleDiv.appendChild(itemsContainer);
     shoppingListContainer.appendChild(aisleDiv);
   });
 
-  // Purchased section collapsible
+  // --- Purchased Section (collapsed by default) ---
   if(purchased.length>0){
     const purchasedDiv=document.createElement('div'); purchasedDiv.className='mt-4 bg-white rounded-xl shadow-md overflow-y-auto';
+
     const header=document.createElement('div');
     header.className='bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center cursor-pointer';
     const title=document.createElement('span'); title.textContent='Purchased';
     const arrow=document.createElement('span'); arrow.textContent='▼'; arrow.className='transition-transform duration-200';
     header.appendChild(title); header.appendChild(arrow);
 
-    const itemsContainer=document.createElement('div');
-    itemsContainer.classList.add('hidden'); arrow.style.transform='rotate(-90deg)';
-
-    purchasedDiv.appendChild(header); purchasedDiv.appendChild(itemsContainer);
+    const itemsContainer=document.createElement('div'); 
+    itemsContainer.classList.add('hidden'); // section collapsed by default
+    arrow.style.transform='rotate(-90deg)';
 
     header.onclick=()=>{
       itemsContainer.classList.toggle('hidden');
@@ -274,10 +263,20 @@ function render(){
       itemsContainer.appendChild(row);
     });
 
+    purchasedDiv.appendChild(header); purchasedDiv.appendChild(itemsContainer);
     shoppingListContainer.appendChild(purchasedDiv);
   }
 
-  // --- Pantry Section ---
+  // --- Pantry Section (collapsed by default) ---
+  const pantryDiv=document.createElement('div'); pantryDiv.className='mt-4';
+  const pantryHeader=document.createElement('div'); pantryHeader.className='bg-blue-400 text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center cursor-pointer';
+  const pantryTitle=document.createElement('span'); pantryTitle.textContent='Pantry';
+  const pantryArrow=document.createElement('span'); pantryArrow.textContent='▼'; pantryArrow.className='transition-transform duration-200';
+  pantryHeader.appendChild(pantryTitle); pantryHeader.appendChild(pantryArrow);
+  const pantryItemsContainer=document.createElement('div'); pantryItemsContainer.classList.add('hidden'); pantryArrow.style.transform='rotate(-90deg)';
+  pantryHeader.onclick=()=>{ pantryItemsContainer.classList.toggle('hidden'); pantryArrow.style.transform = pantryItemsContainer.classList.contains('hidden')?'rotate(-90deg)':'rotate(0deg)'; };
+
+  // Group pantry by aisle but fully expanded inside
   const pantryGrouped = {};
   pantry.forEach(i=>{
     const aisle=i.aisle||'Other';
@@ -285,55 +284,39 @@ function render(){
     pantryGrouped[aisle].push(i);
   });
 
-  const pantryHeader=document.createElement('h2');
-  pantryHeader.className='text-lg font-bold text-gray-800';
-  pantryHeader.textContent='Pantry';
-  pantryContainer.appendChild(pantryHeader);
-
   Object.keys(pantryGrouped).sort().forEach(aisle=>{
     const aisleDiv=document.createElement('div');
-    aisleDiv.className='bg-white rounded-xl shadow-md overflow-y-auto mt-2';
+    aisleDiv.className='mt-2';
 
-    const header=document.createElement('div');
-    header.className='bg-blue-400 text-white px-2 py-1 sticky top-0 z-10 text-sm font-light flex justify-between items-center cursor-pointer';
-    const title=document.createElement('span'); title.textContent=aisle;
-    const arrow=document.createElement('span'); arrow.textContent='▼'; arrow.className='transition-transform duration-200';
-    header.appendChild(title); header.appendChild(arrow);
+    const aisleHeader=document.createElement('div'); aisleHeader.textContent=aisle;
+    aisleHeader.className='text-sm font-bold mb-1';
 
-    const itemsContainer=document.createElement('div');
-    itemsContainer.classList.add('hidden'); arrow.style.transform='rotate(-90deg)';
-    aisleDiv.appendChild(header); aisleDiv.appendChild(itemsContainer);
-
-    header.onclick=()=>{
-      itemsContainer.classList.toggle('hidden');
-      arrow.style.transform = itemsContainer.classList.contains('hidden') ? 'rotate(-90deg)' : 'rotate(0deg)';
-    };
-
+    const aisleItemsContainer=document.createElement('div'); // fully expanded
     pantryGrouped[aisle].forEach(i=>{
       const row=document.createElement('div');
       row.className='flex items-center justify-between gap-2 p-2 hover:bg-gray-100 text-sm font-light shadow-sm rounded-md bg-white';
       const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 text-gray-900 font-normal';
-      const priceInput = document.createElement('input');
-      priceInput.type='number'; priceInput.step='0.01'; priceInput.value=i.price||''; 
+      const priceInput = document.createElement('input'); priceInput.type='number'; priceInput.step='0.01'; priceInput.value=i.price||''; 
       priceInput.className='w-20 px-1 py-0.5 text-sm border rounded text-black';
       priceInput.onchange=()=>{i.price=priceInput.value.trim(); saveRender();};
-
       const addBtn=document.createElement('button'); addBtn.textContent='➕'; addBtn.className='px-2 py-1 bg-[#22C55E] text-white rounded'; addBtn.onclick=()=>addPantryItemToList(i);
-
       row.appendChild(nameSpan); row.appendChild(priceInput); row.appendChild(addBtn);
-      itemsContainer.appendChild(row);
+      aisleItemsContainer.appendChild(row);
     });
 
-    pantryContainer.appendChild(aisleDiv);
+    aisleDiv.appendChild(aisleHeader); aisleDiv.appendChild(aisleItemsContainer);
+    pantryItemsContainer.appendChild(aisleDiv);
   });
 
-  // Cart total
+  pantryDiv.appendChild(pantryHeader); pantryDiv.appendChild(pantryItemsContainer);
+  pantryContainer.appendChild(pantryDiv);
+
+  // --- Update Cart Total ---
   const total = items.reduce((s,i)=>s + (parseFloat(i.price)||0)*parseInt(i.quantity||1),0);
   document.getElementById('cart-total').textContent='Total: $'+total.toFixed(2);
 }
 
 render();
 </script>
-
 </body>
 </html>
