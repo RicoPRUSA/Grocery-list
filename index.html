@@ -218,14 +218,19 @@ function render(){
     shoppingDiv.appendChild(aisleDiv);
   });
 
-  // --- Purchased Section (collapsed by default) ---
+  // --- Purchased Section (collapsed by default with arrow) ---
   const purchasedDiv = document.createElement('div');
   const purchasedHeader = document.createElement('div');
-  purchasedHeader.className='bg-[#27395F] text-white px-2 py-1 cursor-pointer rounded-t mt-2';
-  purchasedHeader.textContent='Purchased ▼';
+  let collapsedPurchased = true;
+  purchasedHeader.className='bg-[#27395F] text-white px-2 py-1 cursor-pointer rounded-t mt-2 flex justify-between items-center';
+  purchasedHeader.innerHTML = '<span>Purchased</span><span class="arrow">►</span>';
   const purchasedItems = document.createElement('div');
   purchasedItems.className='flex flex-col space-y-1 p-2 hidden';
-  purchasedHeader.onclick = ()=>purchasedItems.classList.toggle('hidden');
+  purchasedHeader.onclick = ()=>{
+    purchasedItems.classList.toggle('hidden');
+    collapsedPurchased = !collapsedPurchased;
+    purchasedHeader.querySelector('.arrow').textContent = collapsedPurchased ? '►':'▼';
+  };
   items.filter(i=>i.checked).forEach(i=>{
     const row = document.createElement('div');
     row.className='flex justify-between items-center p-2 bg-white rounded-lg shadow-xl text-sm';
@@ -248,12 +253,19 @@ function render(){
     jumpDiv.appendChild(btn);
   });
 
-  // --- Pantry List (collapsed by default) ---
+  // --- Pantry List (collapsed by default with arrow) ---
   pantryAisles.forEach(a=>{
     const aisleDiv = document.createElement('div'); aisleDiv.id='pantry-aisle-'+a;
-    const header = document.createElement('div'); header.className='bg-blue-400 text-white px-2 py-1 cursor-pointer rounded-t mt-2'; header.textContent=a; aisleDiv.appendChild(header);
+    const header = document.createElement('div'); 
+    let collapsed = true;
+    header.className='bg-blue-400 text-white px-2 py-1 cursor-pointer rounded-t mt-2 flex justify-between items-center';
+    header.innerHTML = `<span>${a}</span><span class="arrow">►</span>`;
     const container = document.createElement('div'); container.className='flex flex-col space-y-1 p-2 hidden';
-    header.onclick=()=>container.classList.toggle('hidden');
+    header.onclick = ()=>{
+      container.classList.toggle('hidden');
+      collapsed = !collapsed;
+      header.querySelector('.arrow').textContent = collapsed ? '►':'▼';
+    };
     pantry.filter(p=>p.aisle===a).forEach(p=>{
       const row = document.createElement('div');
       row.className='flex justify-between items-center p-2 bg-white rounded-lg shadow-xl text-sm';
@@ -266,7 +278,7 @@ function render(){
       row.appendChild(name); row.appendChild(priceInput); row.appendChild(addBtn);
       container.appendChild(row);
     });
-    aisleDiv.appendChild(container); pantryDiv.appendChild(aisleDiv);
+    aisleDiv.appendChild(header); aisleDiv.appendChild(container); pantryDiv.appendChild(aisleDiv);
   });
 
   // --- Update Cart Total ---
@@ -278,4 +290,3 @@ render();
 </script>
 </body>
 </html>
-
