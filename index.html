@@ -1,598 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grocery List</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grocery List</title>
+
+  <!-- React -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Excel -->
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { Plus, Trash2, Check, X, ShoppingCart, Edit2, Menu, Search, Upload, Package, DollarSign } = lucide;
 
-        function GroceryListApp() {
-          const [items, setItems] = useState([]);
-          const [pantryItems, setPantryItems] = useState([]);
-          const [newItem, setNewItem] = useState('');
-          const [newQuantity, setNewQuantity] = useState('1');
-          const [newPrice, setNewPrice] = useState('');
-          const [selectedStore, setSelectedStore] = useState('Walmart');
-          const [editingId, setEditingId] = useState(null);
-          const [editText, setEditText] = useState('');
-          const [editQuantity, setEditQuantity] = useState('');
-          const [editPrice, setEditPrice] = useState('');
-          const [editStore, setEditStore] = useState('');
-          const [editingPantryId, setEditingPantryId] = useState(null);
-          const [editPantryPrice, setEditPantryPrice] = useState('');
-          const [showMenu, setShowMenu] = useState(false);
-          const [showPantry, setShowPantry] = useState(false);
-          const [searchQuery, setSearchQuery] = useState('');
+<body class="bg-slate-100">
+<div id="root"></div>
 
-          const stores = ['Walmart', "Sam's Club", 'Coquito', 'Talin Market'];
+<script type="text/babel">
+const { useState, useEffect } = React;
 
-          const aisleMap = {
-            'Dairy': ['milk', 'eggs', 'cheese', 'butter', 'yogurt', 'cream', 'sour cream'],
-            'Produce': ['apple', 'banana', 'orange', 'lettuce', 'tomato', 'onion', 'potato', 'carrot', 'broccoli'],
-            'Meat': ['chicken', 'beef', 'pork', 'turkey', 'fish', 'salmon', 'steak', 'ground beef'],
-            'Bakery': ['bread', 'bagel', 'muffin', 'croissant', 'donut', 'cake', 'roll'],
-            'Frozen': ['ice cream', 'frozen', 'pizza', 'fries'],
-            'Pantry': ['rice', 'pasta', 'cereal', 'oatmeal', 'flour', 'sugar', 'salt'],
-            'Beverages': ['water', 'juice', 'soda', 'coffee', 'tea', 'beer', 'wine'],
-            'Snacks': ['chips', 'crackers', 'cookies', 'candy', 'popcorn'],
-            'Canned': ['soup', 'beans', 'corn', 'tuna', 'sauce'],
-            'Pharmacy': ['aspirin', 'bandage', 'vitamin', 'shaving cream', 'razor', 'medicine', 'toothpaste', 'shampoo']
-          };
+function GroceryListApp() {
+  const [items, setItems] = useState([]);
+  const [pantry, setPantry] = useState([]);
+  const [newItem, setNewItem] = useState('');
+  const [qty, setQty] = useState('1');
+  const [price, setPrice] = useState('');
+  const [showPantry, setShowPantry] = useState(false);
+  const [search, setSearch] = useState('');
 
-          const getAisleForItem = (itemName) => {
-            const lowerName = itemName.toLowerCase();
-            for (const [aisle, keywords] of Object.entries(aisleMap)) {
-              if (keywords.some(keyword => lowerName.includes(keyword))) {
-                return aisle;
-              }
-            }
-            return 'Other';
-          };
+  useEffect(() => {
+    setItems(JSON.parse(localStorage.getItem('groceryItems') || '[]'));
+    setPantry(JSON.parse(localStorage.getItem('pantryItems') || '[]'));
+  }, []);
 
-          useEffect(() => {
-            const saved = localStorage.getItem('groceryItems');
-            const savedPantry = localStorage.getItem('pantryItems');
-            if (saved) {
-              try {
-                setItems(JSON.parse(saved));
-              } catch (e) {
-                console.error('Error loading items:', e);
-              }
-            }
-            if (savedPantry) {
-              try {
-                setPantryItems(JSON.parse(savedPantry));
-              } catch (e) {
-                console.error('Error loading pantry:', e);
-              }
-            }
-          }, []);
+  useEffect(() => {
+    localStorage.setItem('groceryItems', JSON.stringify(items));
+  }, [items]);
 
-          useEffect(() => {
-            localStorage.setItem('groceryItems', JSON.stringify(items));
-          }, [items]);
+  useEffect(() => {
+    localStorage.setItem('pantryItems', JSON.stringify(pantry));
+  }, [pantry]);
 
-          useEffect(() => {
-            localStorage.setItem('pantryItems', JSON.stringify(pantryItems));
-          }, [pantryItems]);
+  const addItem = () => {
+    if (!newItem.trim()) return;
+    const item = {
+      id: Date.now(),
+      name: newItem.trim(),
+      quantity: qty,
+      price: price,
+      checked: false
+    };
+    setItems([item, ...items]);
+    setNewItem('');
+    setQty('1');
+    setPrice('');
+  };
 
-          const handleFileUpload = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+  const toggleCheck = (id) => {
+    setItems(items.map(i =>
+      i.id === id ? { ...i, checked: !i.checked } : i
+    ));
+  };
 
-            console.log('File selected:', file.name);
+  const cartTotal = items.reduce(
+    (s, i) => s + (parseFloat(i.price) || 0) * (parseInt(i.quantity) || 1),
+    0
+  );
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              try {
-                console.log('File loaded, parsing...');
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-                
-                console.log('Parsed data:', jsonData);
+  const filteredPantry =
+    search.length >= 3
+      ? pantry.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+      : [];
 
-                if (jsonData.length === 0) {
-                  alert('No data found in Excel file.');
-                  return;
-                }
+  return (
+    <div className="max-w-3xl mx-auto p-4 pb-24">
 
-                const newPantryItems = jsonData.map((row, index) => ({
-                  id: Date.now() + index,
-                  name: String(row.Item || row.item || row.Name || row.name || '').trim(),
-                  price: String(row.Price || row.price || '').trim()
-                })).filter(item => item.name);
+      {/* Header */}
+      <div className="bg-[#27395F] text-white p-4 rounded-xl shadow flex justify-between">
+        <h1 className="text-xl font-bold">🛒 Grocery List</h1>
+        <button onClick={() => setShowPantry(!showPantry)} className="text-2xl">☰</button>
+      </div>
 
-                console.log('New pantry items:', newPantryItems);
+      {/* Add Item */}
+      <div className="bg-white rounded-xl shadow p-4 mt-4 space-y-2">
+        <input
+          value={newItem}
+          onChange={e => setNewItem(e.target.value)}
+          placeholder="Item"
+          className="w-full border p-2 rounded"
+        />
+        <div className="flex gap-2">
+          <input value={qty} onChange={e => setQty(e.target.value)} className="w-16 border p-2 rounded" />
+          <input value={price} onChange={e => setPrice(e.target.value)} placeholder="Price" className="w-24 border p-2 rounded" />
+          <button onClick={addItem} className="bg-green-500 text-white px-4 rounded">➕</button>
+        </div>
+      </div>
 
-                if (newPantryItems.length === 0) {
-                  alert('No valid items found. Make sure your Excel has an "Item" or "Name" column.');
-                  return;
-                }
-
-                setPantryItems([...pantryItems, ...newPantryItems]);
-                alert('Successfully imported ' + newPantryItems.length + ' items!');
-                e.target.value = '';
-              } catch (error) {
-                console.error('Error:', error);
-                alert('Error reading file: ' + error.message);
-              }
-            };
-            reader.onerror = (error) => {
-              console.error('FileReader error:', error);
-              alert('Error reading file. Please try again.');
-            };
-            reader.readAsArrayBuffer(file);
-          };
-
-          const addItemFromPantry = (pantryItem) => {
-            const aisle = getAisleForItem(pantryItem.name);
-            const item = {
-              id: Date.now(),
-              name: pantryItem.name,
-              quantity: '1',
-              price: pantryItem.price || '',
-              aisle: aisle,
-              store: selectedStore,
-              checked: false
-            };
-            setItems([item, ...items]);
-            setSearchQuery('');
-          };
-
-          const addItem = () => {
-            if (newItem.trim()) {
-              const aisle = getAisleForItem(newItem);
-              const item = {
-                id: Date.now(),
-                name: newItem.trim(),
-                quantity: newQuantity,
-                price: newPrice,
-                aisle: aisle,
-                store: selectedStore,
-                checked: false
-              };
-              setItems([item, ...items]);
-              setNewItem('');
-              setNewQuantity('1');
-              setNewPrice('');
-            }
-          };
-
-          const handleKeyPress = (e) => {
-            if (e.key === 'Enter') {
-              addItem();
-            }
-          };
-
-          const deleteItem = (id) => {
-            setItems(items.filter(item => item.id !== id));
-          };
-
-          const deletePantryItem = (id) => {
-            setPantryItems(pantryItems.filter(item => item.id !== id));
-          };
-
-          const toggleCheck = (id) => {
-            setItems(items.map(item =>
-              item.id === id ? { ...item, checked: !item.checked } : item
-            ));
-          };
-
-          const startEdit = (item) => {
-            setEditingId(item.id);
-            setEditText(item.name);
-            setEditQuantity(item.quantity);
-            setEditPrice(item.price || '');
-            setEditStore(item.store);
-          };
-
-          const saveEdit = () => {
-            if (editText.trim()) {
-              const aisle = getAisleForItem(editText);
-              setItems(items.map(item =>
-                item.id === editingId
-                  ? { ...item, name: editText.trim(), quantity: editQuantity, price: editPrice, aisle: aisle, store: editStore }
-                  : item
-              ));
-            }
-            setEditingId(null);
-          };
-
-          const cancelEdit = () => {
-            setEditingId(null);
-          };
-
-          const startEditPantry = (item) => {
-            setEditingPantryId(item.id);
-            setEditPantryPrice(item.price || '');
-          };
-
-          const savePantryEdit = () => {
-            setPantryItems(pantryItems.map(item =>
-              item.id === editingPantryId
-                ? { ...item, price: editPantryPrice }
-                : item
-            ));
-            setEditingPantryId(null);
-          };
-
-          const cancelPantryEdit = () => {
-            setEditingPantryId(null);
-          };
-
-          const clearChecked = () => {
-            setItems(items.filter(item => !item.checked));
-          };
-
-          const clearAll = () => {
-            if (window.confirm('Are you sure you want to delete all items?')) {
-              setItems([]);
-            }
-          };
-
-          const StoreIcon = ({ store }) => {
-            if (store === 'Walmart') return <ShoppingCart className="w-3 h-3" />;
-            if (store === 'Coquito') return <span className="text-xs">🥥</span>;
-            if (store === 'Talin Market') return <span className="text-xs">🇨🇺</span>;
-            return <span className="text-xs">📦</span>;
-          };
-
-          const activeItems = items.filter(item => !item.checked);
-          const purchasedItems = items.filter(item => item.checked);
-          
-          const groupedByAisle = activeItems.reduce((acc, item) => {
-            const aisle = item.aisle || 'Other';
-            if (!acc[aisle]) acc[aisle] = [];
-            acc[aisle].push(item);
-            return acc;
-          }, {});
-
-          const cartTotal = items.reduce((sum, item) => {
-            const price = parseFloat(item.price) || 0;
-            const qty = parseInt(item.quantity) || 1;
-            return sum + (price * qty);
-          }, 0);
-
-          const filteredPantry = searchQuery.length >= 3 
-            ? pantryItems.filter(item =>
-                item.name.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-            : [];
-
-          return (
-            <div className="min-h-screen pb-20" style={{ backgroundColor: '#f5f7fa' }}>
-              <div className="max-w-4xl mx-auto p-3">
-                <div className="rounded-xl shadow-lg p-4 mb-3" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ShoppingCart className="w-6 h-6 text-white" />
-                      <h1 className="text-xl font-bold text-white">Grocery List</h1>
-                      <span className="text-lg">🇵🇷</span>
-                    </div>
-                    <button
-                      onClick={() => setShowMenu(!showMenu)}
-                      className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                    >
-                      <Menu className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
-                  {showMenu && (
-                    <div className="mt-3 bg-white rounded-lg shadow-xl overflow-hidden">
-                      <button
-                        onClick={() => { setShowPantry(!showPantry); setShowMenu(false); }}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 text-gray-700 text-sm border-b"
-                      >
-                        <Package className="w-4 h-4 inline mr-2" />
-                        {showPantry ? 'Hide' : 'Show'} Pantry
-                      </button>
-                      <button
-                        onClick={() => { clearChecked(); setShowMenu(false); }}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 text-gray-700 text-sm border-b"
-                      >
-                        Clear Purchased
-                      </button>
-                      <button
-                        onClick={() => { clearAll(); setShowMenu(false); }}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 text-red-600 text-sm"
-                      >
-                        Clear All Items
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="relative mt-3">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search pantry (3+ letters)..."
-                      className="w-full pl-10 pr-3 py-2 bg-white border-0 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/50"
-                    />
-                    {searchQuery.length >= 3 && filteredPantry.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border z-20 max-h-60 overflow-y-auto">
-                        {filteredPantry.map(item => (
-                          <div
-                            key={item.id}
-                            className="flex items-center justify-between p-3 hover:bg-gray-50 border-b cursor-pointer"
-                            onClick={() => addItemFromPantry(item)}
-                          >
-                            <div>
-                              <span className="text-sm text-gray-800 font-medium">{item.name}</span>
-                              {item.price && <span className="ml-2 text-xs text-green-600">${item.price}</span>}
-                            </div>
-                            <Plus className="w-4 h-4 text-purple-600" />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {showPantry && (
-                  <div className="bg-white rounded-xl shadow-lg p-4 mb-3">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Package className="w-5 h-5 text-purple-600" />
-                        <h2 className="text-lg font-bold text-gray-800">My Pantry ({pantryItems.length})</h2>
-                      </div>
-                      <label className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs flex items-center gap-2">
-                        <Upload className="w-3 h-3" />
-                        Import Excel
-                        <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className="hidden" />
-                      </label>
-                    </div>
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {pantryItems.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex-1">
-                            <span className="text-sm font-medium text-gray-800">{item.name}</span>
-                            {editingPantryId === item.id ? (
-                              <div className="flex items-center gap-2 mt-1">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={editPantryPrice}
-                                  onChange={(e) => setEditPantryPrice(e.target.value)}
-                                  className="w-20 px-2 py-1 border rounded text-xs"
-                                  placeholder="Price"
-                                />
-                                <button onClick={savePantryEdit} className="text-green-600">
-                                  <Check className="w-4 h-4" />
-                                </button>
-                                <button onClick={cancelPantryEdit} className="text-red-600">
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2 mt-1">
-                                {item.price && <span className="text-xs text-green-600 font-semibold">${item.price}</span>}
-                                <button onClick={() => startEditPantry(item)} className="text-purple-600">
-                                  <DollarSign className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => addItemFromPantry(item)} className="text-purple-600 p-2 hover:bg-purple-50 rounded">
-                              <Plus className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => deletePantryItem(item.id)} className="text-red-600 p-2 hover:bg-red-50 rounded">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                      {pantryItems.length === 0 && (
-                        <div className="text-center py-8 text-gray-400">
-                          <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">No pantry items yet</p>
-                          <p className="text-xs">Import Excel file to get started</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="bg-white rounded-xl shadow-lg p-3 mb-3">
-                  <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-                    <input
-                      type="text"
-                      value={newItem}
-                      onChange={(e) => setNewItem(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Item..."
-                      className="col-span-2 sm:flex-1 sm:min-w-[120px] px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                    <input
-                      type="text"
-                      value={newQuantity}
-                      onChange={(e) => setNewQuantity(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Qty"
-                      className="px-2 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={newPrice}
-                      onChange={(e) => setNewPrice(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Price"
-                      className="px-2 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                    <select
-                      value={selectedStore}
-                      onChange={(e) => setSelectedStore(e.target.value)}
-                      className="col-span-2 sm:col-span-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      <option value="Walmart">🛒 Walmart</option>
-                      <option value="Sam's Club">📦 Sam's</option>
-                      <option value="Coquito">🥥 Coquito</option>
-                      <option value="Talin Market">🇨🇺 Talin</option>
-                    </select>
-                    <button
-                      onClick={addItem}
-                      className="col-span-2 sm:col-span-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm flex items-center justify-center gap-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add
-                    </button>
-                  </div>
-                </div>
-
-                {Object.keys(groupedByAisle).length > 0 && (
-                  <div className="space-y-2 mb-3">
-                    {Object.entries(groupedByAisle).sort().map(([aisle, aisleItems]) => (
-                      <div key={aisle} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div className="px-3 py-2" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                          <h3 className="text-sm font-bold text-white">{aisle}</h3>
-                        </div>
-                        <div className="p-2 space-y-1">
-                          {aisleItems.map(item => (
-                            <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                              <button
-                                onClick={() => toggleCheck(item.id)}
-                                className="w-5 h-5 rounded-full border-2 border-purple-500 hover:border-purple-600 flex items-center justify-center flex-shrink-0"
-                              ></button>
-                              {editingId === item.id ? (
-                                <div className="flex-1 flex flex-wrap gap-1">
-                                  <input
-                                    type="text"
-                                    value={editText}
-                                    onChange={(e) => setEditText(e.target.value)}
-                                    className="flex-1 min-w-[100px] px-2 py-1 border rounded text-xs"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={editQuantity}
-                                    onChange={(e) => setEditQuantity(e.target.value)}
-                                    className="w-12 px-1 py-1 border rounded text-xs"
-                                  />
-                                  <input
-                                    type="number"
-                                    step="0.01"
-                                    value={editPrice}
-                                    onChange={(e) => setEditPrice(e.target.value)}
-                                    className="w-16 px-1 py-1 border rounded text-xs"
-                                  />
-                                  <button onClick={saveEdit} className="text-green-600 p-1">
-                                    <Check className="w-4 h-4" />
-                                  </button>
-                                  <button onClick={cancelEdit} className="text-red-600 p-1">
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              ) : (
-                                <>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="text-sm font-medium text-gray-800">{item.name}</span>
-                                      <span className="text-xs text-purple-600">×{item.quantity}</span>
-                                      {item.price && (
-                                        <span className="text-xs font-bold text-green-600">
-                                          ${(parseFloat(item.price) * parseInt(item.quantity)).toFixed(2)}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-1 mt-1">
-                                      <StoreIcon store={item.store} />
-                                      <span className="text-xs text-gray-500">{item.store}</span>
-                                    </div>
-                                  </div>
-                                  <button onClick={() => startEdit(item)} className="text-purple-600 p-1 flex-shrink-0">
-                                    <Edit2 className="w-4 h-4" />
-                                  </button>
-                                  <button onClick={() => deleteItem(item.id)} className="text-red-600 p-1 flex-shrink-0">
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {purchasedItems.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-3">
-                    <div className="px-3 py-2 bg-green-600">
-                      <h3 className="text-sm font-bold text-white">Purchased</h3>
-                    </div>
-                    <div className="p-2 space-y-1">
-                      {purchasedItems.map(item => (
-                        <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                          <button
-                            onClick={() => toggleCheck(item.id)}
-                            className="w-5 h-5 rounded-full bg-green-600 border-2 border-green-500 flex items-center justify-center flex-shrink-0"
-                          >
-                            <Check className="w-3 h-3 text-white" />
-                          </button>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm line-through text-gray-400">{item.name}</span>
-                            {item.price && (
-                              <span className="ml-2 text-xs text-gray-400">
-                                ${(parseFloat(item.price) * parseInt(item.quantity)).toFixed(2)}
-                              </span>
-                            )}
-                          </div>
-                          <button onClick={() => deleteItem(item.id)} className="text-red-600 p-1 flex-shrink-0">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {items.length === 0 && (
-                  <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                    <ShoppingCart className="w-16 h-16 mx-auto mb-3 text-purple-400 opacity-50" />
-                    <p className="text-lg text-gray-600">Your list is empty</p>
-                    <p className="text-sm text-gray-400">Add items to get started</p>
-                  </div>
-                )}
-              </div>
-
-              {items.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 shadow-2xl z-50" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                  <div className="max-w-4xl mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-white text-xs opacity-90">Cart Total</div>
-                        <div className="text-white text-2xl font-bold">${cartTotal.toFixed(2)}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-white text-xs opacity-90">{items.length} items</div>
-                        <div className="text-white text-sm">
-                          {purchasedItems.length} / {items.length} checked
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+      {/* Pantry */}
+      {showPantry && (
+        <div className="bg-white rounded-xl shadow p-4 mt-4">
+          <h2 className="font-bold mb-2">📦 Pantry</h2>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search pantry"
+            className="w-full border p-2 rounded mb-2"
+          />
+          {filteredPantry.map(p => (
+            <div key={p.id} className="flex justify-between p-2 border-b">
+              <span>{p.name}</span>
+              <button onClick={() => setItems([{...p, id: Date.now(), checked:false}, ...items])}>➕</button>
             </div>
-          );
-        }
+          ))}
+        </div>
+      )}
 
-        lucide.createIcons();
-        ReactDOM.render(<GroceryListApp />, document.getElementById('root'));
-    </script>
+      {/* Items */}
+      <div className="mt-4 space-y-2">
+        {items.map(i => (
+          <div key={i.id} className="bg-white rounded-xl shadow p-3 flex justify-between items-center">
+            <div>
+              <input type="checkbox" checked={i.checked} onChange={() => toggleCheck(i.id)} />
+              <span className={i.checked ? 'line-through ml-2' : 'ml-2'}>{i.name}</span>
+            </div>
+            <span>${((i.price || 0) * i.quantity).toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Cart */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#27395F] text-white p-4">
+        <div className="max-w-3xl mx-auto flex justify-between">
+          <span>Total</span>
+          <span className="font-bold">${cartTotal.toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<GroceryListApp />);
+</script>
 </body>
 </html>
