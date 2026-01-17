@@ -10,14 +10,14 @@
 <body class="bg-slate-200 min-h-screen flex flex-col">
 
 <!-- Wrapper with proper mobile padding and centering -->
-<div class="w-full max-w-3xl mx-auto flex-1 flex flex-col px-4 py-4 sm:px-8 sm:py-8">
+<div class="w-full max-w-3xl mx-auto flex-1 flex flex-col px-4 py-4 sm:px-6 sm:py-6">
 
   <!-- Header -->
   <div class="flex justify-between items-center mb-2 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white">
     <h1 class="text-2xl font-bold flex items-center gap-2">🛒 Grocery List</h1>
     <!-- Hamburger Menu -->
     <div class="relative flex items-center">
-      <button id="menu-btn" class="text-3xl font-bold p-1 hover:text-blue-300">☰</button>
+      <button id="menu-btn" class="text-3xl font-bold p-1 hover:text-blue-300 bg-transparent">☰</button>
       <div id="menu" class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg border border-blue-400 bg-white z-50 hidden">
         <button onclick="clearPurchased()" class="w-full text-left px-4 py-2 hover:bg-blue-100 text-blue-800 text-sm">Clear Purchased</button>
         <button onclick="clearAll()" class="w-full text-left px-4 py-2 hover:bg-red-100 text-red-700 text-sm">Clear All</button>
@@ -35,6 +35,7 @@
       <input type="text" id="new-item" placeholder="Item name" class="flex-1 px-3 py-2 rounded text-black min-w-[120px]">
       <input type="number" id="new-quantity" value="1" class="w-16 px-2 py-2 rounded text-black">
       <input type="number" id="new-price" placeholder="Price" class="w-20 px-2 py-2 rounded text-black">
+      <input type="text" id="new-aisle" placeholder="Aisle" class="w-32 px-2 py-2 rounded text-black">
       <button onclick="addItem()" class="flex items-center gap-1 px-4 py-2 bg-blue-500 hover:bg-blue-400 rounded whitespace-nowrap">➕ Add</button>
     </div>
     <div class="relative w-full mt-2">
@@ -43,8 +44,16 @@
     </div>
   </div>
 
-  <!-- Scrollable Items -->
-  <div class="flex-1 overflow-y-auto space-y-2 mb-20" id="items-container"></div>
+  <!-- Scrollable Lists -->
+  <div class="flex-1 overflow-y-auto space-y-4 mb-24" id="lists-container">
+
+    <!-- Shopping List Container -->
+    <div id="shopping-list"></div>
+
+    <!-- Pantry Section -->
+    <div id="pantry-list"></div>
+
+  </div>
 
 </div>
 
@@ -84,6 +93,7 @@ document.getElementById('import-file').addEventListener('change', function(e){
     pantry.push(...newItems);
     alert('Imported '+newItems.length+' pantry items');
     e.target.value='';
+    saveRender();
   };
   reader.readAsArrayBuffer(file);
 });
@@ -97,12 +107,16 @@ searchInput.addEventListener('input', function(){
   searchResults.innerHTML='';
   if(q.length<3){ searchResults.classList.add('hidden'); return; }
   const matches = pantry.filter(p=>p.name.toLowerCase().includes(q));
-  if(matches.length===0){ searchResults.innerHTML='<div class="p-2 text-sm text-gray-500">No matches</div>'; searchResults.classList.remove('hidden'); return;}
+  if(matches.length===0){ 
+    searchResults.innerHTML='<div class="p-2 text-sm text-gray-500">No matches</div>'; 
+    searchResults.classList.remove('hidden'); 
+    return;
+  }
   matches.forEach(p=>{
     const div = document.createElement('div');
     div.className='p-2 border-b cursor-pointer hover:bg-gray-100 text-black text-sm';
-    div.textContent = p.name+(p.price? ` $${p.price}`:'');
-    div.onclick = ()=>{ addPantryItem(p); searchInput.value=''; searchResults.classList.add('hidden'); };
+    div.textContent = `${p.name} ${p.price ? '$'+p.price : ''} [${p.aisle}]`;
+    div.onclick = ()=>{ addPantryItemToList(p); searchInput.value=''; searchResults.classList.add('hidden'); };
     searchResults.appendChild(div);
   });
   searchResults.classList.remove('hidden');
@@ -115,7 +129,8 @@ document.addEventListener('click', function(e){
   }
 });
 
-function addPantryItem(p){ 
+// ===== CRUD Functions =====
+function addPantryItemToList(p){ 
   items.unshift({
     id:Date.now(),
     name:p.name,
@@ -127,14 +142,20 @@ function addPantryItem(p){
   saveRender(); 
 }
 
-// ===== CRUD =====
 function addItem(){
   const name=document.getElementById('new-item').value.trim();
   const qty=parseInt(document.getElementById('new-quantity').value)||1;
   const price=document.getElementById('new-price').value.trim();
+  const aisle=document.getElementById('new-aisle').value.trim() || 'Other';
   if(!name) return;
-  items.unshift({id:Date.now(), name, quantity:qty, price, aisle:'Other', checked:false});
-  document.getElementById('new-item').value=''; document.getElementById('new-quantity').value='1'; document.getElementById('new-price').value='';
+  // Add to shopping list
+  items.unshift({id:Date.now(), name, quantity:qty, price, aisle, checked:false});
+  // Add to pantry
+  pantry.unshift({id:Date.now()+1, name, quantity:qty, price, aisle, checked:false});
+  document.getElementById('new-item').value=''; 
+  document.getElementById('new-quantity').value='1'; 
+  document.getElementById('new-price').value='';
+  document.getElementById('new-aisle').value='';
   saveRender();
 }
 
@@ -155,14 +176,21 @@ function decreaseQty(id){
   saveRender();
 }
 
-function saveRender(){ localStorage.setItem('groceryItems',JSON.stringify(items)); render(); }
+// ===== Save & Render =====
+function saveRender(){ 
+  localStorage.setItem('groceryItems',JSON.stringify(items)); 
+  localStorage.setItem('pantryItems',JSON.stringify(pantry));
+  render(); 
+}
 
 // ===== Render =====
 function render(){
-  const container=document.getElementById('items-container');
-  container.innerHTML='';
+  const shoppingListContainer=document.getElementById('shopping-list');
+  shoppingListContainer.innerHTML='';
+  const pantryContainer=document.getElementById('pantry-list');
+  pantryContainer.innerHTML='';
 
-  // Group active items by aisle
+  // --- Shopping List ---
   const grouped = {};
   const purchased = [];
   items.forEach(i=>{
@@ -172,7 +200,6 @@ function render(){
     grouped[aisle].push(i);
   });
 
-  // Render active items grouped by aisle
   Object.keys(grouped).sort().forEach(aisle=>{
     const aisleDiv=document.createElement('div');
     aisleDiv.className='bg-white rounded-xl shadow-md max-h-[400px] overflow-y-auto';
@@ -189,11 +216,8 @@ function render(){
 
       const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 text-gray-900 font-normal';
 
-      // Right-aligned price and quantity buttons
       const rightDiv=document.createElement('div'); rightDiv.className='flex items-center gap-1 min-w-[140px] justify-end';
-
       const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='text-sm w-16 text-right';
-
       const minus=document.createElement('button'); minus.textContent='-'; minus.className='w-7 h-7 rounded-full bg-[#FF5C5C] text-white text-sm flex items-center justify-center'; minus.onclick=()=>decreaseQty(i.id);
       const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-6 text-center text-sm';
       const plus=document.createElement('button'); plus.textContent='+'; plus.className='w-7 h-7 rounded-full bg-[#4CAF50] text-white text-sm flex items-center justify-center'; plus.onclick=()=>increaseQty(i.id);
@@ -206,7 +230,7 @@ function render(){
       aisleDiv.appendChild(row);
     });
 
-    container.appendChild(aisleDiv);
+    shoppingListContainer.appendChild(aisleDiv);
   });
 
   // Purchased section
@@ -222,26 +246,58 @@ function render(){
       row.className='flex items-center gap-2 p-2 bg-gray-200 rounded-xl hover:bg-gray-300 text-sm font-light shadow-sm';
 
       const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=i.checked; chk.onclick=()=>toggleCheck(i.id);
-
       const nameSpan=document.createElement('span'); nameSpan.textContent=i.name; nameSpan.className='flex-1 line-through text-gray-900 font-normal';
 
       const rightDiv=document.createElement('div'); rightDiv.className='flex items-center gap-1 min-w-[140px] justify-end';
-
       const priceSpan=document.createElement('span'); priceSpan.textContent=i.price ? '$'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2) : ''; priceSpan.className='text-sm w-16 text-right';
-
       const minus=document.createElement('button'); minus.textContent='-'; minus.className='w-7 h-7 rounded-full bg-[#FF5C5C] text-white text-sm flex items-center justify-center'; minus.onclick=()=>decreaseQty(i.id);
       const qtySpan=document.createElement('span'); qtySpan.textContent=i.quantity; qtySpan.className='w-6 text-center text-sm';
       const plus=document.createElement('button'); plus.textContent='+'; plus.className='w-7 h-7 rounded-full bg-[#4CAF50] text-white text-sm flex items-center justify-center'; plus.onclick=()=>increaseQty(i.id);
 
       rightDiv.appendChild(priceSpan); rightDiv.appendChild(minus); rightDiv.appendChild(qtySpan); rightDiv.appendChild(plus);
-
       const del=document.createElement('button'); del.textContent='🗑'; del.onclick=()=>deleteItem(i.id);
 
       row.appendChild(chk); row.appendChild(nameSpan); row.appendChild(rightDiv); row.appendChild(del);
       purchasedDiv.appendChild(row);
     });
-    container.appendChild(purchasedDiv);
+    shoppingListContainer.appendChild(purchasedDiv);
   }
+
+  // --- Pantry Section ---
+  const pantryGrouped = {};
+  pantry.forEach(i=>{
+    const aisle=i.aisle||'Other';
+    if(!pantryGrouped[aisle]) pantryGrouped[aisle]=[];
+    pantryGrouped[aisle].push(i);
+  });
+
+  const pantryHeader=document.createElement('h2');
+  pantryHeader.className='text-lg font-bold text-gray-800';
+  pantryHeader.textContent='Pantry';
+  pantryContainer.appendChild(pantryHeader);
+
+  Object.keys(pantryGrouped).sort().forEach(aisle=>{
+    const aisleDiv=document.createElement('div');
+    aisleDiv.className='bg-white rounded-xl shadow-md max-h-[300px] overflow-y-auto mt-2';
+    const header=document.createElement('div');
+    header.className='bg-blue-400 text-white px-2 py-1 sticky top-0 z-10 text-sm font-light';
+    header.textContent=aisle;
+    aisleDiv.appendChild(header);
+
+    pantryGrouped[aisle].forEach(i=>{
+      const row=document.createElement('div');
+      row.className='flex items-center justify-between gap-2 p-2 hover:bg-gray-100 text-sm font-light shadow-sm rounded-md bg-white';
+
+      const nameSpan=document.createElement('span'); nameSpan.textContent=i.name + (i.price ? ` $${i.price}`:''); nameSpan.className='flex-1 text-gray-900 font-normal';
+
+      const addBtn=document.createElement('button'); addBtn.textContent='➕'; addBtn.className='px-2 py-1 bg-green-500 text-white rounded'; addBtn.onclick=()=>addPantryItemToList(i);
+
+      row.appendChild(nameSpan); row.appendChild(addBtn);
+      aisleDiv.appendChild(row);
+    });
+
+    pantryContainer.appendChild(aisleDiv);
+  });
 
   // Update cart total
   let total = items.reduce((sum,i)=>{
