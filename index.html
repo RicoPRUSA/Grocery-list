@@ -9,7 +9,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
@@ -133,7 +133,7 @@
                     Quantity: item.quantity,
                     Price: item.price || 0,
                     Total: (parseFloat(item.price || 0) * item.quantity).toFixed(2),
-                    Aisle: item.aisle.replace(/[^a-zA-Z ]/g, "").trim(), // Remove emojis for cleaner excel
+                    Aisle: item.aisle.replace(/[^a-zA-Z ]/g, "").trim(),
                     Status: item.checked ? 'Purchased' : 'Pending'
                 }));
                 const ws = XLSX.utils.json_to_sheet(dataToExport);
@@ -163,7 +163,6 @@
                 <div className="min-h-screen pb-32">
                     <div className="max-w-xl mx-auto p-4">
                         
-                        {/* Header */}
                         <header className="rounded-3xl profound-shadow px-5 py-5 mb-8 text-white bg-gradient-to-br from-emerald-600 to-teal-800">
                             <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-3">
@@ -200,7 +199,6 @@
                             </div>
                         </header>
 
-                        {/* Menu Choice */}
                         {showMenu && (
                             <div className="mb-6 bg-white rounded-2xl profound-shadow border border-slate-50 overflow-hidden scale-in">
                                 <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
@@ -250,7 +248,6 @@
                             </div>
                         )}
 
-                        {/* Quick Input Area - Shadow Removed from Button */}
                         <div className="bg-white rounded-3xl soft-depth p-4 mb-8 grid grid-cols-12 gap-3 border border-slate-100/50">
                             <input type="text" placeholder="Add an item..." value={newItem} onChange={e => setNewItem(e.target.value)} onKeyPress={e => e.key === 'Enter' && addItem()} className="col-span-12 sm:col-span-6 p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-emerald-500 outline-none transition-all"/>
                             <div className="col-span-6 sm:col-span-3 flex items-center bg-slate-50 rounded-2xl border border-slate-100 px-2">
@@ -261,7 +258,6 @@
                             <button onClick={addItem} className="col-span-6 sm:col-span-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl py-4 transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-none">Add Item</button>
                         </div>
 
-                        {/* List Categories */}
                         <div className="space-y-8">
                             {Object.entries(groupedByAisle).sort().map(([aisle, aisleItems]) => (
                                 <div key={aisle} className="scale-in">
@@ -284,7 +280,6 @@
                             ))}
                         </div>
 
-                        {/* Purchased */}
                         {items.some(i => i.checked) && (
                             <div className="mt-12 opacity-50">
                                 <h3 className="text-[10px] font-black mb-4 uppercase text-slate-300 tracking-[0.3em] px-2">Purchased</h3>
@@ -301,7 +296,6 @@
                         )}
                     </div>
 
-                    {/* Footer Progress */}
                     {items.length > 0 && (
                         <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 py-4 px-8 z-40 shadow-[0_-15px_30px_-10px_rgba(0,0,0,0.08)]">
                             <div className="max-w-xl mx-auto flex justify-between items-center">
@@ -321,7 +315,6 @@
                         </div>
                     )}
 
-                    {/* Edit Modal - Shadow Removed from Save Button */}
                     {editingItem && (
                         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6">
                             <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm profound-shadow border border-slate-100 scale-in">
