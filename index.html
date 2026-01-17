@@ -14,17 +14,7 @@
   <!-- Header -->
   <div class="flex justify-between items-center mb-4 p-4 rounded-xl shadow bg-[#27395F] border border-[#1a2438] text-white">
     <h1 class="text-2xl font-bold flex items-center gap-2">🛒 Grocery List</h1>
-    <div class="relative">
-      <button id="menu-btn" class="p-2 rounded bg-blue-600 hover:bg-blue-500 font-bold">☰ Menu</button>
-      <div id="menu" class="absolute right-0 mt-2 w-52 rounded-lg shadow-lg border bg-blue-100 border-blue-400 z-50 hidden">
-        <button onclick="clearPurchased()" class="w-full text-left px-4 py-2 hover:bg-blue-200 text-blue-800 text-sm">Clear Purchased</button>
-        <button onclick="clearAll()" class="w-full text-left px-4 py-2 hover:bg-red-200 text-red-700 text-sm">Clear All</button>
-        <label class="w-full text-left px-4 py-2 hover:bg-blue-200 text-blue-800 text-sm cursor-pointer block">
-          Import Pantry
-          <input type="file" id="import-file" class="hidden" accept=".xlsx,.xls">
-        </label>
-      </div>
-    </div>
+    <button id="menu-btn" class="p-3 text-2xl rounded bg-blue-600 hover:bg-blue-500 font-bold">☰</button>
   </div>
 
   <!-- Add Item & Search -->
@@ -47,8 +37,13 @@
     </div>
   </div>
 
-  <!-- Items List -->
-  <div id="items-container" class="flex-1 overflow-y-auto mb-4 space-y-2"></div>
+  <!-- Active Items List -->
+  <div class="flex-1 overflow-y-auto mb-4 space-y-2" id="items-container"></div>
+
+  <!-- Purchased Items Section -->
+  <div class="flex-1 overflow-y-auto mb-4 space-y-2" id="purchased-container">
+    <div class="bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 rounded-t-xl shadow">Purchased</div>
+  </div>
 
 </div>
 
@@ -56,15 +51,18 @@
 // ===== Data =====
 let items = JSON.parse(localStorage.getItem('groceryItems')||'[]');
 let pantry = JSON.parse(localStorage.getItem('pantryItems')||'[]');
-let editingId = null;
 
 // ===== Hamburger Menu =====
 const menuBtn = document.getElementById('menu-btn');
-const menu = document.getElementById('menu');
-menuBtn.addEventListener('click',()=>menu.classList.toggle('hidden'));
+menuBtn.addEventListener('click', () => {
+  alert("Menu Options:\n- Clear Purchased\n- Clear All\n- Import Pantry\n\nUse the file input or buttons manually for now.");
+});
 
 // ===== Import Pantry =====
-document.getElementById('import-file').addEventListener('change', function(e){
+const importFile = document.createElement('input');
+importFile.type = 'file';
+importFile.accept = '.xlsx,.xls';
+importFile.addEventListener('change', function(e){
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
@@ -77,7 +75,7 @@ document.getElementById('import-file').addEventListener('change', function(e){
       id:Date.now()+i,
       name:String(r.Item||r.item||r.Name||r.name||''),
       price:String(r.Price||r.price||''),
-      aisle:String(r.Aisle||r.aisle||''),
+      aisle:String(r.Aisle||r.aisle||'Other'),
       store:'Walmart',
       checked:false,
       quantity:'1'
@@ -109,7 +107,6 @@ searchInput.addEventListener('input', function(){
   searchResults.classList.remove('hidden');
 });
 
-// Close search if click outside
 document.addEventListener('click', function(e){
   if(!searchInput.contains(e.target) && !searchResults.contains(e.target)){
     searchResults.classList.add('hidden');
@@ -141,7 +138,10 @@ function addItem(){
   saveRender();
 }
 
-function toggleCheck(id){ items = items.map(i=>i.id===id?{...i,checked:!i.checked}:i); saveRender(); }
+function toggleCheck(id){ 
+  items = items.map(i=>i.id===id?{...i,checked:!i.checked}:i); 
+  saveRender(); 
+}
 function deleteItem(id){ items=items.filter(i=>i.id!==id); saveRender(); }
 function clearPurchased(){ items=items.filter(i=>!i.checked); saveRender(); }
 function clearAll(){ if(confirm('Clear all items?')){items=[]; saveRender();} }
@@ -151,15 +151,21 @@ function saveRender(){ localStorage.setItem('groceryItems',JSON.stringify(items)
 // ===== Render =====
 function render(){
   const container=document.getElementById('items-container');
-  container.innerHTML='';
+  const purchasedContainer=document.getElementById('purchased-container');
+  container.innerHTML=''; 
+  purchasedContainer.innerHTML='<div class="bg-[#27395F] text-white px-2 py-1 sticky top-0 z-10 rounded-t-xl shadow">Purchased</div>';
 
   const grouped={};
+  const purchased=[];
+
   items.forEach(i=>{
+    if(i.checked){ purchased.push(i); return; }
     const aisle = i.aisle||'Other';
     if(!grouped[aisle]) grouped[aisle]=[];
     grouped[aisle].push(i);
   });
 
+  // Active items grouped by aisle
   Object.keys(grouped).sort().forEach(aisle=>{
     const aisleDiv=document.createElement('div');
     aisleDiv.className='mb-2 rounded-xl shadow border bg-white max-h-[400px] overflow-y-auto';
@@ -179,6 +185,17 @@ function render(){
     });
 
     container.appendChild(aisleDiv);
+  });
+
+  // Purchased items
+  purchased.forEach(i=>{
+    const row=document.createElement('div');
+    row.className='flex flex-col sm:flex-row sm:items-center gap-2 p-2 bg-gray-200 rounded-xl hover:bg-gray-300';
+    const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=i.checked; chk.onclick=()=>toggleCheck(i.id);
+    const text=document.createElement('span'); text.textContent=i.name+' ×'+i.quantity+(i.price? ' $'+(parseFloat(i.price)*parseInt(i.quantity)).toFixed(2):'')+' ('+i.store+')'; text.className='flex-1 line-through';
+    const del=document.createElement('button'); del.textContent='🗑'; del.onclick=()=>deleteItem(i.id);
+    row.appendChild(chk); row.appendChild(text); row.appendChild(del);
+    purchasedContainer.appendChild(row);
   });
 }
 
