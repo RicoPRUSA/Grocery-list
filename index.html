@@ -12,6 +12,8 @@
     min-width: 3rem;
     max-width: 5rem;
   }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #888; border-radius: 3px; }
 </style>
 </head>
 <body class="bg-slate-200 min-h-screen flex flex-col">
@@ -45,7 +47,7 @@
     </div>
     <div class="relative w-full mt-2">
       <input type="text" id="search-pantry" placeholder="Search pantry (3+ letters)" class="w-full px-3 py-2 rounded text-black">
-      <div id="search-results" class="absolute top-full left-0 right-0 bg-white border border-blue-400 max-h-60 overflow-y-auto mt-1 rounded shadow z-50 hidden text-black"></div>
+      <div id="search-results" class="absolute top-full left-0 right-0 bg-white border border-blue-400 max-h-60 overflow-y-auto mt-1 rounded shadow z-50 hidden text-black scrollbar-thin"></div>
     </div>
   </div>
 
@@ -54,7 +56,7 @@
     <div id="shopping-list"></div>
 
     <!-- Pantry Quick-Jump Buttons -->
-    <div id="pantry-jump-buttons" class="flex gap-2 overflow-x-auto p-2 bg-gray-100 rounded mb-2"></div>
+    <div id="pantry-jump-buttons" class="flex gap-2 overflow-x-auto p-2 bg-gray-100 rounded mb-2 scrollbar-thin"></div>
 
     <div id="pantry-list"></div>
   </div>
@@ -185,11 +187,91 @@ function saveRender(){
 
 // ===== Render =====
 function render(){
-// [Rendering code omitted for brevity — same as previously detailed version]
-// It includes shopping list aisles, purchased section collapsed, pantry with quick-jump buttons, auto-resizing price input, +/- buttons, sticky cart total
+  const shoppingDiv = document.getElementById('shopping-list');
+  const pantryDiv = document.getElementById('pantry-list');
+  const jumpDiv = document.getElementById('pantry-jump-buttons');
+  shoppingDiv.innerHTML=''; pantryDiv.innerHTML=''; jumpDiv.innerHTML='';
+
+  // --- Shopping List by aisle ---
+  const aisles = [...new Set(items.map(i=>i.aisle||'Other'))];
+  aisles.forEach(a=>{
+    const aisleDiv = document.createElement('div');
+    const header = document.createElement('div');
+    header.className='bg-[#27395F] text-white px-2 py-1 cursor-pointer rounded-t';
+    header.textContent=a;
+    aisleDiv.appendChild(header);
+    const container = document.createElement('div');
+    container.className='flex flex-col space-y-1 p-2';
+    items.filter(i=>i.aisle===a).forEach(i=>{
+      const row = document.createElement('div');
+      row.className='flex justify-between items-center p-1 bg-white rounded shadow text-sm';
+      const name = document.createElement('span'); name.textContent=i.name;
+      const price = document.createElement('span'); price.textContent='$'+((parseFloat(i.price)||0)*parseInt(i.quantity||1)).toFixed(2);
+      const qtyDiv = document.createElement('div'); 
+      qtyDiv.className='flex gap-1';
+      const plus = document.createElement('button'); plus.textContent='+'; plus.className='bg-[#22C55E] text-white px-2 rounded'; plus.onclick=()=>increaseQty(i.id);
+      const minus = document.createElement('button'); minus.textContent='-'; minus.className='bg-[#FF5C5C] text-white px-2 rounded'; minus.onclick=()=>decreaseQty(i.id);
+      qtyDiv.appendChild(minus); qtyDiv.appendChild(plus);
+      const del = document.createElement('button'); del.textContent='✖'; del.className='text-red-600'; del.onclick=()=>deleteItem(i.id);
+      row.appendChild(name); row.appendChild(price); row.appendChild(qtyDiv); row.appendChild(del);
+      container.appendChild(row);
+    });
+    aisleDiv.appendChild(container);
+    shoppingDiv.appendChild(aisleDiv);
+  });
+
+  // --- Purchased Section ---
+  const purchasedDiv = document.createElement('div');
+  const purchasedHeader = document.createElement('div');
+  purchasedHeader.className='bg-[#27395F] text-white px-2 py-1 cursor-pointer rounded-t mt-2';
+  purchasedHeader.textContent='Purchased ▼';
+  const purchasedItems = document.createElement('div');
+  purchasedItems.className='flex flex-col space-y-1 p-2 hidden';
+  purchasedHeader.onclick = ()=>purchasedItems.classList.toggle('hidden');
+  items.filter(i=>i.checked).forEach(i=>{
+    const row = document.createElement('div');
+    row.className='flex justify-between items-center p-1 bg-white rounded shadow text-sm';
+    const name = document.createElement('span'); name.textContent=i.name; name.className='line-through text-gray-400';
+    const price = document.createElement('span'); price.textContent='$'+((parseFloat(i.price)||0)*parseInt(i.quantity||1)).toFixed(2); price.className='line-through text-gray-400';
+    const del = document.createElement('button'); del.textContent='✖'; del.className='text-red-600'; del.onclick=()=>deleteItem(i.id);
+    row.appendChild(name); row.appendChild(price); row.appendChild(del);
+    purchasedItems.appendChild(row);
+  });
+  purchasedDiv.appendChild(purchasedHeader); purchasedDiv.appendChild(purchasedItems);
+  shoppingDiv.appendChild(purchasedDiv);
+
+  // --- Pantry Quick-Jump Buttons ---
+  const pantryAisles = [...new Set(pantry.map(p=>p.aisle||'Other'))];
+  pantryAisles.forEach(a=>{
+    const btn = document.createElement('button');
+    btn.textContent=a;
+    btn.className='px-2 py-1 rounded bg-blue-300 text-white text-xs whitespace-nowrap';
+    btn.onclick=()=>document.getElementById('pantry-aisle-'+a).scrollIntoView({behavior:'smooth',block:'start'});
+    jumpDiv.appendChild(btn);
+  });
+
+  // --- Pantry List ---
+  pantryAisles.forEach(a=>{
+    const aisleDiv = document.createElement('div'); aisleDiv.id='pantry-aisle-'+a;
+    const header = document.createElement('div'); header.className='bg-blue-400 text-white px-2 py-1 cursor-pointer rounded-t mt-2'; header.textContent=a; aisleDiv.appendChild(header);
+    const container = document.createElement('div'); container.className='flex flex-col space-y-1 p-2';
+    pantry.filter(p=>p.aisle===a).forEach(p=>{
+      const row = document.createElement('div');
+      row.className='flex justify-between items-center p-1 bg-white rounded shadow text-sm';
+      const name = document.createElement('span'); name.textContent=p.name; name.className='flex-1';
+      const priceInput = document.createElement('input'); priceInput.type='number'; priceInput.step='0.01'; priceInput.value=p.price||''; priceInput.className='price-input px-1 py-1 text-sm border rounded text-black'; priceInput.oninput=()=>{p.price=priceInput.value; saveRender();};
+      const addBtn = document.createElement('button'); addBtn.textContent='+'; addBtn.className='w-7 h-7 rounded-full bg-[#22C55E] text-white flex items-center justify-center'; addBtn.onclick=()=>addPantryItemToList(p);
+      row.appendChild(name); row.appendChild(priceInput); row.appendChild(addBtn);
+      container.appendChild(row);
+    });
+    aisleDiv.appendChild(container); pantryDiv.appendChild(aisleDiv);
+  });
+
+  // --- Update Cart Total ---
+  const total = items.reduce((s,i)=>s + (parseFloat(i.price)||0)*parseInt(i.quantity||1),0);
+  document.getElementById('cart-total').textContent='Total: $'+total.toFixed(2);
 }
 
-// ===== Initial Render =====
 render();
 </script>
 </body>
