@@ -109,12 +109,11 @@
                 return '📦 Other';
             };
 
-            // Voice Recognition Toggle Logic
             const toggleVoiceSearch = () => {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 
                 if (!SpeechRecognition) {
-                    alert("Voice recognition is not supported by your current browser.");
+                    alert("Voice recognition not supported on this browser.");
                     return;
                 }
 
@@ -124,33 +123,22 @@
                     return;
                 }
 
-                // Security Check for HTTPS
-                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                    alert("Voice search requires a secure (HTTPS) connection. Please check your browser's address bar.");
-                    return;
-                }
-
                 const recognition = new SpeechRecognition();
-                recognition.lang = 'es-PR';
-                recognition.continuous = false;
+                recognition.lang = 'es-PR'; // Works for English too
                 recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
 
                 recognition.onstart = () => setIsListening(true);
                 recognition.onend = () => setIsListening(false);
                 
                 recognition.onerror = (event) => {
                     setIsListening(false);
-                    if (event.error === 'not-allowed') {
-                        alert("Microphone access was denied. Please check your browser settings.");
-                    } else {
-                        console.error("Speech error:", event.error);
-                    }
+                    console.error("Speech Recognition Error", event.error);
                 };
 
                 recognition.onresult = (event) => {
                     const transcript = event.results[0][0].transcript;
                     setSearchQuery(transcript);
-                    recognition.stop();
                 };
 
                 recognitionRef.current = recognition;
@@ -244,9 +232,9 @@
                 <div className="min-h-screen pb-32 bg-[#F9F8F3]">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4">
                         
-                        {/* Sticky Container */}
+                        {/* Header & Sticky Search Area */}
                         <div className="sticky top-2 z-50 mb-8 space-y-3">
-                            <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800">
+                            <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 transition-all">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="bg-white/20 p-2 rounded-lg"><Icon name="ShoppingCart" className="w-5 h-5" /></div>
@@ -275,7 +263,7 @@
                                 )}
                             </header>
 
-                            {/* Search/Add Input with Microphone Toggle */}
+                            {/* Detached Search/Mic Input */}
                             <div className="relative z-40">
                                 <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                                 <input
@@ -284,12 +272,12 @@
                                     value={searchQuery} 
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && addItemManually(searchQuery)}
-                                    placeholder={isListening ? "Listening... Speak now" : "Search or add items..."}
-                                    className={`w-full pl-11 pr-12 py-4 bg-white border rounded-xl profound-shadow text-sm placeholder-slate-400 focus:outline-none transition-all font-medium text-slate-900 ${isListening ? 'border-red-500 ring-4 ring-red-100' : 'border-slate-100 focus:ring-2 focus:ring-emerald-500'}`}
+                                    placeholder={isListening ? "Listening..." : "Search or add items..."}
+                                    className={`w-full pl-11 pr-14 py-4 bg-white border rounded-xl profound-shadow text-sm placeholder-slate-400 focus:outline-none transition-all font-medium text-slate-900 ${isListening ? 'border-red-500 ring-4 ring-red-100' : 'border-slate-100 focus:ring-2 focus:ring-emerald-500'}`}
                                 />
                                 <button 
                                     onClick={toggleVoiceSearch}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all active:scale-90 z-50"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 hover:bg-slate-50 rounded-full transition-all active:scale-90 z-50"
                                 >
                                     {isListening ? (
                                         <Icon name="Square" className="w-5 h-5 text-red-600 pulse-red" />
@@ -321,7 +309,7 @@
                             </div>
                         </div>
 
-                        {/* Pantry Database Section */}
+                        {/* Pantry Section */}
                         {showPantry && (
                             <div className="bg-white rounded-2xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in mx-1 text-slate-900">
                                 <div className="flex justify-between items-center mb-5">
@@ -354,7 +342,7 @@
                             </div>
                         )}
 
-                        {/* List View */}
+                        {/* Grouped Aisle View */}
                         <div className="space-y-10">
                             {Object.entries(groupedByAisle).sort().map(([aisle, aisleItems]) => (
                                 <div key={aisle} className="scale-in">
@@ -375,7 +363,7 @@
                                     <div className="bg-white rounded-2xl profound-shadow border border-slate-50 divide-y divide-slate-50 overflow-hidden">
                                         {aisleItems.map(item => (
                                             <div key={item.id} className="p-5 flex gap-5 items-center group transition-colors hover:bg-slate-50/50 active:bg-slate-100" onClick={() => setEditingItem(item)}>
-                                                <button onClick={(e) => { e.stopPropagation(); toggleCheck(item.id); }} className="w-7 h-7 rounded-lg border-2 border-slate-100 shrink-0 transition-all hover:border-emerald-500 flex items-center justify-center active:scale-90">
+                                                <button onClick={(e) => { e.stopPropagation(); toggleCheck(item.id); }} className="w-7 h-7 rounded-lg border-2 border-slate-100 shrink-0 transition-all hover:border-emerald-500 flex items-center justify-center">
                                                     {item.checked && <Icon name="Check" className="w-4 h-4 text-emerald-500" />}
                                                 </button>
                                                 <div className="flex-1 min-w-0">
@@ -394,8 +382,8 @@
 
                         {/* Purchased Section */}
                         {items.some(i => i.checked) && (
-                            <div className="mt-16 opacity-50 mb-10 scale-in">
-                                <h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2 text-center">Purchased Items</h3>
+                            <div className="mt-16 opacity-50 mb-10 scale-in text-center">
+                                <h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2">Purchased Items</h3>
                                 <div className="bg-white rounded-xl border border-dashed border-slate-200 divide-y divide-slate-50 overflow-hidden">
                                     {items.filter(i => i.checked).map(item => (
                                         <div key={item.id} className="flex items-center gap-4 p-4">
@@ -422,14 +410,14 @@
                                         <div className="h-full bg-emerald-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(items.filter(i => i.checked).length / items.length) * 100}%`}}></div>
                                     </div>
                                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                                        {items.filter(i => i.checked).length}/{items.length} Done
+                                        {items.filter(i => i.checked).length}/{items.length} Complete
                                     </p>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Edit Modal */}
+                    {/* Modal: Edit details */}
                     {editingItem && (
                         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                             <div className="bg-white rounded-2xl p-8 w-full max-w-sm profound-shadow border border-slate-100 scale-in text-slate-900">
