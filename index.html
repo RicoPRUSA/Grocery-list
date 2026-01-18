@@ -178,7 +178,7 @@
                 <div className="min-h-screen pb-32">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4">
                         
-                        {/* Header: Less rounded (rounded-2xl) */}
+                        {/* Header: Merged Search and Sticky */}
                         <header className="rounded-2xl profound-shadow px-4 sm:px-6 py-5 mb-8 text-white bg-gradient-to-br from-emerald-600 to-teal-800 sticky top-2 z-50">
                             <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-3">
@@ -191,7 +191,7 @@
                             </div>
                             
                             <div className="relative">
-                                <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 w-4 h-4" />
+                                <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4" />
                                 <input
                                     ref={searchRef}
                                     type="text" 
@@ -199,11 +199,11 @@
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && addItemManually(searchQuery)}
                                     placeholder="Search or add new item..."
-                                    className="w-full pl-11 pr-4 py-3 bg-white/10 border border-white/10 rounded-xl text-sm placeholder-white/40 focus:outline-none focus:bg-white/20 transition-all font-medium"
+                                    className="w-full pl-11 pr-4 py-3 bg-white/10 border border-white/10 rounded-xl text-sm placeholder-white/60 focus:outline-none focus:bg-white/20 transition-all font-medium"
                                 />
                                 
                                 {searchQuery.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-[70vh] overflow-y-auto scale-in">
+                                    <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-[60vh] overflow-y-auto scale-in text-slate-900">
                                         <button 
                                             onClick={() => addItemManually(searchQuery)}
                                             className="w-full flex items-center gap-4 p-4 hover:bg-emerald-50 border-b border-slate-50 text-emerald-600 font-black text-sm text-left"
@@ -216,11 +216,11 @@
                                             <button 
                                                 key={p.id} 
                                                 onClick={() => addItemFromPantry(p)} 
-                                                className="w-full flex justify-between items-center p-4 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-slate-800 text-left"
+                                                className="w-full flex justify-between items-center p-4 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left"
                                             >
                                                 <div>
-                                                    <span className="font-bold text-sm block">{p.name}</span>
-                                                    <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider">{p.aisle}</span>
+                                                    <span className="font-bold text-sm block text-slate-800">{p.name}</span>
+                                                    <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider">{p.aisle}</span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     {p.price && <span className="text-xs text-emerald-600 font-black">${p.price}</span>}
@@ -233,7 +233,7 @@
                             </div>
                         </header>
 
-                        {/* Menu Choice: rounded-xl */}
+                        {/* Menu Dropdown */}
                         {showMenu && (
                             <div className="mb-6 bg-white rounded-xl profound-shadow border border-slate-50 overflow-hidden scale-in mx-1">
                                 <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
@@ -251,7 +251,7 @@
                             </div>
                         )}
 
-                        {/* Pantry Database Section: rounded-2xl */}
+                        {/* Pantry Database Section */}
                         {showPantry && (
                             <div className="bg-white rounded-2xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in mx-1">
                                 <div className="flex justify-between items-center mb-5">
@@ -267,7 +267,7 @@
                                         <div key={p.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100/50">
                                             <div className="flex-1 mr-4">
                                                 <p className="text-xs font-bold text-slate-700">{p.name}</p>
-                                                <p className="text-[9px] text-slate-400 font-black uppercase">{p.aisle}</p>
+                                                <p className="text-[9px] text-slate-500 font-black uppercase tracking-wider">{p.aisle}</p>
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <input 
@@ -284,11 +284,12 @@
                             </div>
                         )}
 
-                        {/* List Categories: rounded-2xl */}
+                        {/* Grouped Shopping List */}
                         <div className="space-y-8">
                             {Object.entries(groupedByAisle).sort().map(([aisle, aisleItems]) => (
                                 <div key={aisle} className="scale-in">
-                                    <h3 className="px-2 mb-3 text-[10px] font-black uppercase text-slate-400 tracking-[0.3em]">{aisle}</h3>
+                                    {/* Darker Aisle Font: text-slate-600 */}
+                                    <h3 className="px-2 mb-3 text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">{aisle}</h3>
                                     <div className="bg-white rounded-2xl profound-shadow border border-slate-50 divide-y divide-slate-50 overflow-hidden">
                                         {aisleItems.map(item => (
                                             <div key={item.id} className="p-5 flex gap-5 items-center group transition-colors hover:bg-slate-50/50" onClick={() => setEditingItem(item)}>
@@ -296,8 +297,8 @@
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-bold text-slate-700 text-sm truncate">{item.name}</p>
                                                     <div className="flex items-center gap-3 mt-1">
-                                                        <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md uppercase">x{item.quantity}</span>
-                                                        {item.price && <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md tracking-wider">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>}
+                                                        <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md uppercase">x{item.quantity}</span>
+                                                        {item.price && <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md tracking-wider">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>}
                                                     </div>
                                                 </div>
                                             </div>
@@ -307,14 +308,14 @@
                             ))}
                         </div>
 
-                        {/* Purchased: rounded-xl */}
+                        {/* Purchased Section */}
                         {items.some(i => i.checked) && (
-                            <div className="mt-12 opacity-50 mb-10">
-                                <h3 className="text-[10px] font-black mb-4 uppercase text-slate-300 tracking-[0.3em] px-2">Purchased</h3>
+                            <div className="mt-12 opacity-50 mb-10 scale-in">
+                                <h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2">Purchased</h3>
                                 <div className="bg-white rounded-xl border border-dashed border-slate-200 divide-y divide-slate-50 overflow-hidden">
                                     {items.filter(i => i.checked).map(item => (
                                         <div key={item.id} className="flex items-center gap-4 p-4">
-                                            <button onClick={() => setItems(items.map(i => i.id === item.id ? {...i, checked: false} : i))} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0"><Icon name="Check" className="w-4 h-4"/></button>
+                                            <button onClick={() => setItems(items.map(i => i.id === item.id ? {...i, checked: false} : i))} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-none"><Icon name="Check" className="w-4 h-4"/></button>
                                             <span className="line-through text-xs font-semibold text-slate-400 truncate flex-1">{item.name}</span>
                                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="p-2 text-slate-300 hover:text-red-400"><Icon name="Trash2" className="w-4 h-4"/></button>
                                         </div>
@@ -324,7 +325,7 @@
                         )}
                     </div>
 
-                    {/* Footer */}
+                    {/* Fixed Footer: Stretched for Mobile */}
                     {items.length > 0 && (
                         <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 py-4 px-4 sm:px-8 z-40 shadow-[0_-15px_30px_-10px_rgba(0,0,0,0.08)]">
                             <div className="max-w-2xl mx-auto flex justify-between items-center">
@@ -336,7 +337,7 @@
                                     <div className="h-2 w-24 bg-slate-100 rounded-full mb-1.5 overflow-hidden">
                                         <div className="h-full bg-emerald-500 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(items.filter(i => i.checked).length / items.length) * 100}%`}}></div>
                                     </div>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
                                         {items.filter(i => i.checked).length}/{items.length} Done
                                     </p>
                                 </div>
@@ -344,19 +345,19 @@
                         </div>
                     )}
 
-                    {/* Edit Modal: rounded-2xl */}
+                    {/* Edit Details Modal */}
                     {editingItem && (
                         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-                            <div className="bg-white rounded-2xl p-8 w-full max-w-sm profound-shadow border border-slate-100 scale-in">
+                            <div className="bg-white rounded-2xl p-8 w-full max-w-sm profound-shadow border border-slate-100 scale-in text-slate-900">
                                 <h2 className="text-sm font-black text-slate-800 mb-6 uppercase tracking-widest">Edit Details</h2>
                                 <div className="space-y-6">
                                     <div className="space-y-1">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase ml-2">Name</label>
+                                        <label className="text-[9px] font-black text-slate-500 uppercase ml-2">Name</label>
                                         <input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2">Quantity</label>
+                                            <label className="text-[9px] font-black text-slate-500 uppercase ml-2">Quantity</label>
                                             <div className="flex items-center bg-slate-50 rounded-xl border border-slate-100 p-1">
                                                 <button onClick={() => setEditingItem({...editingItem, quantity: Math.max(1, editingItem.quantity - 1)})} className="p-3 text-slate-400"><Icon name="Minus" className="w-4 h-4"/></button>
                                                 <span className="flex-1 text-center font-black text-sm">{editingItem.quantity}</span>
@@ -364,7 +365,7 @@
                                             </div>
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-slate-400 uppercase ml-2">Price ($)</label>
+                                            <label className="text-[9px] font-black text-slate-500 uppercase ml-2">Price ($)</label>
                                             <input type="number" step="0.01" value={editingItem.price} onChange={e => setEditingItem({...editingItem, price: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-black" />
                                         </div>
                                     </div>
@@ -372,7 +373,7 @@
                                         <button onClick={() => {setItems(items.map(i => i.id === editingItem.id ? {...editingItem, aisle: getAisleForItem(editingItem.name)} : i)); setEditingItem(null);}} className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-[0.2em] active:scale-95 transition-all shadow-none">Save</button>
                                         <button onClick={() => setEditingItem(null)} className="flex-1 bg-slate-100 text-slate-400 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] transition-all shadow-none">Cancel</button>
                                     </div>
-                                    <button onClick={() => {setItems(items.filter(i => i.id !== editingItem.id)); setEditingItem(null);}} className="w-full py-2 text-red-400 text-[10px] font-black uppercase tracking-widest opacity-50 hover:opacity-100">Delete Item</button>
+                                    <button onClick={() => {setItems(items.filter(i => i.id !== editingItem.id)); setEditingItem(null);}} className="w-full py-2 text-red-500 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100">Delete Item</button>
                                 </div>
                             </div>
                         </div>
