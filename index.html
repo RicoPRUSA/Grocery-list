@@ -36,11 +36,13 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .check-pop { animation: checkPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes checkPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
+        .pulse-red {
+            animation: pulse-red 1.5s infinite;
+        }
+        @keyframes pulse-red {
+            0% { color: #ef4444; transform: scale(1); }
+            50% { color: #b91c1c; transform: scale(1.2); }
+            100% { color: #ef4444; transform: scale(1); }
         }
     </style>
 </head>
@@ -60,6 +62,7 @@
                 ShoppingCart: (<><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></>),
                 Menu: (<><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></>),
                 Search: (<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>),
+                Mic: (<><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>),
                 Upload: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></>),
                 Download: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>),
                 Package: (<><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12"/></>),
@@ -78,6 +81,7 @@
             const [showMenu, setShowMenu] = useState(false);
             const [showPantry, setShowPantry] = useState(false);
             const [searchQuery, setSearchQuery] = useState('');
+            const [isListening, setIsListening] = useState(false);
             const searchRef = useRef(null);
 
             const aisleMap = {
@@ -102,6 +106,37 @@
                 return '📦 Other';
             };
 
+            // Voice Recognition Logic
+            const startVoiceSearch = () => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    alert("Voice search is not supported in this browser (or mode).");
+                    return;
+                }
+
+                // Check if in Standalone/PWA mode on iOS (Web Speech API is usually blocked there)
+                if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
+                    alert("Voice recognition is restricted by Apple in Home Screen app mode. Please use Safari directly for voice input.");
+                    return;
+                }
+
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'es-PR'; // Set to Spanish PR, but will work with English too
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => setIsListening(true);
+                recognition.onend = () => setIsListening(false);
+                recognition.onerror = () => setIsListening(false);
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    setSearchQuery(transcript);
+                };
+
+                recognition.start();
+            };
+
             useEffect(() => {
                 const savedItems = localStorage.getItem('groceryItems');
                 const savedPantry = localStorage.getItem('pantryItems');
@@ -117,6 +152,7 @@
                 const item = { id: Date.now(), name: name.trim(), quantity: 1, price: '', aisle: getAisleForItem(name), checked: false };
                 setItems([item, ...items]);
                 setSearchQuery('');
+                searchRef.current?.focus();
             };
 
             const addItemFromPantry = (p) => {
@@ -169,7 +205,6 @@
 
             const cartTotal = items.reduce((sum, i) => sum + (parseFloat(i.price || 0) * parseFloat(i.quantity || 1)), 0);
             
-            // Intelligence for Aisle Progress Bars
             const aisleStats = useMemo(() => {
                 const stats = {};
                 items.forEach(item => {
@@ -189,12 +224,12 @@
                 : [];
 
             return (
-                <div className="min-h-screen pb-32">
+                <div className="min-h-screen pb-32 bg-[#F9F8F3]">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4">
                         
-                        {/* Sticky Header Section */}
+                        {/* Sticky Header */}
                         <div className="sticky top-2 z-50 mb-8 space-y-3">
-                            <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 transition-all">
+                            <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="bg-white/20 p-2 rounded-lg"><Icon name="ShoppingCart" className="w-5 h-5" /></div>
@@ -207,23 +242,23 @@
 
                                 {showMenu && (
                                     <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl profound-shadow border border-slate-100 overflow-hidden scale-in z-[60] text-slate-700 mx-1 sm:mx-0">
-                                        <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm transition-colors">
+                                        <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
                                             <Icon name="Package" className="w-5 h-5 text-emerald-500" /> {showPantry ? 'Hide' : 'Show'} Pantry Manager
                                         </button>
-                                        <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm transition-colors">
+                                        <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
                                             <Icon name="Download" className="w-5 h-5 text-emerald-500" /> Export List to Excel
                                         </button>
-                                        <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm transition-colors text-emerald-600">
+                                        <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm text-emerald-600">
                                             <Icon name="Check" className="w-5 h-5" /> Clear Checked Items
                                         </button>
-                                        <button onClick={() => {if(confirm('Reset all?')) {setItems([]); setPantryItems([]);} setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 text-red-600 font-bold text-sm transition-colors">
+                                        <button onClick={() => {if(confirm('Reset all?')) {setItems([]); setPantryItems([]);} setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 text-red-600 font-bold text-sm">
                                             <Icon name="Trash2" className="w-5 h-5" /> Reset App
                                         </button>
                                     </div>
                                 )}
                             </header>
 
-                            {/* Search/Add Input */}
+                            {/* Search/Add Input with Microphone */}
                             <div className="relative z-40">
                                 <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                                 <input
@@ -232,9 +267,15 @@
                                     value={searchQuery} 
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && addItemManually(searchQuery)}
-                                    placeholder="Add items (e.g. Milk, Eggs...)"
-                                    className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-100 rounded-xl profound-shadow text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-slate-900"
+                                    placeholder={isListening ? "Listening..." : "Add items..."}
+                                    className={`w-full pl-11 pr-12 py-3.5 bg-white border rounded-xl profound-shadow text-sm placeholder-slate-400 focus:outline-none transition-all font-medium text-slate-900 ${isListening ? 'border-red-500 ring-2 ring-red-100' : 'border-slate-100 focus:ring-2 focus:ring-emerald-500'}`}
                                 />
+                                <button 
+                                    onClick={startVoiceSearch}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all active:scale-90"
+                                >
+                                    <Icon name="Mic" className={`w-5 h-5 ${isListening ? 'pulse-red' : 'text-slate-400'}`} />
+                                </button>
                                 
                                 {searchQuery.length > 0 && (
                                     <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-[50vh] overflow-y-auto scale-in text-slate-900">
@@ -299,7 +340,6 @@
                                     <div className="flex justify-between items-end px-2 mb-3">
                                         <div className="space-y-1 flex-1">
                                             <h3 className="text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">{aisle}</h3>
-                                            {/* Category Progress Bar */}
                                             <div className="h-1 bg-slate-200/50 rounded-full w-24 overflow-hidden">
                                                 <div 
                                                     className="h-full bg-emerald-500 transition-all duration-700" 
@@ -311,18 +351,14 @@
                                             {aisleStats[aisle]?.checked}/{aisleStats[aisle]?.total} Done
                                         </span>
                                     </div>
-                                    
                                     <div className="bg-white rounded-2xl profound-shadow border border-slate-50 divide-y divide-slate-50 overflow-hidden">
                                         {aisleItems.map(item => (
-                                            <div key={item.id} className="p-5 flex gap-5 items-center group transition-colors hover:bg-slate-50/50 active:bg-slate-100" onClick={() => setEditingItem(item)}>
-                                                <button 
-                                                    onClick={(e) => { e.stopPropagation(); toggleCheck(item.id); }} 
-                                                    className="w-7 h-7 rounded-lg border-2 border-slate-100 shrink-0 transition-all hover:border-emerald-500 flex items-center justify-center active:scale-90"
-                                                >
+                                            <div key={item.id} className="p-5 flex gap-5 items-center group transition-colors hover:bg-slate-50/50" onClick={() => setEditingItem(item)}>
+                                                <button onClick={(e) => {e.stopPropagation(); toggleCheck(item.id);}} className="w-7 h-7 rounded-lg border-2 border-slate-100 shrink-0 transition-all hover:border-emerald-500 flex items-center justify-center">
                                                     {item.checked && <Icon name="Check" className="w-4 h-4 text-emerald-500" />}
                                                 </button>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="font-bold text-slate-700 text-sm truncate transition-all group-active:translate-x-1">{item.name}</p>
+                                                    <p className="font-bold text-slate-700 text-sm truncate">{item.name}</p>
                                                     <div className="flex items-center gap-3 mt-1">
                                                         <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md uppercase">x{item.quantity}</span>
                                                         {item.price && <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md tracking-wider">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>}
@@ -341,7 +377,7 @@
                                 <h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2 text-center">Purchased Items</h3>
                                 <div className="bg-white rounded-xl border border-dashed border-slate-200 divide-y divide-slate-50 overflow-hidden">
                                     {items.filter(i => i.checked).map(item => (
-                                        <div key={item.id} className="flex items-center gap-4 p-4 check-pop">
+                                        <div key={item.id} className="flex items-center gap-4 p-4">
                                             <button onClick={() => toggleCheck(item.id)} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-none"><Icon name="Check" className="w-4 h-4"/></button>
                                             <span className="line-through text-xs font-semibold text-slate-400 truncate flex-1">{item.name}</span>
                                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="p-2 text-slate-300 hover:text-red-400"><Icon name="Trash2" className="w-4 h-4"/></button>
@@ -365,7 +401,7 @@
                                         <div className="h-full bg-emerald-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(items.filter(i => i.checked).length / items.length) * 100}%`}}></div>
                                     </div>
                                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                                        {items.filter(i => i.checked).length}/{items.length} Complete
+                                        {items.filter(i => i.checked).length}/{items.length} Done
                                     </p>
                                 </div>
                             </div>
