@@ -19,11 +19,10 @@
         body { 
             font-family: 'Inter', sans-serif; 
             -webkit-tap-highlight-color: transparent;
-            background-color: #F9F8F3; /* Fresh Market Background */
+            background-color: #F9F8F3; 
         }
         
         .profound-shadow {
-            /* Adjusted with a tiny hint of warm umber for the Fresh Market look */
             box-shadow: 0 20px 25px -5px rgba(68, 64, 46, 0.08), 0 10px 10px -5px rgba(68, 64, 46, 0.04);
         }
 
@@ -33,8 +32,15 @@
         
         .scale-in { animation: scaleIn 0.2s ease-out; }
         @keyframes scaleIn {
-            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+            from { opacity: 0; transform: translateY(-5px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .check-pop { animation: checkPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes checkPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -42,7 +48,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
 
         const Icon = ({ name, className = "w-5 h-5" }) => {
             const icons = {
@@ -111,14 +117,16 @@
                 const item = { id: Date.now(), name: name.trim(), quantity: 1, price: '', aisle: getAisleForItem(name), checked: false };
                 setItems([item, ...items]);
                 setSearchQuery('');
-                searchRef.current?.focus();
             };
 
             const addItemFromPantry = (p) => {
                 const item = { id: Date.now(), name: p.name, quantity: 1, price: p.price || '', aisle: p.aisle || getAisleForItem(p.name), checked: false };
                 setItems([item, ...items]);
                 setSearchQuery('');
-                searchRef.current?.focus();
+            };
+
+            const toggleCheck = (id) => {
+                setItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i));
             };
 
             const handleFileUpload = (e) => {
@@ -160,51 +168,62 @@
             };
 
             const cartTotal = items.reduce((sum, i) => sum + (parseFloat(i.price || 0) * parseFloat(i.quantity || 1)), 0);
-            const groupedByAisle = items.filter(i => !i.checked).reduce((acc, i) => { (acc[i.aisle] = acc[i.aisle] || []).push(i); return acc; }, {});
+            
+            // Intelligence for Aisle Progress Bars
+            const aisleStats = useMemo(() => {
+                const stats = {};
+                items.forEach(item => {
+                    if (!stats[item.aisle]) stats[item.aisle] = { total: 0, checked: 0 };
+                    stats[item.aisle].total++;
+                    if (item.checked) stats[item.aisle].checked++;
+                });
+                return stats;
+            }, [items]);
+
+            const groupedByAisle = items.filter(i => !i.checked).reduce((acc, i) => { 
+                (acc[i.aisle] = acc[i.aisle] || []).push(i); return acc; 
+            }, {});
 
             const pantryResults = searchQuery.length > 0 
                 ? pantryItems.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
                 : [];
 
             return (
-                <div className="min-h-screen pb-32 bg-[#F9F8F3]">
+                <div className="min-h-screen pb-32">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4">
                         
-                        {/* Sticky Header & Search Bar */}
+                        {/* Sticky Header Section */}
                         <div className="sticky top-2 z-50 mb-8 space-y-3">
-                            
-                            {/* Header: Identities & Menu Button */}
-                            <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800">
+                            <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 transition-all">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="bg-white/20 p-2 rounded-lg"><Icon name="ShoppingCart" className="w-5 h-5" /></div>
                                         <h1 className="text-lg font-black uppercase tracking-tight">Mi Lista 🇵🇷</h1>
                                     </div>
-                                    <button onClick={() => setShowMenu(!showMenu)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                                    <button onClick={() => setShowMenu(!showMenu)} className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90">
                                         <Icon name={showMenu ? "X" : "Menu"} className="w-6 h-6" />
                                     </button>
                                 </div>
 
-                                {/* Floating Menu Over Search Bar */}
                                 {showMenu && (
                                     <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl profound-shadow border border-slate-100 overflow-hidden scale-in z-[60] text-slate-700 mx-1 sm:mx-0">
-                                        <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
+                                        <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm transition-colors">
                                             <Icon name="Package" className="w-5 h-5 text-emerald-500" /> {showPantry ? 'Hide' : 'Show'} Pantry Manager
                                         </button>
-                                        <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
+                                        <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm transition-colors">
                                             <Icon name="Download" className="w-5 h-5 text-emerald-500" /> Export List to Excel
                                         </button>
-                                        <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
-                                            <Icon name="Check" className="w-5 h-5 text-emerald-500" /> Clear Checked Items
+                                        <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm transition-colors text-emerald-600">
+                                            <Icon name="Check" className="w-5 h-5" /> Clear Checked Items
                                         </button>
-                                        <button onClick={() => {if(confirm('Reset all?')) {setItems([]); setPantryItems([]);} setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 text-red-600 font-bold text-sm">
+                                        <button onClick={() => {if(confirm('Reset all?')) {setItems([]); setPantryItems([]);} setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 text-red-600 font-bold text-sm transition-colors">
                                             <Icon name="Trash2" className="w-5 h-5" /> Reset App
                                         </button>
                                     </div>
                                 )}
                             </header>
 
-                            {/* Detached Sticky Search Bar */}
+                            {/* Search/Add Input */}
                             <div className="relative z-40">
                                 <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                                 <input
@@ -213,26 +232,18 @@
                                     value={searchQuery} 
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && addItemManually(searchQuery)}
-                                    placeholder="Search or add new item..."
+                                    placeholder="Add items (e.g. Milk, Eggs...)"
                                     className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-100 rounded-xl profound-shadow text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-slate-900"
                                 />
                                 
                                 {searchQuery.length > 0 && (
                                     <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-[50vh] overflow-y-auto scale-in text-slate-900">
-                                        <button 
-                                            onClick={() => addItemManually(searchQuery)}
-                                            className="w-full flex items-center gap-4 p-4 hover:bg-emerald-50 border-b border-slate-50 text-emerald-600 font-black text-sm text-left"
-                                        >
+                                        <button onClick={() => addItemManually(searchQuery)} className="w-full flex items-center gap-4 p-4 hover:bg-emerald-50 border-b border-slate-50 text-emerald-600 font-black text-sm text-left">
                                             <div className="p-1.5 bg-emerald-100 rounded-lg"><Icon name="Plus" className="w-4 h-4" /></div>
-                                            <span>Add "{searchQuery}" to list</span>
+                                            <span>Add "{searchQuery}"</span>
                                         </button>
-
                                         {pantryResults.map(p => (
-                                            <button 
-                                                key={p.id} 
-                                                onClick={() => addItemFromPantry(p)} 
-                                                className="w-full flex justify-between items-center p-4 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left"
-                                            >
+                                            <button key={p.id} onClick={() => addItemFromPantry(p)} className="w-full flex justify-between items-center p-4 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left">
                                                 <div>
                                                     <span className="font-bold text-sm block text-slate-800">{p.name}</span>
                                                     <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider">{p.aisle}</span>
@@ -281,18 +292,37 @@
                             </div>
                         )}
 
-                        {/* Grouped Shopping List */}
-                        <div className="space-y-8">
+                        {/* Grouped Aisle View */}
+                        <div className="space-y-10">
                             {Object.entries(groupedByAisle).sort().map(([aisle, aisleItems]) => (
                                 <div key={aisle} className="scale-in">
-                                    {/* Darker Aisle Headers */}
-                                    <h3 className="px-2 mb-3 text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">{aisle}</h3>
+                                    <div className="flex justify-between items-end px-2 mb-3">
+                                        <div className="space-y-1 flex-1">
+                                            <h3 className="text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">{aisle}</h3>
+                                            {/* Category Progress Bar */}
+                                            <div className="h-1 bg-slate-200/50 rounded-full w-24 overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-emerald-500 transition-all duration-700" 
+                                                    style={{ width: `${(aisleStats[aisle]?.checked / aisleStats[aisle]?.total) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                            {aisleStats[aisle]?.checked}/{aisleStats[aisle]?.total} Done
+                                        </span>
+                                    </div>
+                                    
                                     <div className="bg-white rounded-2xl profound-shadow border border-slate-50 divide-y divide-slate-50 overflow-hidden">
                                         {aisleItems.map(item => (
-                                            <div key={item.id} className="p-5 flex gap-5 items-center group transition-colors hover:bg-slate-50/50" onClick={() => setEditingItem(item)}>
-                                                <button onClick={(e) => {e.stopPropagation(); setItems(items.map(i => i.id === item.id ? {...i, checked: true} : i))}} className="w-7 h-7 rounded-lg border-2 border-slate-100 shrink-0 transition-all hover:border-emerald-500" />
+                                            <div key={item.id} className="p-5 flex gap-5 items-center group transition-colors hover:bg-slate-50/50 active:bg-slate-100" onClick={() => setEditingItem(item)}>
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); toggleCheck(item.id); }} 
+                                                    className="w-7 h-7 rounded-lg border-2 border-slate-100 shrink-0 transition-all hover:border-emerald-500 flex items-center justify-center active:scale-90"
+                                                >
+                                                    {item.checked && <Icon name="Check" className="w-4 h-4 text-emerald-500" />}
+                                                </button>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="font-bold text-slate-700 text-sm truncate">{item.name}</p>
+                                                    <p className="font-bold text-slate-700 text-sm truncate transition-all group-active:translate-x-1">{item.name}</p>
                                                     <div className="flex items-center gap-3 mt-1">
                                                         <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md uppercase">x{item.quantity}</span>
                                                         {item.price && <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md tracking-wider">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>}
@@ -307,12 +337,12 @@
 
                         {/* Purchased Section */}
                         {items.some(i => i.checked) && (
-                            <div className="mt-12 opacity-50 mb-10 scale-in">
-                                <h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2">Purchased</h3>
+                            <div className="mt-16 opacity-50 mb-10 scale-in">
+                                <h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2 text-center">Purchased Items</h3>
                                 <div className="bg-white rounded-xl border border-dashed border-slate-200 divide-y divide-slate-50 overflow-hidden">
                                     {items.filter(i => i.checked).map(item => (
-                                        <div key={item.id} className="flex items-center gap-4 p-4">
-                                            <button onClick={() => setItems(items.map(i => i.id === item.id ? {...i, checked: false} : i))} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-none"><Icon name="Check" className="w-4 h-4"/></button>
+                                        <div key={item.id} className="flex items-center gap-4 p-4 check-pop">
+                                            <button onClick={() => toggleCheck(item.id)} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-none"><Icon name="Check" className="w-4 h-4"/></button>
                                             <span className="line-through text-xs font-semibold text-slate-400 truncate flex-1">{item.name}</span>
                                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="p-2 text-slate-300 hover:text-red-400"><Icon name="Trash2" className="w-4 h-4"/></button>
                                         </div>
@@ -322,7 +352,7 @@
                         )}
                     </div>
 
-                    {/* Minimal Footer with Small Total */}
+                    {/* Footer Progress & Total */}
                     {items.length > 0 && (
                         <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 py-4 px-4 sm:px-8 z-40 shadow-[0_-15px_30px_-10px_rgba(0,0,0,0.08)]">
                             <div className="max-w-2xl mx-auto flex justify-between items-center text-slate-900">
@@ -332,17 +362,17 @@
                                 </div>
                                 <div className="text-right">
                                     <div className="h-2 w-24 bg-slate-100 rounded-full mb-1.5 overflow-hidden">
-                                        <div className="h-full bg-emerald-500 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(items.filter(i => i.checked).length / items.length) * 100}%`}}></div>
+                                        <div className="h-full bg-emerald-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(items.filter(i => i.checked).length / items.length) * 100}%`}}></div>
                                     </div>
                                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                                        {items.filter(i => i.checked).length}/{items.length} Done
+                                        {items.filter(i => i.checked).length}/{items.length} Complete
                                     </p>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Edit Detail Modal */}
+                    {/* Modal: Edit details */}
                     {editingItem && (
                         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                             <div className="bg-white rounded-2xl p-8 w-full max-w-sm profound-shadow border border-slate-100 scale-in text-slate-900">
@@ -367,7 +397,7 @@
                                         </div>
                                     </div>
                                     <div className="flex gap-3 pt-4">
-                                        <button onClick={() => {setItems(items.map(i => i.id === editingItem.id ? {...editingItem, aisle: getAisleForItem(editingItem.name)} : i)); setEditingItem(null);}} className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-[0.2em] active:scale-95 transition-all shadow-none">Save</button>
+                                        <button onClick={() => {setItems(items.map(i => i.id === editingItem.id ? {...editingItem, aisle: getAisleForItem(editingItem.name)} : i)); setEditingItem(null);}} className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-[0.2em] active:scale-95 transition-all shadow-none">Save Changes</button>
                                         <button onClick={() => setEditingItem(null)} className="flex-1 bg-slate-100 text-slate-400 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] transition-all shadow-none">Cancel</button>
                                     </div>
                                     <button onClick={() => {setItems(items.filter(i => i.id !== editingItem.id)); setEditingItem(null);}} className="w-full py-2 text-red-500 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100">Delete Item</button>
