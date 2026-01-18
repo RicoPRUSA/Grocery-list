@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mi Lista 🇵🇷</title>
     
+    <!-- PWA Favicon & Apple Icon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
     <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAfD77YAAAAXVBMVEUAAABAuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9hU9ziAAAAHnRSTlMAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0e0Y93VwAABBtJREFUeF7tm9tyozAMRUEYAsm+px0ChS3v/v9fDRS6mSstM5YNoZ45XyYatpYvByS6LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMBfR0pZaf6f81pofuO069uN5p9Dhz/fNf9x2u/Wmn8ORXet+X8O5TfNf5wuY6H5j9NrKzT/cbpXmv84vVea/zi91pr/OL0Oun+C9u80/3GqX9B8S9O50vwv06HT/C/TV2v+F2nfa/6X6Thr/pdpf9D8L9Om0/wv067T/C/TptP8L9Oe9geLpgWaf2866E7z700H3Wn+vemX7jT/3vS37jT/3vRX97v0703fXPr3pm8u/XvT9798uI9O879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TAd99+E6Y6H5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mg86uMxaa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9lenWdsdD8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TW6f7H2j/TvMfp/oFzbc07ST9e9M3l/696ZtL/970/S8vXWcsNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y3R3D4D/6B9vXfL9K8kEiwAAAAAAAAAAAAAAAAAAAAAAAAAAAAB83V9IqR7L9HqU6AAAAABJRU5ErkJggg==">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -18,8 +17,8 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-    <!-- Barcode Library -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- Reliable Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -29,10 +28,11 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
         .scale-in { animation: scaleIn 0.2s ease-out; }
         @keyframes scaleIn { from { opacity: 0; transform: translateY(-5px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        /* Scanner specific styles */
-        #reader { border: none !important; }
-        #reader video { border-radius: 1rem; object-fit: cover; }
+        /* Scanner UI Polish */
+        #qr-reader { border: none !important; width: 100% !important; }
+        #qr-reader__scan_region { background: white; }
+        #qr-reader__dashboard { padding: 10px !important; }
+        video { border-radius: 12px; }
     </style>
 </head>
 <body class="text-slate-900">
@@ -64,7 +64,7 @@
                 ShoppingCart: (<><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></>),
                 Menu: (<><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></>),
                 Search: (<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>),
-                Scan: (<><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="8" y1="12" x2="16" y2="12"/></>),
+                Scan: (<><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="12" width="10" height="2"/><rect x="7" y="8" width="10" height="2"/><rect x="7" y="16" width="10" height="2"/></>),
                 Upload: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></>),
                 Download: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>),
                 Package: (<><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12"/></>),
@@ -95,8 +95,8 @@
             const [isScannerOpen, setIsScannerOpen] = useState(false);
             const [isScanning, setIsScanning] = useState(false);
             
+            const scannerRef = useRef(null);
             const searchRef = useRef(null);
-            const html5QrCode = useRef(null);
 
             const aisleMap = {
                 '🥦 Produce': ['apple', 'banana', 'orange', 'lettuce', 'tomato', 'onion', 'potato', 'carrot', 'cilantro', 'lime', 'lemon', 'garlic', 'pepper', 'fruit', 'veggie', 'recao', 'aguacate', 'plátano', 'guineo'],
@@ -120,60 +120,77 @@
                 return '📦 Other';
             };
 
-            // UPC Lookup Logic
-            const lookupUPC = async (upc) => {
+            // 🔍 Product Lookup Logic
+            const fetchProductInfo = async (upc) => {
                 setIsScanning(true);
                 try {
-                    // Try UPCitemdb Trial API (No key required for small use)
-                    const res = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${upc}`);
-                    const data = await res.json();
-                    if (data.items && data.items.length > 0) {
-                        const product = data.items[0];
-                        addItemManually(product.title, product.lowest_recorded_price || "");
+                    // Try OpenFoodFacts first (Best for groceries)
+                    const offRes = await fetch(`https://world.openfoodfacts.org/api/v0/product/${upc}.json`);
+                    const offData = await offRes.json();
+                    
+                    if (offData.status === 1) {
+                        addItemManually(offData.product.product_name || offData.product.generic_name);
                         return;
                     }
-                } catch (e) { console.log("UPCDB fail"); }
 
-                try {
-                    // Fallback to OpenFoodFacts
-                    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${upc}.json`);
-                    const data = await res.json();
-                    if (data.status === 1) {
-                        addItemManually(data.product.product_name, "");
+                    // Fallback to UPCitemdb
+                    const dbRes = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${upc}`);
+                    const dbData = await dbRes.json();
+                    if (dbData.items && dbData.items.length > 0) {
+                        addItemManually(dbData.items[0].title, dbData.items[0].lowest_recorded_price);
                         return;
                     }
-                } catch (e) { console.log("OFF fail"); }
-
-                alert("Product not found. Code: " + upc);
-                setIsScanning(false);
+                    
+                    alert("Product info not found in database. Code: " + upc);
+                } catch (err) {
+                    console.error("Lookup error", err);
+                } finally {
+                    setIsScanning(false);
+                }
             };
 
-            // Barcode Scanner Logic
-            const startScanner = () => {
+            // 📷 Barcode Scanner Control
+            const openScanner = () => {
                 setIsScannerOpen(true);
-                setTimeout(() => {
-                    html5QrCode.current = new Html5Qrcode("reader");
-                    html5QrCode.current.start(
-                        { facingMode: "environment" },
-                        { fps: 10, qrbox: { width: 250, height: 150 } },
-                        (decodedText) => {
-                            stopScanner();
-                            lookupUPC(decodedText);
-                        },
-                        (errorMessage) => {}
-                    );
-                }, 300);
             };
 
             const stopScanner = () => {
-                if (html5QrCode.current) {
-                    html5QrCode.current.stop().then(() => {
+                if (scannerRef.current) {
+                    scannerRef.current.stop().then(() => {
+                        setIsScannerOpen(false);
+                    }).catch(err => {
                         setIsScannerOpen(false);
                     });
                 } else {
                     setIsScannerOpen(false);
                 }
             };
+
+            // Initialize scanner when modal opens
+            useEffect(() => {
+                if (isScannerOpen) {
+                    const html5QrCode = new Html5Qrcode("qr-reader");
+                    scannerRef.current = html5QrCode;
+                    
+                    const config = { 
+                        fps: 10, 
+                        qrbox: { width: 250, height: 150 },
+                        aspectRatio: 1.0
+                    };
+
+                    html5QrCode.start(
+                        { facingMode: "environment" }, 
+                        config, 
+                        (decodedText) => {
+                            stopScanner();
+                            fetchProductInfo(decodedText);
+                        }
+                    ).catch(err => {
+                        alert("Camera Error: " + err);
+                        setIsScannerOpen(false);
+                    });
+                }
+            }, [isScannerOpen]);
 
             useEffect(() => {
                 const listRef = db.ref(`lists/${syncCode}/items`);
@@ -199,18 +216,16 @@
             const addItemManually = (name, price = "") => {
                 if (!name.trim()) return;
                 const match = pantryItems.find(p => p.name.toLowerCase() === name.trim().toLowerCase());
-                const finalPrice = price || (match ? match.price : '');
                 const newItem = { 
                     name: name.trim(), 
                     quantity: 1, 
-                    price: finalPrice, 
+                    price: price || (match ? match.price : ''), 
                     aisle: match ? match.aisle : getAisleForItem(name), 
                     store: currentStore, 
                     checked: false 
                 };
                 db.ref(`lists/${syncCode}/items`).push(newItem);
                 setSearchQuery('');
-                setIsScanning(false);
             };
 
             const addItemFromPantry = (p) => {
@@ -260,28 +275,32 @@
                 if (!file) return;
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                    jsonData.forEach((row) => {
-                        const name = (row.Item || row.Name || '').toString().trim();
-                        if (name) {
-                            db.ref(`lists/${syncCode}/pantry`).push({
-                                name, price: (row.Price || '').toString().trim(), aisle: row.Aisle || getAisleForItem(name)
-                            });
-                        }
-                    });
-                    alert("Pantry updated!");
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                        jsonData.forEach((row) => {
+                            const name = (row.Item || row.Name || '').toString().trim();
+                            if (name) {
+                                db.ref(`lists/${syncCode}/pantry`).push({
+                                    name, price: (row.Price || '').toString().trim(), aisle: row.Aisle || getAisleForItem(name)
+                                });
+                            }
+                        });
+                        alert("Pantry updated!");
+                    } catch (err) { alert("Error reading file."); }
                 };
                 reader.readAsArrayBuffer(file);
             };
 
             const exportToExcel = () => {
+                if (items.length === 0) return alert("List is empty!");
                 const data = items.map(i => ({ Item: i.name, Qty: i.quantity, Price: i.price, Store: i.store, Aisle: i.aisle, Status: i.checked ? 'Done' : 'Pending' }));
                 const ws = XLSX.utils.json_to_sheet(data);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Shopping List");
                 XLSX.writeFile(wb, `Mi_Lista_Export.xlsx`);
+                setShowMenu(false);
             };
 
             const storeItems = useMemo(() => items.filter(i => i.store === currentStore), [items, currentStore]);
@@ -319,14 +338,14 @@
                                         <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Sync Code</label>
                                         <input type="text" value={syncCode} onChange={(e) => {setSyncCode(e.target.value); localStorage.setItem('syncCode', e.target.value);}} className="w-full p-2 bg-white border rounded text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" />
                                     </div>
-                                    <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm text-slate-600"><Icon name="Download" className="w-5 h-5" /> Export Lists to Excel</button>
-                                    <button onClick={() => { storeItems.filter(i => i.checked).forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm text-emerald-600"><Icon name="Check" className="w-5 h-5" /> Clear Purchased ({currentStore})</button>
+                                    <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm text-slate-600"><Icon name="Download" className="w-5 h-5" /> Export All Lists to Excel</button>
+                                    <button onClick={() => { storeItems.filter(i => i.checked).forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm text-emerald-600"><Icon name="Check" className="w-5 h-5" /> Clear Purchased from {currentStore}</button>
                                     <button onClick={() => { if(confirm('Factory Reset?')) { db.ref(`lists/${syncCode}`).remove(); localStorage.clear(); location.reload(); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 font-bold text-sm text-red-700"><Icon name="X" className="w-5 h-5" /> Factory Reset App</button>
                                 </div>
                             )}
                         </header>
 
-                        <div className="flex gap-2 overflow-x-auto pb-4 px-1 no-scrollbar mb-4">
+                        <div className="flex gap-2 overflow-x-auto pb-4 px-1 no-scrollbar custom-scrollbar mb-4">
                             {stores.map(s => (
                                 <button key={s.id} onClick={() => setCurrentStore(s.id)} className={`flex items-center gap-2 whitespace-nowrap px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${currentStore === s.id ? 'bg-white text-slate-800 shadow-lg profound-shadow ring-2 ring-emerald-500/20' : 'bg-white/50 text-slate-400 opacity-70'}`}>
                                     {s.isEmoji ? <span className="text-sm">{s.icon}</span> : <Icon name={s.icon} className={`w-4 h-4 ${s.color}`} />}{s.label}
@@ -336,11 +355,12 @@
 
                         <div className="relative z-40 mb-8">
                             <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                            <input ref={searchRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && addItemManually(searchQuery)} placeholder={isScanning ? "Looking up barcode..." : "Search or add items..."} className={`w-full pl-11 pr-14 py-4 bg-white border border-slate-100 rounded-xl profound-shadow text-sm placeholder-slate-400 focus:outline-none transition-all font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500`} disabled={isScanning} />
-                            <button onClick={startScanner} className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 hover:bg-slate-50 rounded-full active:scale-90 z-50">
+                            <input ref={searchRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && addItemManually(searchQuery)} placeholder={isScanning ? "Looking up product..." : "Search or add items..." } className={`w-full pl-11 pr-14 py-4 bg-white border border-slate-100 rounded-xl profound-shadow text-sm placeholder-slate-400 focus:outline-none transition-all font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500`} />
+                            
+                            <button onClick={openScanner} className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 hover:bg-slate-50 rounded-full active:scale-90 z-50">
                                 <Icon name="Scan" className="w-5 h-5 text-slate-400" />
                             </button>
-                            
+
                             {searchQuery.length > 0 && (
                                 <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-[50vh] overflow-y-auto scale-in">
                                     <button onClick={() => addItemManually(searchQuery)} className="w-full flex items-center gap-4 p-4 hover:bg-emerald-50 border-b text-emerald-600 font-black text-sm text-left"><div className="p-1.5 bg-emerald-100 rounded-lg"><Icon name="Plus" className="w-4 h-4" /></div>Add "{searchQuery}"</button>
@@ -349,14 +369,13 @@
                             )}
                         </div>
 
-                        {/* Scanner Modal */}
+                        {/* Scanner Modal overlay */}
                         {isScannerOpen && (
-                            <div className="fixed inset-0 bg-black/90 z-[100] flex flex-col p-6 items-center justify-center">
-                                <div className="w-full max-w-sm bg-white rounded-2xl overflow-hidden relative profound-shadow">
-                                    <div id="reader" className="w-full"></div>
-                                    <button onClick={stopScanner} className="absolute top-4 right-4 p-3 bg-white/20 backdrop-blur rounded-full text-white z-[110]"><Icon name="X" /></button>
+                            <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col p-6 items-center justify-center">
+                                <div className="w-full max-w-sm rounded-2xl overflow-hidden bg-white profound-shadow">
+                                    <div id="qr-reader" className="w-full"></div>
                                 </div>
-                                <p className="text-white font-black text-xs uppercase tracking-[.3em] mt-8">Align Barcode in the Center</p>
+                                <button onClick={stopScanner} className="mt-8 bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full font-black uppercase text-xs tracking-widest border border-white/20">Cancel Scan</button>
                             </div>
                         )}
 
@@ -364,7 +383,7 @@
                             <div className="bg-white rounded-2xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in mx-1">
                                 <div className="flex justify-between items-center mb-5 border-b border-slate-50 pb-3">
                                     <h2 className="font-black text-slate-700 text-[10px] uppercase tracking-[0.2em] flex items-center gap-2"><Icon name="Package" className="w-3 h-3 text-emerald-500" /> Pantry Database</h2>
-                                    <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-[10px] font-black cursor-pointer flex items-center gap-2 transition-all shadow-md shadow-emerald-100"><Icon name="Upload" className="w-3 h-3" /> IMPORT FILE<input type="file" className="hidden" onChange={handleFileUpload} /></label>
+                                    <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-[10px] font-black cursor-pointer flex items-center gap-2 transition-all active:scale-95 shadow-md shadow-emerald-100"><Icon name="Upload" className="w-3 h-3" /> IMPORT FILE<input type="file" className="hidden" onChange={handleFileUpload} /></label>
                                 </div>
                                 <div className="max-h-64 overflow-y-auto space-y-2 custom-scrollbar pr-2">
                                     {pantryItems.length === 0 && <p className="text-center text-xs text-slate-400 py-6 italic">No items found.</p>}
