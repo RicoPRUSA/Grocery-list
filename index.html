@@ -25,9 +25,9 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
         
-        .scale-in { animation: scaleIn 0.25s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        .scale-in { animation: scaleIn 0.2s ease-out; }
         @keyframes scaleIn {
-            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
     </style>
@@ -102,28 +102,14 @@
 
             const addItemManually = (name) => {
                 if (!name.trim()) return;
-                const item = { 
-                    id: Date.now(), 
-                    name: name.trim(), 
-                    quantity: 1, 
-                    price: '', 
-                    aisle: getAisleForItem(name), 
-                    checked: false 
-                };
+                const item = { id: Date.now(), name: name.trim(), quantity: 1, price: '', aisle: getAisleForItem(name), checked: false };
                 setItems([item, ...items]);
                 setSearchQuery('');
                 searchRef.current?.focus();
             };
 
             const addItemFromPantry = (p) => {
-                const item = { 
-                    id: Date.now(), 
-                    name: p.name, 
-                    quantity: 1, 
-                    price: p.price || '', 
-                    aisle: p.aisle || getAisleForItem(p.name), 
-                    checked: false 
-                };
+                const item = { id: Date.now(), name: p.name, quantity: 1, price: p.price || '', aisle: p.aisle || getAisleForItem(p.name), checked: false };
                 setItems([item, ...items]);
                 setSearchQuery('');
                 searchRef.current?.focus();
@@ -178,24 +164,42 @@
                 <div className="min-h-screen pb-32">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4">
                         
-                        {/* Sticky Container for Header & Search Bar */}
+                        {/* Sticky Container */}
                         <div className="sticky top-2 z-50 mb-8 space-y-3">
                             
-                            {/* Header: Identity & Menu */}
-                            <header className="rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800">
+                            {/* Header: Identities & Menu */}
+                            <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="bg-white/20 p-2 rounded-lg"><Icon name="ShoppingCart" className="w-5 h-5" /></div>
                                         <h1 className="text-lg font-black uppercase tracking-tight">Mi Lista 🇵🇷</h1>
                                     </div>
                                     <button onClick={() => setShowMenu(!showMenu)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                                        <Icon name="Menu" className="w-6 h-6" />
+                                        <Icon name={showMenu ? "X" : "Menu"} className="w-6 h-6" />
                                     </button>
                                 </div>
+
+                                {/* Floating Menu: Positioned on top of everything when open */}
+                                {showMenu && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl profound-shadow border border-slate-100 overflow-hidden scale-in z-[60] text-slate-700 mx-2 sm:mx-0">
+                                        <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
+                                            <Icon name="Package" className="w-5 h-5 text-emerald-500" /> {showPantry ? 'Hide' : 'Show'} Pantry Manager
+                                        </button>
+                                        <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
+                                            <Icon name="Download" className="w-5 h-5 text-emerald-500" /> Export List to Excel
+                                        </button>
+                                        <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
+                                            <Icon name="Check" className="w-5 h-5 text-emerald-500" /> Clear Checked Items
+                                        </button>
+                                        <button onClick={() => {if(confirm('Reset all?')) {setItems([]); setPantryItems([]);} setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 text-red-600 font-bold text-sm">
+                                            <Icon name="Trash2" className="w-5 h-5" /> Reset App
+                                        </button>
+                                    </div>
+                                )}
                             </header>
 
                             {/* Detached Search Bar */}
-                            <div className="relative">
+                            <div className="relative z-40">
                                 <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                                 <input
                                     ref={searchRef}
@@ -208,7 +212,7 @@
                                 />
                                 
                                 {searchQuery.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-[60vh] overflow-y-auto scale-in text-slate-900">
+                                    <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-[50vh] overflow-y-auto scale-in text-slate-900">
                                         <button 
                                             onClick={() => addItemManually(searchQuery)}
                                             className="w-full flex items-center gap-4 p-4 hover:bg-emerald-50 border-b border-slate-50 text-emerald-600 font-black text-sm text-left"
@@ -237,24 +241,6 @@
                                 )}
                             </div>
                         </div>
-
-                        {/* Menu Options */}
-                        {showMenu && (
-                            <div className="mb-6 bg-white rounded-xl profound-shadow border border-slate-50 overflow-hidden scale-in mx-1">
-                                <button onClick={() => {setShowPantry(!showPantry); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
-                                    <Icon name="Package" className="w-5 h-5 text-emerald-500" /> {showPantry ? 'Hide' : 'Show'} Pantry Manager
-                                </button>
-                                <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
-                                    <Icon name="Download" className="w-5 h-5 text-emerald-500" /> Export List to Excel
-                                </button>
-                                <button onClick={() => {setItems(items.filter(i => !i.checked)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b text-slate-700 font-bold text-sm">
-                                    <Icon name="Check" className="w-5 h-5 text-emerald-500" /> Clear Checked Items
-                                </button>
-                                <button onClick={() => {if(confirm('Reset all?')) {setItems([]); setPantryItems([]);} setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 text-red-600 font-bold text-sm">
-                                    <Icon name="Trash2" className="w-5 h-5" /> Reset App
-                                </button>
-                            </div>
-                        )}
 
                         {/* Pantry Database Section */}
                         {showPantry && (
@@ -312,7 +298,7 @@
                             ))}
                         </div>
 
-                        {/* Completed Section */}
+                        {/* Purchased Section */}
                         {items.some(i => i.checked) && (
                             <div className="mt-12 opacity-50 mb-10 scale-in">
                                 <h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2">Purchased</h3>
