@@ -37,7 +37,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // 1. Firebase Config
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCfuw-UnRXxGuaRhOsqfIalkzuy7rgU6Ao",
             authDomain: "mi-lista-bc5a2.firebaseapp.com",
@@ -118,7 +118,6 @@
                 return '📦 Other';
             };
 
-            // 2. Real-time Firebase Listeners
             useEffect(() => {
                 const listRef = db.ref(`lists/${syncCode}/items`);
                 listRef.on('value', (snapshot) => {
@@ -159,6 +158,30 @@
 
             const deleteItem = (id) => {
                 db.ref(`lists/${syncCode}/items/${id}`).remove();
+            };
+
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                        jsonData.forEach((row, index) => {
+                            const name = String(row.Item || row.Name || '').trim();
+                            if (name) {
+                                db.ref(`lists/${syncCode}/pantry`).push({
+                                    name,
+                                    price: String(row.Price || '').trim(),
+                                    aisle: row.Aisle || getAisleForItem(name)
+                                });
+                            }
+                        });
+                    } catch (err) { alert("Error reading file."); }
+                };
+                reader.readAsArrayBuffer(file);
             };
 
             const toggleVoiceSearch = () => {
@@ -212,11 +235,10 @@
                             {showMenu && (
                                 <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl profound-shadow border border-slate-100 overflow-hidden scale-in z-[60] text-slate-700 mx-1">
                                     <div className="p-4 bg-slate-50 border-b">
-                                        <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Sync Code (Share this with partner)</label>
+                                        <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Sync Code</label>
                                         <input type="text" value={syncCode} onChange={(e) => {setSyncCode(e.target.value); localStorage.setItem('syncCode', e.target.value);}} className="w-full p-2 bg-white border rounded text-sm font-bold" />
                                     </div>
-                                    <button onClick={() => {setItems(items.filter(i => !(i.store === currentStore && i.checked))); setShowMenu(false);}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm text-emerald-600"><Icon name="Check" className="w-5 h-5" /> Clear Purchased ({currentStore})</button>
-                                    <button onClick={() => {if(confirm('Factory Reset?')) db.ref(`lists/${syncCode}`).remove(); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 font-bold text-sm text-red-700"><Icon name="Trash2" className="w-5 h-5" /> Factory Reset App</button>
+                                    <button onClick={() => {if(confirm('Wipe everything?')) db.ref(`lists/${syncCode}`).remove(); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 font-bold text-sm text-red-700"><Icon name="Trash2" className="w-5 h-5" /> Factory Reset App</button>
                                 </div>
                             )}
                         </header>
@@ -245,7 +267,15 @@
 
                         {showPantry && (
                             <div className="bg-white rounded-2xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in mx-1 text-slate-900">
-                                <h2 className="font-black text-slate-700 text-[10px] uppercase mb-4 tracking-[0.2em]">Pantry Database</h2>
+                                <div className="flex justify-between items-center mb-5 border-b border-slate-50 pb-3">
+                                    <h2 className="font-black text-slate-700 text-[10px] uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <Icon name="Package" className="w-3 h-3 text-emerald-500" /> Pantry Database
+                                    </h2>
+                                    <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-[10px] font-black cursor-pointer flex items-center gap-2 active:scale-95 shadow-md shadow-emerald-100 transition-all">
+                                        <Icon name="Upload" className="w-3 h-3" /> IMPORT FILE
+                                        <input type="file" className="hidden" onChange={handleFileUpload} />
+                                    </label>
+                                </div>
                                 <div className="max-h-64 overflow-y-auto space-y-2 custom-scrollbar pr-2">
                                     {pantryItems.length === 0 && <p className="text-center text-xs text-slate-400 py-6">Database empty.</p>}
                                     {pantryItems.map(p => (
