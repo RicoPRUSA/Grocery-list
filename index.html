@@ -178,20 +178,25 @@
                 <div className="min-h-screen pb-32">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4">
                         
-                        {/* Header: Merged Search & Sticky */}
-                        <header className="rounded-2xl profound-shadow px-4 sm:px-6 py-5 mb-8 text-white bg-gradient-to-br from-emerald-600 to-teal-800 sticky top-2 z-50">
-                            <div className="flex items-center justify-between mb-5">
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-white/20 p-2 rounded-lg"><Icon name="ShoppingCart" className="w-5 h-5" /></div>
-                                    <h1 className="text-lg font-black uppercase tracking-tight">Mi Lista 🇵🇷</h1>
-                                </div>
-                                <button onClick={() => setShowMenu(!showMenu)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                                    <Icon name="Menu" className="w-6 h-6" />
-                                </button>
-                            </div>
+                        {/* Sticky Container for Header & Search Bar */}
+                        <div className="sticky top-2 z-50 mb-8 space-y-3">
                             
+                            {/* Header: Identity & Menu */}
+                            <header className="rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-white/20 p-2 rounded-lg"><Icon name="ShoppingCart" className="w-5 h-5" /></div>
+                                        <h1 className="text-lg font-black uppercase tracking-tight">Mi Lista 🇵🇷</h1>
+                                    </div>
+                                    <button onClick={() => setShowMenu(!showMenu)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                                        <Icon name="Menu" className="w-6 h-6" />
+                                    </button>
+                                </div>
+                            </header>
+
+                            {/* Detached Search Bar */}
                             <div className="relative">
-                                <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4" />
+                                <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                                 <input
                                     ref={searchRef}
                                     type="text" 
@@ -199,7 +204,7 @@
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && addItemManually(searchQuery)}
                                     placeholder="Search or add new item..."
-                                    className="w-full pl-11 pr-4 py-3 bg-white/10 border border-white/10 rounded-xl text-sm placeholder-white/60 focus:outline-none focus:bg-white/20 transition-all font-medium"
+                                    className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-100 rounded-xl profound-shadow text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-slate-900"
                                 />
                                 
                                 {searchQuery.length > 0 && (
@@ -231,7 +236,7 @@
                                     </div>
                                 )}
                             </div>
-                        </header>
+                        </div>
 
                         {/* Menu Options */}
                         {showMenu && (
@@ -251,9 +256,9 @@
                             </div>
                         )}
 
-                        {/* Pantry/Excel Database */}
+                        {/* Pantry Database Section */}
                         {showPantry && (
-                            <div className="bg-white rounded-2xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in mx-1">
+                            <div className="bg-white rounded-2xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in mx-1 text-slate-900">
                                 <div className="flex justify-between items-center mb-5">
                                     <h2 className="font-black text-slate-700 text-[10px] uppercase tracking-[0.2em]">Pantry Database</h2>
                                     <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-[10px] font-black cursor-pointer flex items-center gap-2 transition-all active:scale-95">
@@ -284,11 +289,10 @@
                             </div>
                         )}
 
-                        {/* Grouped Shopping List */}
+                        {/* Shopping List grouped by Aisle */}
                         <div className="space-y-8">
                             {Object.entries(groupedByAisle).sort().map(([aisle, aisleItems]) => (
                                 <div key={aisle} className="scale-in">
-                                    {/* Darker Aisle Font */}
                                     <h3 className="px-2 mb-3 text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">{aisle}</h3>
                                     <div className="bg-white rounded-2xl profound-shadow border border-slate-50 divide-y divide-slate-50 overflow-hidden">
                                         {aisleItems.map(item => (
@@ -308,7 +312,7 @@
                             ))}
                         </div>
 
-                        {/* Completed/Checked Items */}
+                        {/* Completed Section */}
                         {items.some(i => i.checked) && (
                             <div className="mt-12 opacity-50 mb-10 scale-in">
                                 <h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2">Purchased</h3>
@@ -325,10 +329,10 @@
                         )}
                     </div>
 
-                    {/* Footer: Smaller text-base total */}
+                    {/* Minimal Footer */}
                     {items.length > 0 && (
                         <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 py-4 px-4 sm:px-8 z-40 shadow-[0_-15px_30px_-10px_rgba(0,0,0,0.08)]">
-                            <div className="max-w-2xl mx-auto flex justify-between items-center">
+                            <div className="max-w-2xl mx-auto flex justify-between items-center text-slate-900">
                                 <div>
                                     <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Estimated Total</p>
                                     <p className="text-base font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p>
@@ -345,7 +349,7 @@
                         </div>
                     )}
 
-                    {/* Modal: Edit details */}
+                    {/* Edit Detail Modal */}
                     {editingItem && (
                         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                             <div className="bg-white rounded-2xl p-8 w-full max-w-sm profound-shadow border border-slate-100 scale-in text-slate-900">
