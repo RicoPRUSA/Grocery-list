@@ -222,11 +222,9 @@
                                     <h1 className="text-lg font-black uppercase tracking-tight">Mi Lista 🇵🇷</h1>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    {/* Dedicated Pantry Toggle Badge */}
                                     <button 
                                         onClick={() => setShowPantry(!showPantry)} 
                                         className={`p-2 rounded-full transition-all active:scale-90 ${showPantry ? 'bg-white text-emerald-700 shadow-inner' : 'hover:bg-white/10 text-white/80'}`}
-                                        title="Toggle Pantry Database"
                                     >
                                         <Icon name="Package" className="w-5 h-5" />
                                     </button>
@@ -241,11 +239,23 @@
                                     <button onClick={exportToExcel} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm">
                                         <Icon name="Download" className="w-5 h-5 text-emerald-500" /> Export All Lists to Excel
                                     </button>
-                                    <button onClick={() => {if(confirm('Clear ' + currentStore + ' list?')) setItems(items.filter(i => i.store !== currentStore)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 border-b border-slate-50 font-bold text-sm text-red-600">
-                                        <Icon name="Trash2" className="w-5 h-5" /> Reset {currentStore} List
+                                    
+                                    {/* Clear Purchased Items Choice */}
+                                    <button 
+                                        onClick={() => {
+                                            setItems(items.filter(i => !(i.store === currentStore && i.checked)));
+                                            setShowMenu(false);
+                                        }} 
+                                        className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b border-slate-50 font-bold text-sm text-emerald-600"
+                                    >
+                                        <Icon name="Check" className="w-5 h-5" /> Clear Purchased from {currentStore}
+                                    </button>
+
+                                    <button onClick={() => {if(confirm('Reset ' + currentStore + ' list?')) setItems(items.filter(i => i.store !== currentStore)); setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 border-b border-slate-50 font-bold text-sm text-red-500">
+                                        <Icon name="Trash2" className="w-5 h-5" /> Delete All from {currentStore}
                                     </button>
                                     <button onClick={() => {if(confirm('Wipe everything?')) {setItems([]); setPantryItems([]);} setShowMenu(false)}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 font-bold text-sm text-red-700">
-                                        <Icon name="X" className="w-5 h-5" /> Clear All Data
+                                        <Icon name="X" className="w-5 h-5" /> factory Reset App
                                     </button>
                                 </div>
                             )}
@@ -303,7 +313,7 @@
                             )}
                         </div>
 
-                        {/* Pantry Database (Toggled by Badge) */}
+                        {/* Pantry Section (Toggled by Badge) */}
                         {showPantry && (
                             <div className="bg-white rounded-2xl profound-shadow p-5 mb-8 border border-emerald-50 scale-in mx-1 text-slate-900">
                                 <div className="flex justify-between items-center mb-5 border-b border-slate-50 pb-3">
@@ -371,7 +381,7 @@
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-bold text-slate-700 text-sm truncate">{item.name}</p>
                                                         <div className="flex items-center gap-3 mt-1">
-                                                            <span className="text-[10px] font-black text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md uppercase">x{item.quantity}</span>
+                                                            <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md uppercase">x{item.quantity}</span>
                                                             {item.price && <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md tracking-wider">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>}
                                                         </div>
                                                     </div>
@@ -402,8 +412,8 @@
 
                     {/* Footer */}
                     {storeItems.length > 0 && (
-                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-4 px-4 sm:px-8 z-40 shadow-2xl">
-                            <div className="max-w-2xl mx-auto flex justify-between items-center text-slate-900">
+                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-4 px-4 sm:px-8 z-40 shadow-2xl text-slate-900">
+                            <div className="max-w-2xl mx-auto flex justify-between items-center">
                                 <div>
                                     <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">{currentStore} Total</p>
                                     <p className="text-base font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p>
@@ -457,8 +467,8 @@
                                     </div>
 
                                     <div className="flex gap-3 pt-4">
-                                        <button onClick={() => {setItems(items.map(i => i.id === editingItem.id ? {...editingItem, aisle: getAisleForItem(editingItem.name)} : i)); setEditingItem(null);}} className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-[0.2em] active:scale-95 transition-all shadow-none">Save Changes</button>
-                                        <button onClick={() => setEditingItem(null)} className="flex-1 bg-slate-100 text-slate-400 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] transition-all">Cancel</button>
+                                        <button onClick={() => {setItems(items.map(i => i.id === editingItem.id ? {...editingItem, aisle: getAisleForItem(editingItem.name)} : i)); setEditingItem(null);}} className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-[0.2em] active:scale-95 shadow-none">Save Changes</button>
+                                        <button onClick={() => setEditingItem(null)} className="flex-1 bg-slate-100 text-slate-400 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-none">Cancel</button>
                                     </div>
                                     <button onClick={() => {setItems(items.filter(i => i.id !== editingItem.id)); setEditingItem(null);}} className="w-full py-2 text-red-500 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity">Delete Item</button>
                                 </div>
