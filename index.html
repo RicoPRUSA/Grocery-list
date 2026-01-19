@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mi Lista 🇵🇷</title>
     
-    <!-- THE ICON FIX: High-Res Solid PNG (Opaque Emerald) -->
+    <!-- iPhone Home Screen Icon (Stable PNG) -->
     <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAfD77YAAAAnFBMVEUAAABAuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS+eHNoRAAAAMnRSTlMAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCorLC0uLzAxMjM0uofS3AAAAmxJREFUeF7t29lywjAMRUEYAsm+px0ChS3v/v9fDRS6mSstM5YNoZ45XyYatpYvByS6LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMBfR0pZaf6f81pofuO069uN5p9Dhz/fNf9x2u/Wmn8ORXet+X8O5TfNf5wuY6H5j9NrKzT/cbpXmv84vVea/zi91pr/OL0Oun+C9u80/3GqX9B8S9O50vwv06HT/C/TV2v+F2nfa/6X6Thr/pdpf9D8L9Om0/wv067T/C/TptP8L9Oe9geLpgWaf2866E7z700H3Wn+vemX7jT/3vS37jT/3vRX97v0703fXPr3pm8u/XvT9798uI9O879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TAd99+E6Y6H5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mg86uMxaa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9lenWdsdD8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TW6f7H2j/TvMfp/oFzbc07ST9e9M3l/696ZtL/970/S8vXWcsNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y3R3D4D/6B9vXfL9K8kEiwAAAAAAAAAAAAAAAAAAAAAAAAAAAAB83V9IqR7L9HqU6AAAAABJRU5ErkJggg==">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
-
-    <!-- iOS PWA Meta Tags -->
-    <meta name="apple-mobile-web-app-title" content="Mi Lista">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -45,7 +42,6 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCfuw-UnRXxGuaRhOsqfIalkzuy7rgU6Ao",
             authDomain: "mi-lista-bc5a2.firebaseapp.com",
@@ -105,7 +101,7 @@
             const [offsetX, setOffsetX] = useState(0);
             const threshold = 100;
             const handleStart = (e) => setStartX(e.touches[0].clientX);
-            const handleMove = (e) => { setOffsetX(e.touches[0].clientX - startX); };
+            const handleMove = (e) => setOffsetX(e.touches[0].clientX - startX);
             const handleEnd = () => {
                 if (offsetX > threshold) onSwipeRight();
                 else if (offsetX < -threshold) onSwipeLeft();
@@ -159,11 +155,11 @@
             }, [syncCode]);
 
             const updateSyncCode = () => {
-                if(!tempSyncCode.trim()) return;
-                setSyncCode(tempSyncCode.trim());
-                localStorage.setItem('syncCode', tempSyncCode.trim());
+                const code = tempSyncCode.trim();
+                if(!code) return;
+                setSyncCode(code);
+                localStorage.setItem('syncCode', code);
                 setShowSyncModal(false);
-                alert("Connected to: " + tempSyncCode.trim());
             };
 
             const addItemManually = (name, price = "") => {
@@ -283,8 +279,7 @@
                 <div className="min-h-screen pb-32">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4 text-slate-900">
                         
-                        {/* Auto-Close Backdrop */}
-                        {showMenu && <div className="fixed inset-0 z-[55] bg-transparent" onClick={() => setShowMenu(false)} />}
+                        {showMenu && <div className="fixed inset-0 z-[55]" onClick={() => setShowMenu(false)} />}
                         {showPantry && <div className="fixed inset-0 z-[55] bg-black/10 backdrop-blur-[2px]" onClick={() => setShowPantry(false)} />}
 
                         <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 mb-3 z-50">
@@ -325,7 +320,7 @@
                                 {isListening ? <Icon name="Square" className="w-5 h-5 text-red-600 pulse-red" /> : <Icon name="Mic" className="w-5 h-5 text-slate-400" />}
                             </button>
                             {searchQuery.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-64 overflow-y-auto scale-in">
+                                <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 max-h-64 overflow-y-auto scale-in text-slate-900">
                                     <button onClick={() => addItemManually(searchQuery)} className="w-full flex items-center gap-4 p-4 hover:bg-emerald-50 border-b text-emerald-600 font-black text-sm text-left"><div className="p-1.5 bg-emerald-100 rounded-lg"><Icon name="Plus" className="w-4 h-4" /></div>Add "{searchQuery}"</button>
                                     {pantryResults.map(p => (<button key={p.id} onClick={() => addItemFromPantry(p)} className="w-full flex justify-between items-center p-4 hover:bg-slate-50 border-b last:border-0 text-left"><div><span className="font-bold text-sm block">{p.name}</span><span className="text-[10px] text-slate-500 uppercase font-black tracking-tighter">{p.aisle}</span></div><div className="p-1.5 bg-slate-100 text-slate-400 rounded-lg"><Icon name="Plus" className="w-4 h-4" /></div></button>))}
                                 </div>
@@ -408,23 +403,30 @@
                         )}
                     </div>
 
-                    {/* Sync Settings Modal */}
+                    {/* Sync Modal */}
                     {showSyncModal && (
                         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[110] flex items-center justify-center p-6" onClick={() => setShowSyncModal(false)}>
                             <div className="bg-white rounded-2xl p-8 w-full max-w-sm profound-shadow scale-in" onClick={(e) => e.stopPropagation()}>
                                 <h2 className="text-lg font-black text-slate-800 mb-6 tracking-tight">Sync Settings</h2>
-                                <div className="space-y-4">
+                                <div className="space-y-4 text-slate-900">
                                     <label className="text-[9px] font-black text-slate-400 uppercase ml-1 block">Private Sync Code</label>
-                                    <input type="text" value={tempSyncCode} onChange={(e) => setTempSyncCode(e.target.value)} autoComplete="off" spellCheck="false" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" />
-                                    <button onClick={updateSyncCode} className="w-full bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest active:scale-95 shadow-lg transition-all">Update & Connect</button>
-                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase text-center">Close</button>
+                                    <input 
+                                        type="text" 
+                                        value={tempSyncCode} 
+                                        onChange={(e) => setTempSyncCode(e.target.value)}
+                                        autoComplete="off"
+                                        spellCheck="false"
+                                        className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" 
+                                    />
+                                    <button onClick={updateSyncCode} className="w-full bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest active:scale-95 shadow-lg shadow-emerald-100 transition-all">Update & Connect</button>
+                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase tracking-widest text-center">Close</button>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {storeItems.length > 0 && (
-                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-4 px-8 z-40 shadow-2xl text-slate-900"><div className="max-w-2xl mx-auto flex justify-between items-center text-slate-900"><div><p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">{currentStore} Total</p><p className="text-base font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p></div><div className="text-right"><div className="h-2 w-24 bg-slate-200 rounded-full mb-1.5 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(storeItems.filter(i => i.checked).length / storeItems.length) * 100}%`}}></div></div><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{storeItems.filter(i => i.checked).length}/{storeItems.length} Done</p></div></div></div>
+                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-4 px-4 sm:px-8 z-40 shadow-2xl text-slate-900"><div className="max-w-2xl mx-auto flex justify-between items-center"><div><p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">{currentStore} Total</p><p className="text-base font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p></div><div className="text-right"><div className="h-2 w-24 bg-slate-200 rounded-full mb-1.5 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(storeItems.filter(i => i.checked).length / storeItems.length) * 100}%`}}></div></div><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{storeItems.filter(i => i.checked).length}/{storeItems.length} Done</p></div></div></div>
                     )}
 
                     {editingItem && (
@@ -455,8 +457,8 @@
             );
         };
 
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<GroceryListApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<GroceryListApp />);
     </script>
 </body>
 </html>
