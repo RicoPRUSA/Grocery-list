@@ -30,8 +30,9 @@
         .scale-in { animation: scaleIn 0.2s ease-out; }
         @keyframes scaleIn { from { opacity: 0; transform: translateY(10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        
         .swipe-row-container { position: relative; overflow: hidden; touch-action: pan-y; background: transparent; }
-        .swipe-action-bg { position: absolute; top: 0; bottom: 0; width: 100%; display: flex; align-items: center; color: white; }
+        .swipe-action-bg { position: absolute; top: 0; bottom: 0; width: 100%; display: flex; align-items: center; color: white; transition: opacity 0.2s; }
         .swipe-bg-left { background: #10b981; justify-content: flex-start; padding-left: 1.5rem; left: 0; }
         .swipe-bg-right { background: #ef4444; justify-content: flex-end; padding-right: 1.5rem; right: 0; }
         .swipe-content-layer { position: relative; z-index: 10; background: white; transition: transform 0.1s ease-out; width: 100%; height: 100%; }
@@ -41,7 +42,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Firebase Config
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCfuw-UnRXxGuaRhOsqfIalkzuy7rgU6Ao",
             authDomain: "mi-lista-bc5a2.firebaseapp.com",
@@ -51,12 +52,12 @@
             messagingSenderId: "145809393270",
             appId: "1:145809393270:web:2c6053e877e6e9f0c54157"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
         const { useState, useEffect, useRef, useMemo } = React;
 
-        // --- MASTER SORTING ORDER ---
+        // Custom Aisle Order
         const AISLE_ORDER = [
             'Pharmacy', 'Pet', 'Garden', 'Housewares', 'Hardware', 'Auto', 'Outdoors', 'Clothing',
             'Electronics', 'Arts & Crafts', 'Office Supplies', 'Spirits', 'Baby Aisle', 'Other',
@@ -109,7 +110,7 @@
                 setOffsetX(0);
             };
             return (
-                <div className="swipe-row-container bg-white">
+                <div className="swipe-row-container bg-white first:rounded-t-2xl last:rounded-b-2xl overflow-hidden">
                     <div className="swipe-action-bg swipe-bg-left" style={{ opacity: offsetX > 0 ? 1 : 0 }}><Icon name={rightIcon} /></div>
                     <div className="swipe-action-bg swipe-bg-right" style={{ opacity: offsetX < 0 ? 1 : 0 }}><Icon name={leftIcon} /></div>
                     <div className="swipe-content-layer" style={{ transform: `translateX(${offsetX}px)`, transition: offsetX === 0 ? 'transform 0.2s' : 'none' }} onTouchStart={handleStart} onTouchMove={handleMove} onTouchEnd={handleEnd}>
@@ -143,30 +144,6 @@
             const searchRef = useRef(null);
             const recognitionRef = useRef(null);
 
-            // Auto-Categorization Keywords Map
-            const aisleMap = {
-                'Pharmacy': ['shampoo', 'soap', 'medicine', 'toothpaste', 'jabón', 'vitamin', 'aspirin', 'deodorant'],
-                'Pet': ['dog', 'cat', 'perro', 'gato', 'kibble'],
-                'Garden': ['plant', 'soil', 'seeds'],
-                'Frozen Food': ['ice cream', 'frozen', 'pizza', 'fries', 'nugget', 'helado'],
-                'Dairy': ['milk', 'egg', 'cheese', 'butter', 'yogurt', 'cream', 'half', 'leche', 'huevo', 'queso'],
-                'Produce': ['apple', 'banana', 'orange', 'lettuce', 'tomato', 'onion', 'potato', 'carrot', 'cilantro', 'lime', 'lemon', 'garlic', 'pepper', 'fruit', 'veggie', 'recao', 'aguacate', 'plátano', 'guineo'],
-                'Meat & Seafood': ['chicken', 'beef', 'pork', 'turkey', 'fish', 'steak', 'bacon', 'ham', 'chorizo', 'sausage', 'pollo', 'carne'],
-                'Bakery': ['bread', 'bagel', 'muffin', 'cake', 'pan', 'bizcocho'],
-                'Deli': ['deli', 'ham slice', 'turkey slice'],
-                'Spirits': ['wine', 'beer', 'vodka', 'rum', 'cerveza', 'alcohol']
-            };
-
-            const getAisleForItem = (itemName) => {
-                if (!itemName) return 'Other';
-                const lowerName = itemName.toLowerCase();
-                for (const [aisle, keywords] of Object.entries(aisleMap)) {
-                    if (keywords.some(keyword => lowerName.includes(keyword))) return aisle;
-                }
-                return 'Other';
-            };
-
-            // Firebase Watchers
             useEffect(() => {
                 const listRef = db.ref(`lists/${syncCode}/items`);
                 listRef.on('value', (snap) => {
@@ -182,18 +159,18 @@
             }, [syncCode]);
 
             const updateSyncCode = () => {
-                if(!tempSyncCode.trim()) return;
-                setSyncCode(tempSyncCode.trim());
-                localStorage.setItem('syncCode', tempSyncCode.trim());
+                const code = tempSyncCode.trim();
+                if(!code) return;
+                setSyncCode(code);
+                localStorage.setItem('syncCode', code);
                 setShowSyncModal(false);
-                alert("Sync Connected!");
             };
 
             const addItemManually = (name, price = "") => {
                 if (!name.trim()) return;
                 const match = pantryItems.find(p => p.name.toLowerCase() === name.trim().toLowerCase());
                 const finalPrice = price || (match ? match.price : '');
-                const aisle = match ? match.aisle : getAisleForItem(name);
+                const aisle = match ? match.aisle : 'Other';
                 db.ref(`lists/${syncCode}/items`).push({ name: name.trim(), quantity: 1, price: finalPrice, aisle, store: currentStore, checked: false });
                 if (!match) db.ref(`lists/${syncCode}/pantry`).push({ name: name.trim(), price: finalPrice, aisle });
                 setSearchQuery('');
@@ -228,6 +205,7 @@
                 });
             };
 
+            // --- SMART IMPORT LOGIC ---
             const handleFileUpload = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -237,17 +215,42 @@
                         const data = new Uint8Array(event.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
                         const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                        
                         const newPantry = {};
+                        const seen = new Set();
+                        
                         jsonData.forEach((row) => {
-                            const nameKey = Object.keys(row).find(k => ['item', 'name'].includes(k.toLowerCase()));
+                            // 1. Detect Column Names (Case Insensitive)
+                            const nameKey = Object.keys(row).find(k => ['item', 'name', 'producto', 'nombre', 'articulo'].includes(k.toLowerCase()));
+                            const priceKey = Object.keys(row).find(k => ['price', 'precio', 'costo', 'cost'].includes(k.toLowerCase()));
+                            const aisleKey = Object.keys(row).find(k => ['aisle', 'pasillo', 'seccion', 'section', 'category'].includes(k.toLowerCase()));
+
                             if (nameKey) {
-                                const id = 'p_' + Math.random().toString(36).substr(2, 9);
-                                newPantry[id] = { name: String(row[nameKey]).trim(), price: (row.Price || '').toString(), aisle: row.Aisle || 'Other' };
+                                const name = String(row[nameKey]).trim();
+                                if(name && !seen.has(name.toLowerCase())) {
+                                    seen.add(name.toLowerCase());
+                                    const id = 'p_' + Math.random().toString(36).substr(2, 9);
+                                    
+                                    // 2. Clean Price (remove $ or letters)
+                                    let rawPrice = priceKey ? String(row[priceKey]).replace(/[^0-9.]/g, '') : '';
+                                    
+                                    // 3. Normalize Aisle (Match against our list)
+                                    let rawAisle = aisleKey ? String(row[aisleKey]).trim() : 'Other';
+                                    const matchedAisle = AISLE_ORDER.find(a => a.toLowerCase() === rawAisle.toLowerCase());
+
+                                    newPantry[id] = { 
+                                        name, 
+                                        price: rawPrice, 
+                                        aisle: matchedAisle || 'Other' 
+                                    };
+                                }
                             }
                         });
+                        
+                        // Override Firebase Pantry with normalized data
                         db.ref(`lists/${syncCode}/pantry`).set(newPantry);
-                        alert("Pantry Imported!");
-                    } catch (err) { alert("Import Error."); }
+                        alert("Pantry successfully updated!");
+                    } catch (err) { alert("Error reading file. Check columns."); }
                 };
                 reader.readAsArrayBuffer(file);
             };
@@ -267,13 +270,14 @@
 
             const storeItems = useMemo(() => items.filter(i => i.store === currentStore), [items, currentStore]);
             const cartTotal = storeItems.reduce((sum, i) => sum + (parseFloat(i.price || 0) * parseFloat(i.quantity || 1)), 0);
+            
             const aisleStats = useMemo(() => {
                 const stats = {};
                 storeItems.forEach(item => {
-                    const a = item.aisle || 'Other';
-                    if (!stats[a]) stats[a] = { total: 0, checked: 0 };
-                    stats[a].total++;
-                    if (item.checked) stats[a].checked++;
+                    const aisle = item.aisle || 'Other';
+                    if (!stats[aisle]) stats[aisle] = { total: 0, checked: 0 };
+                    stats[aisle].total++;
+                    if (item.checked) stats[aisle].checked++;
                 });
                 return stats;
             }, [storeItems]);
@@ -285,7 +289,7 @@
                 }, {});
                 return Object.entries(groups)
                     .sort((a, b) => getAisleWeight(a[0]) - getAisleWeight(b[0]))
-                    .map(([n, items]) => [n, [...items].sort((x, y) => x.name.localeCompare(y.name))]);
+                    .map(([name, groupItems]) => [name, [...groupItems].sort((x, y) => x.name.localeCompare(y.name))]);
             }, [storeItems]);
 
             const groupedPantry = useMemo(() => {
@@ -294,7 +298,7 @@
                     (acc[a] = acc[a] || []).push(p); return acc;
                 }, {});
                 return Object.entries(groups).sort((a, b) => getAisleWeight(a[0]) - getAisleWeight(b[0]))
-                    .map(([n, pItems]) => [n, [...pItems].sort((x, y) => x.name.localeCompare(y.name))]);
+                    .map(([name, pItems]) => [name, [...pItems].sort((x, y) => x.name.localeCompare(y.name))]);
             }, [pantryItems]);
 
             const pantryResults = searchQuery.length > 0 ? pantryItems.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())) : [];
@@ -303,16 +307,15 @@
                 <div className="min-h-screen pb-32">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4 text-slate-900">
                         
-                        {/* Auto-Close Layer */}
-                        {(showMenu || showPantry || showSyncModal || editingItem) && (
-                            <div className="fixed inset-0 z-[55] bg-black/15 backdrop-blur-[2px]" onClick={() => { setShowMenu(false); setShowPantry(false); setShowSyncModal(false); setEditingItem(null); }} />
-                        )}
+                        {/* Auto-Close Backdrops */}
+                        {showMenu && <div className="fixed inset-0 z-[55] bg-black/10" onClick={() => setShowMenu(false)} />}
+                        {showPantry && <div className="fixed inset-0 z-[55] bg-black/15 backdrop-blur-[2px]" onClick={() => setShowPantry(false)} />}
 
-                        <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 mb-3 z-[60]">
+                        <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 mb-3 z-50">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <button onClick={() => { setShowSyncModal(true); setTempSyncCode(syncCode); }} className="bg-white/20 p-2 rounded-lg active:scale-90 shadow-inner"><Icon name="ShoppingCart" /></button>
-                                    <h1 className="text-lg font-black uppercase tracking-tight">Mi Lista 🇵🇷</h1>
+                                    <button onClick={() => setShowSyncModal(true)} className="bg-white/20 p-2 rounded-lg active:scale-90 shadow-inner"><Icon name="ShoppingCart" /></button>
+                                    <h1 className="text-lg font-black uppercase tracking-tight" onClick={() => setShowSyncModal(true)}>Mi Lista 🇵🇷</h1>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <button onClick={() => setShowPantry(!showPantry)} className={`p-2 rounded-full transition-all ${showPantry ? 'bg-white text-emerald-700 shadow-inner' : 'hover:bg-white/10 text-white/80'}`}><Icon name="Package" /></button>
@@ -321,19 +324,22 @@
                             </div>
                         </header>
 
-                        {/* Options Overlay */}
                         {showMenu && (
-                            <div className="fixed top-24 left-2 right-2 max-w-2xl mx-auto bg-white rounded-xl profound-shadow border border-slate-100 overflow-hidden scale-in z-[70] text-slate-700" onClick={(e) => e.stopPropagation()}>
-                                <button onClick={() => {
-                                    const ws = XLSX.utils.json_to_sheet(pantryItems.map(p => ({ Item: p.name, Price: p.price, Aisle: p.aisle })));
-                                    const wb = XLSX.utils.book_new();
-                                    XLSX.utils.book_append_sheet(wb, ws, "Pantry");
-                                    XLSX.writeFile(wb, "Pantry_Export.xlsx");
-                                    setShowMenu(false);
-                                }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-slate-600 text-left"><Icon name="Download" /> Export Pantry Database</button>
-                                <button onClick={() => { storeItems.filter(i => i.checked).forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-emerald-600 text-left"><Icon name="Check" /> Clear Purchased ({currentStore})</button>
-                                <button onClick={() => { if(confirm('Delete all for '+currentStore+'?')) { storeItems.forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 border-b font-bold text-sm text-red-600 text-left"><Icon name="Trash2" /> Reset {currentStore} List</button>
-                                <button onClick={() => { if(confirm('Factory Reset Entire App?')) { db.ref(`lists/${syncCode}`).remove(); localStorage.clear(); location.reload(); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-100 font-bold text-sm text-red-700 text-left"><Icon name="X" /> Wipe All Data</button>
+                            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4" onClick={() => setShowMenu(false)}>
+                                <div className="relative bg-white rounded-2xl profound-shadow w-full max-w-sm overflow-hidden scale-in" onClick={(e) => e.stopPropagation()}>
+                                    <h2 className="p-4 bg-slate-50 border-b text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Options</h2>
+                                    <button onClick={() => {
+                                        const ws = XLSX.utils.json_to_sheet(pantryItems.map(p => ({ Item: p.name, Price: p.price, Aisle: p.aisle })));
+                                        const wb = XLSX.utils.book_new();
+                                        XLSX.utils.book_append_sheet(wb, ws, "Pantry");
+                                        XLSX.writeFile(wb, "Mi_Pantry_Database.xlsx");
+                                        setShowMenu(false);
+                                    }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-slate-600 text-left"><Icon name="Download" /> Export Pantry Database</button>
+                                    <button onClick={() => { storeItems.filter(i => i.checked).forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-emerald-600 text-left"><Icon name="Check" /> Clear Purchased ({currentStore})</button>
+                                    <button onClick={() => { if(confirm('Delete all for '+currentStore+'?')) { storeItems.forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 border-b font-bold text-sm text-red-600 text-left"><Icon name="Trash2" /> Reset {currentStore} List</button>
+                                    <button onClick={() => { if(confirm('Factory Reset Entire App?')) { db.ref(`lists/${syncCode}`).remove(); localStorage.clear(); location.reload(); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-100 font-bold text-sm text-red-700 text-left"><Icon name="X" /> Wipe All Data</button>
+                                    <button onClick={() => setShowMenu(false)} className="w-full py-4 text-slate-400 text-xs font-bold uppercase tracking-widest text-center bg-slate-50">Close</button>
+                                </div>
                             </div>
                         )}
 
@@ -361,7 +367,7 @@
 
                         {showPantry && (
                             <div className="fixed top-20 left-2 right-2 max-w-2xl mx-auto z-[70] bg-white rounded-2xl profound-shadow p-5 border border-emerald-50 scale-in" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex justify-between items-center mb-5 border-b pb-3 text-slate-900">
+                                <div className="flex justify-between items-center mb-5 border-b pb-3">
                                     <h2 className="font-black text-slate-700 text-[10px] uppercase tracking-[0.2em] flex items-center gap-2"><Icon name="Package" className="text-emerald-500" /> Pantry</h2>
                                     <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-[10px] font-black cursor-pointer shadow-md active:scale-95 transition-all"><Icon name="Upload" className="w-3 h-3 inline mr-1" /> IMPORT<input type="file" className="hidden" onChange={handleFileUpload} /></label>
                                 </div>
@@ -389,7 +395,7 @@
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setShowPantry(false)} className="w-full py-4 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest border-t">Close</button>
+                                <button onClick={() => setShowPantry(false)} className="w-full py-4 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest border-t text-center">Close Pantry</button>
                             </div>
                         )}
 
@@ -423,9 +429,9 @@
                         {storeItems.some(i => i.checked) && (
                             <div className="mt-16 opacity-50 text-center scale-in text-slate-900"><h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2 italic">In {currentStore} Cart</h3><div className="bg-white/40 rounded-xl border border-dashed border-slate-300 divide-y overflow-hidden mx-1">
                                 {storeItems.filter(i => i.checked).map(item => (
-                                    <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-white/50 transition-colors">
+                                    <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-white/50 transition-colors text-left">
                                         <button onClick={() => toggleCheck(item.id, true)} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0 active:scale-90"><Icon name="Check" /></button>
-                                        <span className="line-through text-xs font-semibold text-slate-500 truncate flex-1 text-left">{item.name}</span>
+                                        <span className="line-through text-xs font-semibold text-slate-500 truncate flex-1">{item.name}</span>
                                         <button onClick={() => deleteItem(item.id)} className="p-2 text-slate-300 hover:text-red-400 transition-colors"><Icon name="Trash2" /></button>
                                     </div>
                                 ))}
@@ -433,18 +439,18 @@
                         )}
                     </div>
 
-                    {/* Sync Settings Modal */}
+                    {/* Sync Modal (Centered) */}
                     {showSyncModal && (
                         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[110] flex items-center justify-center p-6 text-slate-900" onClick={() => setShowSyncModal(false)}>
                             <div className="bg-white rounded-2xl p-6 w-[90vw] max-w-sm profound-shadow scale-in" onClick={(e) => e.stopPropagation()}>
                                 <h2 className="text-lg font-black text-slate-800 mb-6 tracking-tight text-center uppercase tracking-widest">Sync Settings</h2>
-                                <div className="space-y-4">
+                                <div className="space-y-4 text-slate-900">
                                     <label className="text-[9px] font-black text-slate-400 uppercase ml-1 block">Private Sync Code</label>
                                     <div className="flex flex-col gap-3">
                                         <input type="text" value={tempSyncCode} onChange={(e) => setTempSyncCode(e.target.value)} onFocus={(e) => e.target.select()} autoComplete="off" spellCheck="false" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900" />
-                                        <button onClick={updateSyncCode} className="w-full bg-emerald-600 text-white p-4 rounded-xl font-black text-[10px] uppercase shadow-lg shadow-emerald-100 active:scale-95 transition-all">Update & Connect</button>
+                                        <button onClick={updateSyncCode} className="w-full bg-emerald-600 text-white p-4 rounded-xl font-black text-[10px] uppercase shadow-lg active:scale-95 transition-all">Update & Connect</button>
                                     </div>
-                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase text-center tracking-widest">Cancel</button>
+                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase text-center">Cancel</button>
                                 </div>
                             </div>
                         </div>
@@ -464,13 +470,8 @@
                                         <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Qty</label><div className="flex items-center bg-slate-50 rounded-xl border p-1"><button onClick={() => setEditingItem({...editingItem, quantity: Math.max(1, editingItem.quantity - 1)})} className="p-3 text-slate-400"><Icon name="Minus" /></button><span className="flex-1 text-center font-black text-sm">{editingItem.quantity}</span><button onClick={() => setEditingItem({...editingItem, quantity: editingItem.quantity + 1})} className="p-3 text-slate-400"><Icon name="Plus" /></button></div></div>
                                         <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Price ($)</label><input type="number" step="0.01" value={editingItem.price} onChange={e => setEditingItem({...editingItem, price: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-xl text-sm font-black focus:ring-2 focus:ring-emerald-500 outline-none" /></div>
                                     </div>
-                                    <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Store</label><select value={editingItem.store} onChange={e => setEditingItem({...editingItem, store: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-xl text-sm font-bold appearance-none transition-all text-slate-900">{stores.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></div>
-                                    <div>
-                                        <label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Aisle</label>
-                                        <select value={editingItem.aisle} onChange={e => setEditingItem({...editingItem, aisle: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-xl text-sm font-bold appearance-none transition-all text-slate-900">
-                                            {AISLE_ORDER.map(a => <option key={a} value={a}>{a}</option>)}
-                                        </select>
-                                    </div>
+                                    <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Store</label><select value={editingItem.store} onChange={e => setEditingItem({...editingItem, store: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-xl text-sm font-bold appearance-none transition-all">{stores.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></div>
+                                    <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Aisle</label><select value={editingItem.aisle} onChange={e => setEditingItem({...editingItem, aisle: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-xl text-sm font-bold appearance-none transition-all">{AISLE_ORDER.map(a => <option key={a} value={a}>{a}</option>)}</select></div>
                                     <button onClick={saveModalChanges} className="w-full bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] active:scale-95 transition-all shadow-lg shadow-emerald-100">Save Changes</button>
                                     <button onClick={() => setEditingItem(null)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase tracking-widest text-center">Cancel</button>
                                     <button onClick={() => {deleteItem(editingItem.id); setEditingItem(null);}} className="w-full py-2 text-red-500 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity text-center text-red-500">Delete Item</button>
