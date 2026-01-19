@@ -8,13 +8,16 @@
     <!-- iPhone Home Screen Icon -->
     <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAfD77YAAAAnFBMVEUAAABAuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS8/mH9NAAAACnRSTlMABAgMEBQXGyAnYIditwAAAitJREFUeF7t28FtwzAMRUEYAsm+px0ChS3v/v9fDRS6mSstM5YNoZ45XyYatpYvByS6LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMBfR0pZaf6f81pofuO069uN5p9Dhz/fNf9x2u/Wmn8ORXet+X8O5TfNf5wuY6H5j9NrKzT/cbpXmv84vVea/zi91pr/OL0Oun+C9u80/3GqX9B8S9O50vwv06HT/C/TV2v+F2nfa/6X6Thr/pdpf9D8L9Om0/wv067T/C/TptP8L9Oe9geLpgWaf2866E7z700H3Wn+vemX7jT/3vS37jT/3vRX97v0703fXPr3pm8u/XvT9798uI9O879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TAd99+E6Y6H5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mg86uMxaa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9lenWdsdD8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TW6f7H2j/TvMfp/oFzbc07ST9e9M3l/696ZtL/970/S8vXWcsNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y3R3D4D/6B9vXfL9K8kEiwAAAAAAAAAAAAAAAAAAAAAAAAAAAAB83V9IqR7L9HqU6AAAAABJRU5ErkJggg==">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+    
     <meta name="apple-mobile-web-app-title" content="Mi Lista">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Firebase & Libraries -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <!-- UI Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -28,37 +31,39 @@
         .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
         .scale-in { animation: scaleIn 0.2s ease-out; }
-        @keyframes scaleIn { from { opacity: 0; transform: translateY(-10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes scaleIn { from { opacity: 0; transform: translateY(-5px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* Swipe Logic Styles */
-        .swipe-row-container { position: relative; overflow: hidden; touch-action: pan-y; background: transparent; }
-        .swipe-action-bg { position: absolute; top: 0; bottom: 0; width: 100%; display: flex; align-items: center; color: white; transition: opacity 0.2s; }
-        .swipe-bg-left { background: #10b981; justify-content: flex-start; padding-left: 1.5rem; left: 0; }
-        .swipe-bg-right { background: #ef4444; justify-content: flex-end; padding-right: 1.5rem; right: 0; }
-        .swipe-content-layer { position: relative; z-index: 10; background: white; transition: transform 0.1s ease-out; width: 100%; height: 100%; }
+        .swipe-container { position: relative; overflow: hidden; touch-action: pan-y; border-radius: 1rem; }
+        .swipe-action-left { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; display: flex; align-items: center; justify-content: flex-start; padding-left: 1.5rem; color: white; border-radius: 1rem; }
+        .swipe-action-right { position: absolute; right: 0; top: 0; bottom: 0; width: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 1.5rem; color: white; border-radius: 1rem; }
+        .swipeable-content { position: relative; z-index: 10; transition: transform 0.1s ease-out; background: white; width: 100%; height: 100%; }
     </style>
 </head>
 <body class="text-slate-900">
     <div id="root"></div>
 
     <script type="text/babel">
-        // Firebase Configuration
+        // 1. DYNAMIC FIREBASE INIT
         const firebaseConfig = {
             apiKey: "AIzaSyCfuw-UnRXxGuaRhOsqfIalkzuy7rgU6Ao",
             authDomain: "mi-lista-bc5a2.firebaseapp.com",
             projectId: "mi-lista-bc5a2",
+            // PASTE YOUR FULL DATABASE URL HERE IF APP STAYS BLANK:
             databaseURL: "https://mi-lista-bc5a2-default-rtdb.firebaseio.com",
             storageBucket: "mi-lista-bc5a2.firebasestorage.app",
             messagingSenderId: "145809393270",
             appId: "1:145809393270:web:2c6053e877e6e9f0c54157"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
 
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+        } catch (e) { console.error("Firebase Init Error", e); }
+        
+        const db = firebase.database();
         const { useState, useEffect, useRef, useMemo } = React;
 
-        // Custom Aisle Order: descending even numbers handled here
         const AISLE_ORDER = [
             'Pharmacy', 'Pet', 'Garden', 'Housewares', 'Hardware', 'Auto', 'Outdoors', 'Clothing',
             'Electronics', 'Arts & Crafts', 'Office Supplies', 'Spirits', 'Baby Aisle', 'Other',
@@ -84,6 +89,8 @@
                 ShoppingCart: (<><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></>),
                 Menu: (<><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></>),
                 Search: (<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>),
+                Mic: (<><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>),
+                Square: <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />,
                 Download: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></>),
                 Package: (<><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12"/></>),
                 Upload: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></>),
@@ -100,19 +107,18 @@
         const SwipeableRow = ({ onSwipeRight, onSwipeLeft, children, rightIcon = "Check", leftIcon = "Trash2" }) => {
             const [startX, setStartX] = useState(0);
             const [offsetX, setOffsetX] = useState(0);
-            const threshold = 100;
             const handleStart = (e) => setStartX(e.touches[0].clientX);
             const handleMove = (e) => setOffsetX(e.touches[0].clientX - startX);
             const handleEnd = () => {
-                if (offsetX > threshold) onSwipeRight();
-                else if (offsetX < -threshold) onSwipeLeft();
+                if (offsetX > 80) onSwipeRight();
+                else if (offsetX < -80) onSwipeLeft();
                 setOffsetX(0);
             };
             return (
-                <div className="swipe-row-container">
-                    <div className="swipe-action swipe-bg-left" style={{ opacity: offsetX > 0 ? 1 : 0 }}><Icon name={rightIcon} /></div>
-                    <div className="swipe-action swipe-bg-right" style={{ opacity: offsetX < 0 ? 1 : 0 }}><Icon name={leftIcon} /></div>
-                    <div className="swipe-content-layer border-b border-slate-50 last:border-0" style={{ transform: `translateX(${offsetX}px)` }} onTouchStart={handleStart} onTouchMove={handleMove} onTouchEnd={handleEnd}>
+                <div className="swipe-row-container relative overflow-hidden bg-white first:rounded-t-2xl last:rounded-b-2xl">
+                    <div className="swipe-action-left absolute inset-y-0 left-0 w-full bg-emerald-500 flex items-center pl-6 text-white" style={{ opacity: offsetX > 0 ? 1 : 0 }}><Icon name={rightIcon} /></div>
+                    <div className="swipe-action-right absolute inset-y-0 right-0 w-full bg-red-500 flex items-center justify-end pr-6 text-white" style={{ opacity: offsetX < 0 ? 1 : 0 }}><Icon name={leftIcon} /></div>
+                    <div className="swipe-content-layer relative z-10 bg-white" style={{ transform: `translateX(${offsetX}px)`, transition: offsetX === 0 ? 'transform 0.2s' : 'none' }} onTouchStart={handleStart} onTouchMove={handleMove} onTouchEnd={handleEnd}>
                         {children}
                     </div>
                 </div>
@@ -141,6 +147,7 @@
             const [expandedAisles, setExpandedAisles] = useState({});
             
             const searchRef = useRef(null);
+            const recognitionRef = useRef(null);
 
             useEffect(() => {
                 const listRef = db.ref(`lists/${syncCode}/items`);
@@ -161,6 +168,7 @@
                 setSyncCode(tempSyncCode.trim());
                 localStorage.setItem('syncCode', tempSyncCode.trim());
                 setShowSyncModal(false);
+                alert("Connected to: " + tempSyncCode.trim());
             };
 
             const addItemManually = (name, price = "") => {
@@ -207,25 +215,36 @@
                 if (!file) return;
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const workbook = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
-                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                    const newPantry = {};
-                    const seen = new Set();
-                    jsonData.forEach(row => {
-                        const nameKey = Object.keys(row).find(k => ['item', 'name'].includes(k.toLowerCase()));
-                        if(nameKey) {
-                            const name = String(row[nameKey]).trim();
-                            if(name && !seen.has(name.toLowerCase())) {
-                                seen.add(name.toLowerCase());
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                        const newPantry = {};
+                        jsonData.forEach((row) => {
+                            const nameKey = Object.keys(row).find(k => ['item', 'name'].includes(k.toLowerCase()));
+                            if (nameKey) {
                                 const id = 'p_' + Math.random().toString(36).substr(2, 9);
-                                newPantry[id] = { name, price: String(row.Price || row.price || '').trim(), aisle: row.Aisle || row.aisle || 'Other' };
+                                newPantry[id] = { name: String(row[nameKey]).trim(), price: (row.Price || row.price || '').toString(), aisle: row.Aisle || row.aisle || 'Other' };
                             }
-                        }
-                    });
-                    db.ref(`lists/${syncCode}/pantry`).set(newPantry);
-                    alert("Database replaced with file data!");
+                        });
+                        db.ref(`lists/${syncCode}/pantry`).set(newPantry);
+                        alert("Pantry replaced!");
+                    } catch (err) { alert("Error reading file."); }
                 };
                 reader.readAsArrayBuffer(file);
+            };
+
+            const toggleVoiceSearch = () => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) return;
+                if (isListening) { recognitionRef.current?.stop(); return; }
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'es-PR';
+                recognition.onstart = () => setIsListening(true);
+                recognition.onend = () => setIsListening(false);
+                recognition.onresult = (e) => setSearchQuery(e.results[0][0].transcript);
+                recognitionRef.current = recognition;
+                recognition.start();
             };
 
             const storeItems = useMemo(() => items.filter(i => i.store === currentStore), [items, currentStore]);
@@ -267,15 +286,14 @@
                 <div className="min-h-screen pb-32">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4 text-slate-900">
                         
-                        {/* Auto-Close Backdrops */}
-                        {showMenu && <div className="fixed inset-0 z-[55] bg-transparent" onClick={() => setShowMenu(false)} />}
-                        {showPantry && <div className="fixed inset-0 z-[55] bg-black/10 backdrop-blur-[2px]" onClick={() => setShowPantry(false)} />}
+                        {/* Auto-Close Backdrop */}
+                        {(showMenu || showPantry) && <div className="fixed inset-0 z-[55] bg-black/10 backdrop-blur-[2px]" onClick={() => { setShowMenu(false); setShowPantry(false); }} />}
 
                         <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 mb-3 z-50">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <button onClick={() => setShowSyncModal(true)} className="bg-white/20 p-2 rounded-lg active:scale-90"><Icon name="ShoppingCart" /></button>
-                                    <h1 className="text-lg font-black uppercase tracking-tight" onClick={() => setShowSyncModal(true)}>Mi Lista 🇵🇷</h1>
+                                    <button onClick={() => setShowSyncModal(true)} className="bg-white/20 p-2 rounded-lg active:scale-90 shadow-inner"><Icon name="ShoppingCart" /></button>
+                                    <h1 className="text-lg font-black uppercase tracking-tight">Mi Lista 🇵🇷</h1>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <button onClick={() => setShowPantry(!showPantry)} className={`p-2 rounded-full transition-all ${showPantry ? 'bg-white text-emerald-700' : 'text-white/80'}`}><Icon name="Package" /></button>
@@ -283,17 +301,17 @@
                                 </div>
                             </div>
                             {showMenu && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl profound-shadow border border-slate-100 overflow-hidden scale-in z-[70] text-slate-700" onClick={(e) => e.stopPropagation()}>
-                                    <button onClick={() => { 
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl profound-shadow border border-slate-100 overflow-hidden scale-in z-[70] text-slate-700 mx-1" onClick={(e) => e.stopPropagation()}>
+                                    <button onClick={() => {
                                         const ws = XLSX.utils.json_to_sheet(pantryItems.map(p => ({ Item: p.name, Price: p.price, Aisle: p.aisle })));
                                         const wb = XLSX.utils.book_new();
                                         XLSX.utils.book_append_sheet(wb, ws, "Pantry");
-                                        XLSX.writeFile(wb, "Mi_Pantry_Export.xlsx");
+                                        XLSX.writeFile(wb, "Mi_Pantry_Database.xlsx");
                                         setShowMenu(false);
                                     }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-slate-600 text-left"><Icon name="Download" /> Export Pantry Database</button>
                                     <button onClick={() => { storeItems.filter(i => i.checked).forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-emerald-600 text-left"><Icon name="Check" /> Clear Purchased ({currentStore})</button>
                                     <button onClick={() => { if(confirm('Delete all for '+currentStore+'?')) { storeItems.forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 border-b font-bold text-sm text-red-600 text-left"><Icon name="Trash2" /> Reset {currentStore} List</button>
-                                    <button onClick={() => { if(confirm('Factory Reset Entire App?')) { db.ref(`lists/${syncCode}`).remove(); localStorage.clear(); location.reload(); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-100 font-bold text-sm text-red-700 text-left"><Icon name="X" /> Wipe All Data</button>
+                                    <button onClick={() => { if(confirm('Factory Reset?')) { db.ref(`lists/${syncCode}`).remove(); localStorage.clear(); location.reload(); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-100 font-bold text-sm text-red-700 text-left"><Icon name="X" /> Wipe All Data</button>
                                 </div>
                             )}
                         </header>
@@ -382,9 +400,9 @@
                         </div>
 
                         {storeItems.some(i => i.checked) && (
-                            <div className="mt-16 opacity-50 text-center scale-in"><h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em]">In {currentStore} Cart</h3><div className="bg-white/40 rounded-xl border border-dashed border-slate-300 divide-y divide-slate-100 overflow-hidden mx-1">
+                            <div className="mt-16 opacity-50 text-center scale-in"><h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em]">In {currentStore} Cart</h3><div className="bg-white/40 rounded-xl border border-dashed border-slate-300 divide-y overflow-hidden mx-1">
                                 {storeItems.filter(i => i.checked).map(item => (
-                                    <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-white/50"><button onClick={() => toggleCheck(item.id, true)} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0"><Icon name="Check" /></button><span className="line-through text-xs font-semibold text-slate-500 truncate flex-1 text-left">{item.name}</span><button onClick={() => deleteItem(item.id)} className="p-2 text-slate-300"><Icon name="Trash2" /></button></div>
+                                    <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-white/50"><button onClick={() => toggleCheck(item.id, true)} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0 active:scale-90"><Icon name="Check" /></button><span className="line-through text-xs font-semibold text-slate-500 truncate flex-1 text-left">{item.name}</span><button onClick={() => deleteItem(item.id)} className="p-2 text-slate-300"><Icon name="Trash2" /></button></div>
                                 ))}
                             </div></div>
                         )}
@@ -393,21 +411,23 @@
                     {showSyncModal && (
                         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[110] flex items-center justify-center p-6" onClick={() => setShowSyncModal(false)}>
                             <div className="bg-white rounded-2xl p-8 w-full max-w-sm profound-shadow scale-in" onClick={(e) => e.stopPropagation()}>
-                                <h2 className="text-lg font-black text-slate-800 mb-6 tracking-tight">Sync Settings</h2>
+                                <h2 className="text-lg font-black text-slate-800 mb-6 tracking-tight text-center">Sync Settings</h2>
                                 <div className="space-y-4">
-                                    <label className="text-[9px] font-black text-slate-400 uppercase ml-1 block">Private Sync Code</label>
-                                    <div className="flex gap-2">
-                                        <input type="text" value={tempSyncCode} onChange={(e) => setTempSyncCode(e.target.value)} onFocus={(e) => e.target.select()} autoComplete="off" spellCheck="false" className="flex-1 p-4 bg-slate-50 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none" />
-                                        <button onClick={updateSyncCode} className="bg-emerald-600 text-white px-4 rounded-xl font-black text-[10px] uppercase">Link</button>
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] font-black text-slate-400 uppercase ml-1 block">Private Sync Code</label>
+                                        <div className="flex gap-2">
+                                            <input type="text" value={tempSyncCode} onChange={(e) => setTempSyncCode(e.target.value)} autoComplete="off" spellCheck="false" className="flex-1 p-4 bg-slate-50 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none" />
+                                            <button onClick={updateSyncCode} className="bg-emerald-600 text-white px-4 rounded-xl font-black text-[10px] uppercase shadow-lg">Link</button>
+                                        </div>
                                     </div>
-                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase text-center">Close</button>
+                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase text-center tracking-widest">Cancel</button>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {storeItems.length > 0 && (
-                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-4 px-4 sm:px-8 z-40 shadow-2xl text-slate-900"><div className="max-w-2xl mx-auto flex justify-between items-center"><div><p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">{currentStore} Total</p><p className="text-base font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p></div><div className="text-right"><div className="h-2 w-24 bg-slate-200 rounded-full mb-1.5 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-1000" style={{width: `${(storeItems.filter(i => i.checked).length / storeItems.length) * 100}%`}}></div></div><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{storeItems.filter(i => i.checked).length}/{storeItems.length} Done</p></div></div></div>
+                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-4 px-8 z-40 shadow-2xl text-slate-900"><div className="max-w-2xl mx-auto flex justify-between items-center text-slate-900"><div><p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">{currentStore} Total</p><p className="text-base font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p></div><div className="text-right"><div className="h-2 w-24 bg-slate-200 rounded-full mb-1.5 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{width: `${(storeItems.filter(i => i.checked).length / storeItems.length) * 100}%`}}></div></div><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{storeItems.filter(i => i.checked).length}/{storeItems.length} Done</p></div></div></div>
                     )}
 
                     {editingItem && (
