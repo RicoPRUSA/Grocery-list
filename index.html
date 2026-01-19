@@ -28,12 +28,10 @@
         .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
         .scale-in { animation: scaleIn 0.2s ease-out; }
-        @keyframes scaleIn { from { opacity: 0; transform: translateY(10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes scaleIn { from { opacity: 0; transform: translateY(5px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* Swipe Styles */
         .swipe-row-container { position: relative; overflow: hidden; touch-action: pan-y; background: transparent; }
-        .swipe-action-bg { position: absolute; top: 0; bottom: 0; width: 100%; display: flex; align-items: center; color: white; transition: opacity 0.2s; }
+        .swipe-action-bg { position: absolute; top: 0; bottom: 0; width: 100%; display: flex; align-items: center; color: white; }
         .swipe-bg-left { background: #10b981; justify-content: flex-start; padding-left: 1.5rem; left: 0; }
         .swipe-bg-right { background: #ef4444; justify-content: flex-end; padding-right: 1.5rem; right: 0; }
         .swipe-content-layer { position: relative; z-index: 10; background: white; transition: transform 0.1s ease-out; width: 100%; height: 100%; }
@@ -43,7 +41,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Firebase Configuration
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCfuw-UnRXxGuaRhOsqfIalkzuy7rgU6Ao",
             authDomain: "mi-lista-bc5a2.firebaseapp.com",
@@ -53,7 +51,8 @@
             messagingSenderId: "145809393270",
             appId: "1:145809393270:web:2c6053e877e6e9f0c54157"
         };
-        firebase.initializeApp(firebaseConfig);
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
         const { useState, useEffect, useRef, useMemo } = React;
@@ -87,7 +86,6 @@
                 Square: <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />,
                 Download: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></>),
                 Package: (<><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12"/></>),
-                Upload: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></>),
                 ChevronDown: <path d="m6 9 6 6 6-6" />,
                 ChevronRight: <path d="m9 18 6-6-6-6" />,
             };
@@ -103,14 +101,14 @@
             const [offsetX, setOffsetX] = useState(0);
             const threshold = 90;
             const handleStart = (e) => setStartX(e.touches[0].clientX);
-            const handleMove = (e) => { setOffsetX(e.touches[0].clientX - startX); };
+            const handleMove = (e) => setOffsetX(e.touches[0].clientX - startX);
             const handleEnd = () => {
                 if (offsetX > threshold) onSwipeRight();
                 else if (offsetX < -threshold) onSwipeLeft();
                 setOffsetX(0);
             };
             return (
-                <div className="swipe-row-container bg-white first:rounded-t-2xl last:rounded-b-2xl overflow-hidden">
+                <div className="swipe-row-container bg-white overflow-hidden">
                     <div className="swipe-action-bg swipe-bg-left" style={{ opacity: offsetX > 0 ? 1 : 0 }}><Icon name={rightIcon} /></div>
                     <div className="swipe-action-bg swipe-bg-right" style={{ opacity: offsetX < 0 ? 1 : 0 }}><Icon name={leftIcon} /></div>
                     <div className="swipe-content-layer" style={{ transform: `translateX(${offsetX}px)`, transition: offsetX === 0 ? 'transform 0.2s' : 'none' }} onTouchStart={handleStart} onTouchMove={handleMove} onTouchEnd={handleEnd}>
@@ -211,21 +209,18 @@
                 if (!file) return;
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    try {
-                        const data = new Uint8Array(event.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                        const newPantry = {};
-                        jsonData.forEach((row) => {
-                            const nameKey = Object.keys(row).find(k => ['item', 'name'].includes(k.toLowerCase()));
-                            if (nameKey) {
-                                const id = 'p_' + Math.random().toString(36).substr(2, 9);
-                                newPantry[id] = { name: String(row[nameKey]).trim(), price: (row.Price || row.price || '').toString(), aisle: row.Aisle || row.aisle || 'Other' };
-                            }
-                        });
-                        db.ref(`lists/${syncCode}/pantry`).set(newPantry);
-                        alert("Pantry replaced!");
-                    } catch (err) { alert("Error reading file."); }
+                    const workbook = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
+                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    const newPantry = {};
+                    jsonData.forEach((row) => {
+                        const nameKey = Object.keys(row).find(k => ['item', 'name'].includes(k.toLowerCase()));
+                        if (nameKey) {
+                            const id = 'p_' + Math.random().toString(36).substr(2, 9);
+                            newPantry[id] = { name: String(row[nameKey]).trim(), price: (row.Price || '').toString(), aisle: row.Aisle || 'Other' };
+                        }
+                    });
+                    db.ref(`lists/${syncCode}/pantry`).set(newPantry);
+                    alert("Database imported!");
                 };
                 reader.readAsArrayBuffer(file);
             };
@@ -248,13 +243,14 @@
             const aisleStats = useMemo(() => {
                 const stats = {};
                 storeItems.forEach(item => {
-                    const aisle = item.aisle || 'Other';
-                    if (!stats[aisle]) stats[aisle] = { total: 0, checked: 0 };
-                    stats[aisle].total++;
-                    if (item.checked) stats[aisle].checked++;
+                    const a = item.aisle || 'Other';
+                    if (!stats[a]) stats[a] = { total: 0, checked: 0 };
+                    stats[a].total++;
+                    if (item.checked) stats[a].checked++;
                 });
                 return stats;
             }, [storeItems]);
+
             const sortedAisles = useMemo(() => {
                 const groups = storeItems.filter(i => !i.checked).reduce((acc, i) => { 
                     const a = i.aisle || 'Other';
@@ -262,44 +258,50 @@
                 }, {});
                 return Object.entries(groups)
                     .sort((a, b) => getAisleWeight(a[0]) - getAisleWeight(b[0]))
-                    .map(([name, groupItems]) => [name, [...groupItems].sort((x, y) => x.name.localeCompare(y.name))]);
+                    .map(([n, items]) => [n, [...items].sort((x, y) => x.name.localeCompare(y.name))]);
             }, [storeItems]);
+
             const groupedPantry = useMemo(() => {
                 const groups = pantryItems.reduce((acc, p) => {
                     const a = p.aisle || 'Other';
                     (acc[a] = acc[a] || []).push(p); return acc;
                 }, {});
                 return Object.entries(groups).sort((a, b) => getAisleWeight(a[0]) - getAisleWeight(b[0]))
-                    .map(([name, pItems]) => [name, [...pItems].sort((x, y) => x.name.localeCompare(y.name))]);
+                    .map(([n, pItems]) => [n, [...pItems].sort((x, y) => x.name.localeCompare(y.name))]);
             }, [pantryItems]);
+
             const pantryResults = searchQuery.length > 0 ? pantryItems.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())) : [];
 
             return (
                 <div className="min-h-screen pb-32">
                     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4 text-slate-900">
                         
-                        {/* Backdrop Closers */}
+                        {/* Auto-Close Backdrop for the Menu Popup */}
                         {showMenu && <div className="fixed inset-0 z-[55] bg-transparent" onClick={() => setShowMenu(false)} />}
+                        
+                        {/* Auto-Close Backdrop for Pantry Overlay */}
                         {showPantry && <div className="fixed inset-0 z-[55] bg-black/10 backdrop-blur-[2px]" onClick={() => setShowPantry(false)} />}
 
                         <header className="relative rounded-2xl profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 mb-3 z-50">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <button onClick={() => { setShowSyncModal(true); setTempSyncCode(syncCode); }} className="bg-white/20 p-2 rounded-lg active:scale-90 shadow-inner"><Icon name="ShoppingCart" /></button>
+                                    <button onClick={() => { setShowSyncModal(true); setTempSyncCode(syncCode); }} className="bg-white/20 p-2 rounded-lg active:scale-90 transition-all shadow-inner"><Icon name="ShoppingCart" /></button>
                                     <h1 className="text-lg font-black uppercase tracking-tight" onClick={() => setShowSyncModal(true)}>Mi Lista 🇵🇷</h1>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <button onClick={() => setShowPantry(!showPantry)} className={`p-2 rounded-full transition-all ${showPantry ? 'bg-white text-emerald-700 shadow-inner' : 'hover:bg-white/10 text-white/80'}`}><Icon name="Package" /></button>
-                                    <button onClick={() => setShowMenu(!showMenu)} className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"><Icon name={showMenu ? "X" : "Menu"} /></button>
+                                    <button onClick={() => setShowMenu(!showMenu)} className="p-2 hover:bg-white/10 rounded-full active:scale-90 transition-all"><Icon name={showMenu ? "X" : "Menu"} /></button>
                                 </div>
                             </div>
+                            
+                            {/* POPUP MENU */}
                             {showMenu && (
                                 <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl profound-shadow border border-slate-100 overflow-hidden scale-in z-[70] text-slate-700 mx-1" onClick={(e) => e.stopPropagation()}>
-                                    <button onClick={() => { 
+                                    <button onClick={() => {
                                         const ws = XLSX.utils.json_to_sheet(pantryItems.map(p => ({ Item: p.name, Price: p.price, Aisle: p.aisle })));
                                         const wb = XLSX.utils.book_new();
                                         XLSX.utils.book_append_sheet(wb, ws, "Pantry");
-                                        XLSX.writeFile(wb, "Mi_Pantry_Export.xlsx");
+                                        XLSX.writeFile(wb, "Pantry_Export.xlsx");
                                         setShowMenu(false);
                                     }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-slate-600 text-left"><Icon name="Download" /> Export Pantry Database</button>
                                     <button onClick={() => { storeItems.filter(i => i.checked).forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-emerald-600 text-left"><Icon name="Check" /> Clear Purchased ({currentStore})</button>
@@ -339,7 +341,7 @@
                                 </div>
                                 <div className="max-h-[60vh] overflow-y-auto space-y-2 custom-scrollbar pr-2">
                                     {groupedPantry.map(([aisle, pItems]) => (
-                                        <div key={aisle} className="border-b last:border-0 text-slate-900">
+                                        <div key={aisle} className="border-b last:border-0">
                                             <button onClick={() => setExpandedAisles(prev => ({ ...prev, [aisle]: !prev[aisle] }))} className="w-full flex items-center justify-between py-3 text-left focus:outline-none">
                                                 <div className="flex items-center gap-3"><Icon name={expandedAisles[aisle] ? "ChevronDown" : "ChevronRight"} className="w-4 h-4 text-slate-400" /><span className="text-[10px] font-black uppercase text-slate-600 tracking-widest">{aisle} ({pItems.length})</span></div>
                                             </button>
@@ -348,7 +350,7 @@
                                                     {pItems.map(p => (
                                                         <SwipeableRow key={p.id} onSwipeLeft={() => db.ref(`lists/${syncCode}/pantry/${p.id}`).remove()} onSwipeRight={() => addItemFromPantry(p)} rightIcon="Plus">
                                                             <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl">
-                                                                <div className="flex-1 mr-4"><p className="text-xs font-bold text-slate-700">{p.name}</p></div>
+                                                                <div className="flex-1 mr-4 text-left"><p className="text-xs font-bold text-slate-700">{p.name}</p></div>
                                                                 <div className="flex items-center gap-4">
                                                                     <input type="number" step="0.01" value={p.price} onClick={(e) => e.stopPropagation()} onChange={(e) => updatePantryPriceAndSyncList(p.id, p.name, e.target.value)} className="w-16 p-2 text-[11px] font-black border rounded-lg bg-white outline-none focus:ring-1 focus:ring-emerald-400" />
                                                                     <button onClick={(e) => { e.stopPropagation(); addItemFromPantry(p); }} className="p-2 text-emerald-600 active:scale-90"><Icon name="Plus" className="w-5 h-5"/></button>
@@ -361,7 +363,7 @@
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setShowPantry(false)} className="w-full py-4 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest border-t">Close Pantry</button>
+                                <button onClick={() => setShowPantry(false)} className="w-full py-4 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest border-t">Close</button>
                             </div>
                         )}
 
@@ -369,9 +371,9 @@
                             {sortedAisles.map(([aisle, aisleItems]) => (
                                 <div key={aisle} className="scale-in">
                                     <div className="flex justify-between items-end px-2 mb-3">
-                                        <div className="space-y-1 flex-1">
+                                        <div className="space-y-1 flex-1 text-left">
                                             <h3 className="text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">{aisle}</h3>
-                                            <div className="h-1 bg-slate-300/30 rounded-full w-24 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-700 shadow-md shadow-emerald-200" style={{ width: `${(aisleStats[aisle]?.checked / aisleStats[aisle]?.total) * 100}%` }} /></div>
+                                            <div className="h-1 bg-slate-300/30 rounded-full w-24 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-700" style={{ width: `${(aisleStats[aisle]?.checked / aisleStats[aisle]?.total) * 100}%` }} /></div>
                                         </div>
                                         <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-white/50 px-2 py-0.5 rounded-full">{aisleStats[aisle]?.checked}/{aisleStats[aisle]?.total} Done</span>
                                     </div>
@@ -379,8 +381,8 @@
                                         {aisleItems.map(item => (
                                             <SwipeableRow key={item.id} onSwipeLeft={() => deleteItem(item.id)} onSwipeRight={() => toggleCheck(item.id, item.checked)}>
                                                 <div className="flex items-center p-5 gap-5 active:bg-slate-50 transition-colors">
-                                                    <button onClick={(e) => { e.stopPropagation(); toggleCheck(item.id, item.checked); }} className={`w-7 h-7 rounded-lg border-2 shrink-0 flex items-center justify-center transition-all ${item.checked ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-100' : 'border-slate-100'}`}>{item.checked && <Icon name="Check" className="text-white" />}</button>
-                                                    <div className="flex-1 min-w-0" onClick={() => setEditingItem({...item})}>
+                                                    <button onClick={(e) => { e.stopPropagation(); toggleCheck(item.id, item.checked); }} className={`w-7 h-7 rounded-lg border-2 shrink-0 flex items-center justify-center transition-all ${item.checked ? 'bg-emerald-500 border-emerald-500 shadow-lg' : 'border-slate-100'}`}>{item.checked && <Icon name="Check" className="text-white" />}</button>
+                                                    <div className="flex-1 min-w-0 text-left" onClick={() => setEditingItem({...item})}>
                                                         <p className="font-bold text-slate-700 text-sm truncate">{item.name}</p>
                                                         <div className="flex items-center gap-3 mt-1"><span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md uppercase">x{item.quantity}</span>{item.price && <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md tracking-wider">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>}</div>
                                                     </div>
@@ -393,12 +395,12 @@
                         </div>
 
                         {storeItems.some(i => i.checked) && (
-                            <div className="mt-16 opacity-50 text-center scale-in text-slate-900"><h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2 italic">In {currentStore} Cart</h3><div className="bg-white/40 rounded-xl border border-dashed border-slate-300 divide-y overflow-hidden mx-1">
+                            <div className="mt-16 opacity-50 text-center scale-in"><h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2 italic">In {currentStore} Cart</h3><div className="bg-white/40 rounded-xl border border-dashed border-slate-300 divide-y overflow-hidden mx-1">
                                 {storeItems.filter(i => i.checked).map(item => (
                                     <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-white/50 transition-colors">
                                         <button onClick={() => toggleCheck(item.id, true)} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0 active:scale-90"><Icon name="Check" /></button>
                                         <span className="line-through text-xs font-semibold text-slate-500 truncate flex-1 text-left">{item.name}</span>
-                                        <button onClick={() => deleteItem(item.id)} className="p-2 text-slate-300 hover:text-red-400 transition-colors"><Icon name="Trash2" /></button>
+                                        <button onClick={() => deleteItem(item.id)} className="p-2 text-slate-300 hover:text-red-400"><Icon name="Trash2" /></button>
                                     </div>
                                 ))}
                             </div></div>
@@ -412,11 +414,11 @@
                                 <h2 className="text-lg font-black text-slate-800 mb-6 tracking-tight text-center uppercase tracking-widest">Sync Settings</h2>
                                 <div className="space-y-4">
                                     <label className="text-[9px] font-black text-slate-400 uppercase ml-1 block">Private Sync Code</label>
-                                    <div className="flex flex-col gap-3">
-                                        <input type="text" value={tempSyncCode} onChange={(e) => setTempSyncCode(e.target.value)} onFocus={(e) => e.target.select()} autoComplete="off" spellCheck="false" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900" />
-                                        <button onClick={updateSyncCode} className="w-full bg-emerald-600 text-white p-4 rounded-xl font-black text-[10px] uppercase shadow-lg shadow-emerald-100 active:scale-95 transition-all">Update & Connect</button>
+                                    <div className="flex gap-2">
+                                        <input type="text" value={tempSyncCode} onChange={(e) => setTempSyncCode(e.target.value)} onFocus={(e) => e.target.select()} autoComplete="off" spellCheck="false" className="flex-1 p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900" />
+                                        <button onClick={updateSyncCode} className="bg-emerald-600 text-white px-4 rounded-xl font-black text-[10px] uppercase shadow-lg">Link</button>
                                     </div>
-                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase text-center tracking-widest">Close</button>
+                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase text-center tracking-widest">Cancel</button>
                                 </div>
                             </div>
                         </div>
