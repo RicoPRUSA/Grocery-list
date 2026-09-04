@@ -1,470 +1,530 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mi Lista 🇵🇷</title>
-    
-    <!-- iPhone Home Screen Icon -->
-    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAfD77YAAAAnFBMVEUAAABAuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS8/mH9NAAAACnRSTlMABAgMEBQXGyAnYIditwAAAitJREFUeF7t28FtwzAMRUEYAsm+px0ChS3v/v9fDRS6mSstM5YNoZ45XyYatpYvByS6LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMBfR0pZaf6f81pofuO069uN5p9Dhz/fNf9x2u/Wmn8ORXet+X8O5TfNf5wuY6H5j9NrKzT/cbpXmv84vVea/zi91pr/OL0Oun+C9u80/3GqX9B8S9O50vwv06HT/C/TV2v+F2nfa/6X6Thr/pdpf9D8L9Om0/wv067T/C/TptP8L9Oe9geLpgWaf2866E7z700H3Wn+vemX7jT/3vS37jT/3vRX97v0703fXPr3pm8u/XvT9798uI9O879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TAd99+E6Y6H5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mg86uMxaa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9lenWdsdD8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TW6f7H2j/TvMfp/oFzbc07ST9e9M3l/696ZtL/970/S8vXWcsNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y3R3D4D/6B9vXfL9K8kEiwAAAAAAAAAAAAAAAAAAAAAAAAAAAAB83V9IqR7L9HqU6AAAAABJRU5ErkJggg==">
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAfD77YAAAAnFBMVEUAAABAuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS9AuS+eHNoRAAAAMnRSTlMAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCorLC0uLzAxMjM0uofS3AAAAmxJREFUeF7t29lywjAMRUEYAsm+px0ChS3v/v9fDRS6mSstM5YNoZ45XyYatpYvByS6LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMBfR0pZaf6f81pofuO069uN5p9Dhz/fNf9x2u/Wmn8ORXet+X8O5TfNf5wuY6H5j9NrKzT/cbpXmv84vVea/zi91pr/OL0Oun+C9u80/3GqX9B8S9O50vwv06HT/C/TV2v+F2nfa/6X6Thr/pdpf9D8L9Om0/wv067T/C/TptP8L9Oe9geLpgWaf2866E7z700H3Wn+vemX7jT/3vS37jT/3vRX97v0703fXPr3pm8u/XvT9798uI9O879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TLtO879Mu07zv0y7TvO/TAd99+E6Y6H5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mXaf5X6Zdp/lfpl2n+V+mg86uMxaa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9l2nWa/2XadZr/Zdp1mv9lenWdsdD8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TptP8L9Ou0/wv067T/C/TW6f7H2j/TvMfp/oFzbc07ST9e9M3l/696ZtL/970/S8vXWcsNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y7TrNP/LtOs0/8u06zT/y3R3D4D/6B9vXfL9K8kEiwAAAAAAAAAAAAAAAAAAAAAAAAAAAAB83V9IqR7L9HqU6AAAAABJRU5ErkJggg==">
-    
-    <!-- Firebase & Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; background-color: #F2F0E4; overflow-x: hidden; }
-        .profound-shadow { box-shadow: 0 12px 24px -6px rgba(68, 64, 46, 0.15), 0 4px 8px -4px rgba(68, 64, 46, 0.1); }
-        .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
-        .scale-in { animation: scaleIn 0.2s ease-out; }
-        @keyframes scaleIn { from { opacity: 0; transform: translateY(10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .swipe-row-container { position: relative; overflow: hidden; touch-action: pan-y; background: transparent; }
-        .swipe-action-bg { position: absolute; top: 0; bottom: 0; width: 100%; display: flex; align-items: center; color: white; transition: opacity 0.2s; }
-        .swipe-bg-left { background: #10b981; justify-content: flex-start; padding-left: 1.5rem; left: 0; }
-        .swipe-bg-right { background: #ef4444; justify-content: flex-end; padding-right: 1.5rem; right: 0; }
-        .swipe-content-layer { position: relative; z-index: 10; background: white; transition: transform 0.1s ease-out; width: 100%; height: 100%; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wheel — an emotion journal</title>
+<meta name="description" content="Name what you're feeling with the full feelings wheel, then keep a private, offline-friendly mood journal.">
+<meta name="theme-color" content="#fbf7f2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wheel">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23fbf7f2'/%3E%3Cpath d='M32 32 L32 4 A28 28 0 0 1 56 18 Z' fill='%23f7c9a3'/%3E%3Cpath d='M32 32 L56 18 A28 28 0 0 1 56 46 Z' fill='%23f4a9a9'/%3E%3Cpath d='M32 32 L56 46 A28 28 0 0 1 32 60 Z' fill='%23d9b3e0'/%3E%3Cpath d='M32 32 L32 60 A28 28 0 0 1 8 46 Z' fill='%23b9c6ec'/%3E%3Cpath d='M32 32 L8 46 A28 28 0 0 1 8 18 Z' fill='%23a8dcd6'/%3E%3Cpath d='M32 32 L8 18 A28 28 0 0 1 32 4 Z' fill='%23c3e3a5'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Wheel%20%E2%80%94%20an%20emotion%20journal%22%2C%22short_name%22%3A%22Wheel%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fbf7f2%22%2C%22theme_color%22%3A%22%23fbf7f2%22%7D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf7f2;
+  --surface:#ffffff;
+  --surface-soft:#f6f1ea;
+  --border:#e8e0d4;
+  --text:#3a352f;
+  --text-soft:#7c7568;
+  --text-faint:#a49c8c;
+  --accent:#c98f6b;
+  --font-display:"Newsreader",serif;
+  --font-body:"Work Sans",sans-serif;
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
+body{min-height:100vh;min-height:100dvh;}
+.app{max-width:640px;margin:0 auto;padding:44px 22px 64px;}
+.eyebrow{font-size:13px;color:var(--text-faint);margin:0 0 12px;}
+h1{font-family:var(--font-display);font-weight:500;font-size:38px;line-height:1.12;margin:0 0 14px;}
+.hero-sub{font-size:16px;line-height:1.6;color:var(--text-soft);max-width:46ch;margin:0;}
+.wheel-stage{margin:36px 0 6px;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);}
+.wheel-inner{width:100%;max-width:880px;margin:0 auto;position:relative;box-sizing:border-box;padding:0 16px;}
+#wheel{display:block;width:100%;height:auto;touch-action:none;cursor:grab;}
+#wheel.is-dragging{cursor:grabbing;}
+.wheel-seg{cursor:pointer;stroke:var(--bg);stroke-width:1.4;transition:opacity .15s ease;}
+.wheel-seg:hover,.wheel-seg:focus-visible{opacity:.82;outline:none;}
+.wheel-seg:focus{outline:none;}
+.wheel-seg.is-active{stroke:var(--text);stroke-width:2.4;}
+.wheel-seg.is-dim{opacity:.22;}
+.wheel-label{font-family:var(--font-body);pointer-events:none;}
+.center-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:150px;height:150px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text-soft);font-family:var(--font-display);font-size:16px;font-style:italic;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;box-shadow:0 1px 3px rgba(58,53,47,.08);}
+.center-hub:hover{border-color:var(--accent);color:var(--text);}
+.scroll-hint{font-size:12.5px;color:var(--text-faint);text-align:center;margin:10px 0 0;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-top:26px;box-shadow:0 1px 3px rgba(58,53,47,.06);animation:rise .2s ease;}
+@keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.panel-inner{padding:22px 22px 24px;position:relative;}
+.panel-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-faint);font-size:15px;cursor:pointer;padding:4px;}
+.panel-close:hover{color:var(--text);}
+.panel-crumb{margin:0 0 4px;font-size:13px;color:var(--text-faint);}
+.panel h2{font-family:var(--font-display);font-weight:500;font-size:26px;margin:0 0 8px;padding-right:30px;}
+.panel-hint{font-size:14px;color:var(--text-soft);line-height:1.5;margin:0 0 18px;}
+.field-label{display:block;font-size:13px;color:var(--text-soft);margin-bottom:8px;}
+.field-label .optional{color:var(--text-faint);}
+#noteInput{width:100%;background:var(--surface-soft);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font-body);font-size:14px;padding:12px 14px;resize:vertical;margin-bottom:16px;}
+#noteInput:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:999px;font-family:var(--font-body);font-weight:600;font-size:14px;padding:12px 22px;cursor:pointer;}
+.btn-primary:hover{opacity:.9;}
+.btn-ghost{background:none;border:none;color:var(--text-faint);font-family:var(--font-body);font-size:13px;cursor:pointer;padding:4px;}
+.btn-ghost:hover{color:var(--text-soft);}
+.journal{margin-top:52px;}
+.journal-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;}
+.journal-head h2{font-family:var(--font-display);font-weight:500;font-size:20px;margin:0;}
+.journal-empty{font-size:14px;color:var(--text-faint);margin:0;}
+.journal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;border-radius:var(--radius);overflow:hidden;}
+.journal-item{background:var(--surface);border:1px solid var(--border);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;}
+.journal-item+.journal-item{border-top:none;}
+.journal-item:first-child{border-radius:var(--radius) var(--radius) 0 0;}
+.journal-item:last-child{border-radius:0 0 var(--radius) var(--radius);}
+.journal-item:only-child{border-radius:var(--radius);}
+.journal-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.journal-body{flex:1;min-width:0;}
+.journal-row{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+.journal-emotion{font-weight:600;font-size:14.5px;}
+.journal-crumb{font-size:12px;color:var(--text-faint);}
+.journal-time{font-size:12px;color:var(--text-faint);white-space:nowrap;}
+.journal-note{font-size:13.5px;color:var(--text-soft);margin:4px 0 0;line-height:1.5;word-break:break-word;}
+.journal-del{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:13px;padding:2px 4px;flex-shrink:0;}
+.journal-del:hover{color:var(--text-soft);}
+.foot{margin-top:52px;padding-top:20px;border-top:1px solid var(--border);}
+.foot p{font-size:12.5px;color:var(--text-faint);margin:0;line-height:1.6;}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);background:var(--text);color:var(--bg);font-size:13.5px;padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media (max-width:460px){h1{font-size:30px;}.app{padding:34px 16px 48px;}}
+@media (prefers-reduced-motion:reduce){.panel{animation:none;}.wheel-seg{transition:none;}}
+</style>
 </head>
-<body class="text-slate-900">
-    <div id="root"></div>
+<body>
+<div class="app">
 
-    <script type="text/babel">
-        const firebaseConfig = {
-            apiKey: "AIzaSyCfuw-UnRXxGuaRhOsqfIalkzuy7rgU6Ao",
-            authDomain: "mi-lista-bc5a2.firebaseapp.com",
-            projectId: "mi-lista-bc5a2",
-            databaseURL: "https://mi-lista-bc5a2-default-rtdb.firebaseio.com",
-            storageBucket: "mi-lista-bc5a2.firebasestorage.app",
-            messagingSenderId: "145809393270",
-            appId: "1:145809393270:web:2c6053e877e6e9f0c54157"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+  <header>
+    <p class="eyebrow">A private mood journal</p>
+    <h1>What's moving<br>through you?</h1>
+    <p class="hero-sub">Start in the center, then work outward — general, then specific. Tap whichever ring feels closest.</p>
+  </header>
 
-        const { useState, useEffect, useRef, useMemo } = React;
+  <div class="wheel-stage">
+    <div class="wheel-scroll">
+      <div class="wheel-inner">
+        <svg id="wheel" viewBox="0 0 1120 1120" role="img" aria-label="A feelings wheel with seven core emotions, each branching into more specific feelings across two outer rings."></svg>
+        <button id="centerBtn" class="center-hub" type="button" aria-label="Clear selection"><span id="centerLabel">Tap a feeling</span></button>
+      </div>
+    </div>
+    <p class="scroll-hint">Click and drag — or swipe with a finger — to spin the wheel.</p>
+  </div>
 
-        const AISLE_ORDER = [
-            'Pharmacy', 'Pet', 'Garden', 'Housewares', 'Hardware', 'Auto', 'Outdoors', 'Clothing',
-            'Electronics', 'Arts & Crafts', 'Office Supplies', 'Spirits', 'Baby Aisle', 'Other',
-            'Frozen Food', 'Dairy',
-            'Aisle 30', 'Aisle 28', 'Aisle 26', 'Aisle 24', 'Aisle 22', 'Aisle 20', 'Aisle 18',
-            'Deli',
-            'Aisle 16', 'Aisle 14', 'Aisle 12', 'Aisle 10', 'Aisle 8', 'Aisle 6', 'Aisle 4',
-            'Meat & Seafood', 'Aisle 2', 'Bakery', 'Produce', "Sam's Club"
-        ];
+  <section id="panel" class="panel" hidden>
+    <div class="panel-inner">
+      <button id="panelClose" class="panel-close" type="button" aria-label="Close">✕</button>
+      <p class="panel-crumb" id="panelCrumb">—</p>
+      <h2 id="panelEmotion">—</h2>
+      <p class="panel-hint" id="panelHint"></p>
+      <label class="field-label" for="noteInput">What's underneath it? <span class="optional">(optional)</span></label>
+      <textarea id="noteInput" rows="3" placeholder="A line or two about what's going on…"></textarea>
+      <button id="logBtn" class="btn-primary" type="button">Log this feeling</button>
+    </div>
+  </section>
 
-        const getAisleWeight = (name) => {
-            const index = AISLE_ORDER.indexOf(name);
-            return index === -1 ? 999 : index;
-        };
+  <section class="journal">
+    <div class="journal-head">
+      <h2>Your journal</h2>
+      <button id="clearBtn" class="btn-ghost" type="button">Clear all</button>
+    </div>
+    <p id="journalEmpty" class="journal-empty">Nothing logged yet. Entries stay on this device only.</p>
+    <ul id="journalList" class="journal-list"></ul>
+  </section>
 
-        const Icon = ({ name, className = "w-5 h-5" }) => {
-            const icons = {
-                Plus: <path d="M12 5v14M5 12h14" />,
-                Minus: <path d="M5 12h14" />,
-                Trash2: (<><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></>),
-                Check: <path d="M20 6 9 17l-5-5" />,
-                X: (<><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>),
-                ShoppingCart: (<><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></>),
-                Menu: (<><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></>),
-                Search: (<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>),
-                Mic: (<><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>),
-                Square: <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />,
-                Download: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></>),
-                Package: (<><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12"/></>),
-                Upload: (<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></>),
-                ChevronDown: <path d="m6 9 6 6 6-6" />,
-                ChevronRight: <path d="m9 18 6-6-6-6" />,
-            };
-            return (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    {icons[name] || null}
-                </svg>
-            );
-        };
+  <footer class="foot">
+    <p>Based on the feelings wheel popularized by therapist Dr. Gloria Willcox. Entries are stored only in this browser — nothing is sent anywhere.</p>
+  </footer>
 
-        const SwipeableRow = ({ onSwipeRight, onSwipeLeft, children, rightIcon = "Check", leftIcon = "Trash2" }) => {
-            const [startX, setStartX] = useState(0);
-            const [offsetX, setOffsetX] = useState(0);
-            const threshold = 90;
-            const handleStart = (e) => setStartX(e.touches[0].clientX);
-            const handleMove = (e) => { setOffsetX(e.touches[0].clientX - startX); };
-            const handleEnd = () => {
-                if (offsetX > threshold) onSwipeRight();
-                else if (offsetX < -threshold) onSwipeLeft();
-                setOffsetX(0);
-            };
-            return (
-                <div className="swipe-row-container bg-white overflow-hidden">
-                    <div className="swipe-action-bg swipe-bg-left" style={{ opacity: offsetX > 0 ? 1 : 0 }}><Icon name={rightIcon} /></div>
-                    <div className="swipe-action-bg swipe-bg-right" style={{ opacity: offsetX < 0 ? 1 : 0 }}><Icon name={leftIcon} /></div>
-                    <div className="swipe-content-layer" style={{ transform: `translateX(${offsetX}px)`, transition: offsetX === 0 ? 'transform 0.2s' : 'none' }} onTouchStart={handleStart} onTouchMove={handleMove} onTouchEnd={handleEnd}>
-                        {children}
-                    </div>
-                </div>
-            );
-        };
+</div>
 
-        const GroceryListApp = () => {
-            const stores = [
-                { id: 'Walmart', icon: 'ShoppingCart', color: 'text-blue-500', label: 'Walmart' },
-                { id: "Sam's Club", icon: 'Package', color: 'text-orange-700', label: "Sam's" },
-                { id: 'Coquito', icon: '🥥', isEmoji: true, label: 'Coquito' },
-                { id: 'Talin Market', icon: '🇵🇷', isEmoji: true, label: 'Talin' }
-            ];
-            
-            const [items, setItems] = useState([]);
-            const [pantryItems, setPantryItems] = useState([]);
-            const [syncCode, setSyncCode] = useState(localStorage.getItem('syncCode') || 'Familia');
-            const [tempSyncCode, setTempSyncCode] = useState(syncCode);
-            const [currentStore, setCurrentStore] = useState('Walmart');
-            const [editingItem, setEditingItem] = useState(null);
-            const [showMenu, setShowMenu] = useState(false);
-            const [showPantry, setShowPantry] = useState(false);
-            const [showSyncModal, setShowSyncModal] = useState(false);
-            const [searchQuery, setSearchQuery] = useState('');
-            const [isListening, setIsListening] = useState(false);
-            const [expandedAisles, setExpandedAisles] = useState({});
-            
-            const searchRef = useRef(null);
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-            useEffect(() => {
-                const listRef = db.ref(`lists/${syncCode}/items`);
-                listRef.on('value', (snap) => {
-                    const data = snap.val();
-                    setItems(data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : []);
-                });
-                const pantryRef = db.ref(`lists/${syncCode}/pantry`);
-                pantryRef.on('value', (snap) => {
-                    const data = snap.val();
-                    setPantryItems(data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : []);
-                });
-                return () => { listRef.off(); pantryRef.off(); };
-            }, [syncCode]);
+<script>
+(() => {
+"use strict";
 
-            const updateSyncCode = () => {
-                const code = tempSyncCode.trim();
-                if(!code) return;
-                setSyncCode(code);
-                localStorage.setItem('syncCode', code);
-                setShowSyncModal(false);
-                alert("Connected to: " + code);
-            };
+/* ---------------- Data: seven core feelings, each branching into a mid ring
+   and an outer ring of more specific words. ---------------- */
+const WHEEL = [
+  { label:"Bad", hue:150, hint:"A catch-all for a low, foggy state that doesn't have a sharper name yet.",
+    mids:[
+      { label:"Bored", leaves:["Indifferent","Apathetic"] },
+      { label:"Busy", leaves:["Pressured","Rushed"] },
+      { label:"Stressed", leaves:["Overwhelmed","Out of control"] },
+      { label:"Tired", leaves:["Sleepy","Unfocused"] }
+    ]},
+  { label:"Fearful", hue:189, hint:"The body bracing against a threat, real or imagined.",
+    mids:[
+      { label:"Scared", leaves:["Helpless","Frightened"] },
+      { label:"Anxious", leaves:["Overwhelmed","Worried"] },
+      { label:"Insecure", leaves:["Inadequate","Inferior","Worthless"] },
+      { label:"Weak", leaves:["Insignificant","Excluded","Persecuted"] },
+      { label:"Rejected", leaves:["Nervous","Exposed"] },
+      { label:"Threatened", leaves:["Betrayed"] }
+    ]},
+  { label:"Angry", hue:250, hint:"Energy that rises when something blocks you or crosses a line.",
+    mids:[
+      { label:"Let down", leaves:["Resentful","Disrespected"] },
+      { label:"Humiliated", leaves:["Ridiculed","Indignant"] },
+      { label:"Bitter", leaves:["Violated","Jealous"] },
+      { label:"Mad", leaves:["Furious","Provoked"] },
+      { label:"Aggressive", leaves:["Hostile","Infuriated"] },
+      { label:"Frustrated", leaves:["Annoyed","Withdrawn"] },
+      { label:"Distant", leaves:["Numb","Sceptical","Dismissive"] }
+    ]},
+  { label:"Disgusted", hue:284, hint:"A pulling-away from something that feels wrong or unwanted.",
+    mids:[
+      { label:"Critical", leaves:["Judgmental"] },
+      { label:"Disapproving", leaves:["Appalled","Revolted"] },
+      { label:"Disappointed", leaves:["Embarrassed","Hesitant"] },
+      { label:"Awful", leaves:["Nauseated","Detestable"] },
+      { label:"Repelled", leaves:["Horrified"] }
+    ]},
+  { label:"Sad", hue:338, hint:"A response to loss — of a person, a plan, or a version of yourself.",
+    mids:[
+      { label:"Hurt", leaves:["Embarrassed","Disappointed"] },
+      { label:"Depressed", leaves:["Inferior","Empty"] },
+      { label:"Guilty", leaves:["Ashamed","Remorseful"] },
+      { label:"Despair", leaves:["Powerless","Grief"] },
+      { label:"Vulnerable", leaves:["Fragile","Victimised"] },
+      { label:"Lonely", leaves:["Abandoned","Isolated"] }
+    ]},
+  { label:"Happy", hue:22, hint:"A sense of things being good, open, or going your way.",
+    mids:[
+      { label:"Playful", leaves:["Aroused","Cheeky"] },
+      { label:"Content", leaves:["Free","Joyful"] },
+      { label:"Interested", leaves:["Curious","Inquisitive"] },
+      { label:"Proud", leaves:["Successful","Confident"] },
+      { label:"Accepted", leaves:["Respected","Valued"] },
+      { label:"Powerful", leaves:["Courageous","Creative"] },
+      { label:"Peaceful", leaves:["Loving","Thankful"] },
+      { label:"Trusting", leaves:["Sensitive","Intimate"] },
+      { label:"Optimistic", leaves:["Hopeful","Inspired"] }
+    ]},
+  { label:"Surprised", hue:46, hint:"The jolt of something not matching what you expected.",
+    mids:[
+      { label:"Startled", leaves:["Shocked","Dismayed"] },
+      { label:"Confused", leaves:["Disillusioned","Perplexed"] },
+      { label:"Amazed", leaves:["Astonished","Awe"] },
+      { label:"Excited", leaves:["Eager","Energetic"] }
+    ]}
+];
 
-            const addItemManually = (name, price = "") => {
-                if (!name.trim()) return;
-                const match = pantryItems.find(p => p.name.toLowerCase() === name.trim().toLowerCase());
-                const finalPrice = price || (match ? match.price : '');
-                const aisle = match ? match.aisle : 'Other';
-                db.ref(`lists/${syncCode}/items`).push({ name: name.trim(), quantity: 1, price: finalPrice, aisle, store: currentStore, checked: false });
-                if (!match) db.ref(`lists/${syncCode}/pantry`).push({ name: name.trim(), price: finalPrice, aisle });
-                setSearchQuery('');
-            };
+/* ---------------- Layout: allocate angle proportional to leaf count ---------------- */
+const CX = 560, CY = 560;
+const R = { c0:95, c1:205, m0:205, m1:355, o0:355, o1:545 };
 
-            const addItemFromPantry = (p) => {
-                db.ref(`lists/${syncCode}/items`).push({ name: p.name, quantity: 1, price: p.price || '', aisle: p.aisle, store: currentStore, checked: false });
-                setSearchQuery('');
-            };
+let total = 0;
+WHEEL.forEach(core => {
+  let n = 0;
+  core.mids.forEach(mid => { mid.leafCount = mid.leaves.length; n += mid.leafCount; });
+  core.leafCount = n;
+  total += n;
+});
+let cursor = 0;
+WHEEL.forEach(core => {
+  const span = core.leafCount / total * 360;
+  core.start = cursor; core.end = cursor + span;
+  let a = cursor;
+  core.mids.forEach(mid => {
+    const mspan = mid.leafCount / core.leafCount * span;
+    mid.start = a; mid.end = a + mspan;
+    let b = a;
+    const lspan = mspan / mid.leafCount;
+    mid.ranges = mid.leaves.map(name => { const r = { name, start:b, end:b+lspan }; b += lspan; return r; });
+    a += mspan;
+  });
+  cursor += span;
+});
 
-            const toggleCheck = (id, currentStatus) => db.ref(`lists/${syncCode}/items/${id}`).update({ checked: !currentStatus });
-            const deleteItem = (id) => db.ref(`lists/${syncCode}/items/${id}`).remove();
+/* ---------------- Geometry ---------------- */
+function polar(r, angleDeg) {
+  const rad = (angleDeg - 90) * Math.PI / 180;
+  return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
+}
+function sectorPath(r0, r1, startAngle, endAngle) {
+  const p0i = polar(r0, startAngle), p0o = polar(r1, startAngle);
+  const p1o = polar(r1, endAngle), p1i = polar(r0, endAngle);
+  const large = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${p0i.x} ${p0i.y} L ${p0o.x} ${p0o.y} A ${r1} ${r1} 0 ${large} 1 ${p1o.x} ${p1o.y} `+
+         `L ${p1i.x} ${p1i.y} A ${r0} ${r0} 0 ${large} 0 ${p0i.x} ${p0i.y} Z`;
+}
+/* Radial (spoke-style) label placement: text reads outward from near the
+   inner edge of its ring toward the rim, flipped on the lower half so it
+   never renders upside down. Far more space per label than tangential text
+   would give on a wheel this dense. */
+function tangentLabel(midR, angle) {
+  const p = polar(midR, angle);
+  let rot = angle;
+  if (rot > 90 && rot < 270) rot += 180;
+  return { transform: `translate(${p.x} ${p.y}) rotate(${rot})`, anchor: "middle" };
+}
+function radialLabel(r0, r1, angle) {
+  const flip = angle > 180;
+  const rStart = flip ? r1 - 6 : r0 + 6;
+  const p = polar(rStart, angle);
+  const rot = flip ? angle - 270 : angle - 90;
+  return { transform: `translate(${p.x} ${p.y}) rotate(${rot})`, anchor: "start" };
+}
+function fillFor(hue, ring) {
+  const light = ring === "core" ? 74 : ring === "mid" ? 84 : 91;
+  const sat = ring === "core" ? 58 : ring === "mid" ? 55 : 50;
+  return `hsl(${hue} ${sat}% ${light}%)`;
+}
+function textFor(hue) { return `hsl(${hue} 45% 26%)`; }
 
-            const saveModalChanges = () => {
-                if (!editingItem) return;
-                db.ref(`lists/${syncCode}/items/${editingItem.id}`).update({ ...editingItem });
-                const existingPantry = pantryItems.find(p => p.name.toLowerCase() === editingItem.name.toLowerCase());
-                if (existingPantry) {
-                    db.ref(`lists/${syncCode}/pantry/${existingPantry.id}`).update({ price: editingItem.price, aisle: editingItem.aisle });
-                } else {
-                    db.ref(`lists/${syncCode}/pantry`).push({ name: editingItem.name, price: editingItem.price, aisle: editingItem.aisle });
-                }
-                setEditingItem(null);
-            };
+/* ---------------- Build the SVG ---------------- */
+const svg = document.getElementById("wheel");
+const NS = "http://www.w3.org/2000/svg";
+const wheelGroup = document.createElementNS(NS, "g");
+wheelGroup.setAttribute("id", "wheelGroup");
+svg.appendChild(wheelGroup);
+const segments = [];
+let justDragged = false;
 
-            const updatePantryPriceAndSyncList = (id, name, newPrice) => {
-                db.ref(`lists/${syncCode}/pantry/${id}`).update({ price: newPrice });
-                items.forEach(item => {
-                    if (item.name.toLowerCase() === name.toLowerCase()) {
-                        db.ref(`lists/${syncCode}/items/${item.id}`).update({ price: newPrice });
-                    }
-                });
-            };
+function addSeg(d, fill, textColor, label, fontSize, labelPos, meta) {
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("d", d);
+  path.setAttribute("fill", fill);
+  path.setAttribute("class", "wheel-seg");
+  path.setAttribute("tabindex", "0");
+  path.setAttribute("role", "button");
+  path.setAttribute("aria-label", label);
+  wheelGroup.appendChild(path);
 
-            const handleFileUpload = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const data = new Uint8Array(event.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                        const newPantry = {};
-                        jsonData.forEach((row) => {
-                            const nameKey = Object.keys(row).find(k => ['item', 'name'].includes(k.toLowerCase()));
-                            const priceKey = Object.keys(row).find(k => ['price', 'precio'].includes(k.toLowerCase()));
-                            const aisleKey = Object.keys(row).find(k => ['aisle', 'pasillo'].includes(k.toLowerCase()));
-                            if (nameKey) {
-                                const id = 'p_' + Math.random().toString(36).substr(2, 9);
-                                const name = String(row[nameKey]).trim();
-                                let rawAisle = aisleKey ? String(row[aisleKey]).trim() : 'Other';
-                                const matchedAisle = AISLE_ORDER.find(a => a.toLowerCase() === rawAisle.toLowerCase());
-                                newPantry[id] = { name, price: priceKey ? String(row[priceKey]).replace(/[^0-9.]/g, '') : '', aisle: matchedAisle || 'Other' };
-                            }
-                        });
-                        db.ref(`lists/${syncCode}/pantry`).set(newPantry);
-                        alert("Pantry successfully updated!");
-                    } catch (err) { alert("Error reading file."); }
-                };
-                reader.readAsArrayBuffer(file);
-            };
+  const text = document.createElementNS(NS, "text");
+  text.setAttribute("class", "wheel-label");
+  text.setAttribute("text-anchor", labelPos.anchor);
+  text.setAttribute("dominant-baseline", "central");
+  text.setAttribute("transform", labelPos.transform);
+  text.setAttribute("font-size", fontSize);
+  text.setAttribute("font-weight", meta.ring === "core" ? "600" : "500");
+  text.style.fill = textColor;
+  text.textContent = label;
+  wheelGroup.appendChild(text);
 
-            const toggleVoiceSearch = () => {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRecognition) return;
-                if (isListening) { recognitionRef.current?.stop(); return; }
-                const recognition = new SpeechRecognition();
-                recognition.lang = 'es-PR';
-                recognition.onstart = () => setIsListening(true);
-                recognition.onend = () => setIsListening(false);
-                recognition.onresult = (e) => setSearchQuery(e.results[0][0].transcript);
-                recognitionRef.current = recognition;
-                recognition.start();
-            };
+  const rec = { el: path, labelEl: text, ...meta };
+  segments.push(rec);
+  const activate = () => {
+    if (justDragged) { justDragged = false; return; }
+    selectSegment(rec);
+  };
+  path.addEventListener("click", activate);
+  path.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+  return rec;
+}
 
-            const storeItems = useMemo(() => items.filter(i => i.store === currentStore), [items, currentStore]);
-            const cartTotal = storeItems.reduce((sum, i) => sum + (parseFloat(i.price || 0) * parseFloat(i.quantity || 1)), 0);
-            
-            const aisleStats = useMemo(() => {
-                const stats = {};
-                storeItems.forEach(item => {
-                    const a = item.aisle || 'Other';
-                    if (!stats[a]) stats[a] = { total: 0, checked: 0 };
-                    stats[a].total++;
-                    if (item.checked) stats[a].checked++;
-                });
-                return stats;
-            }, [storeItems]);
+WHEEL.forEach(core => {
+  const coreMid = (core.start + core.end) / 2;
+  addSeg(
+    sectorPath(R.c0, R.c1, core.start, core.end),
+    fillFor(core.hue, "core"), textFor(core.hue), core.label, 16,
+    tangentLabel((R.c0 + R.c1) / 2, coreMid),
+    { ring:"core", coreLabel:core.label, midLabel:null, name:core.label, hint:core.hint, hue:core.hue }
+  );
+  core.mids.forEach(mid => {
+    const midMid = (mid.start + mid.end) / 2;
+    addSeg(
+      sectorPath(R.m0, R.m1, mid.start, mid.end),
+      fillFor(core.hue, "mid"), textFor(core.hue), mid.label, 11.5,
+      radialLabel(R.m0, R.m1, midMid),
+      { ring:"mid", coreLabel:core.label, midLabel:mid.label, name:mid.label, hint:core.hint, hue:core.hue }
+    );
+    mid.ranges.forEach(leaf => {
+      const leafMid = (leaf.start + leaf.end) / 2;
+      addSeg(
+        sectorPath(R.o0, R.o1, leaf.start, leaf.end),
+        fillFor(core.hue, "outer"), textFor(core.hue), leaf.name, 10.5,
+        radialLabel(R.o0, R.o1, leafMid),
+        { ring:"outer", coreLabel:core.label, midLabel:mid.label, name:leaf.name, hint:core.hint, hue:core.hue }
+      );
+    });
+  });
+});
 
-            const sortedAisles = useMemo(() => {
-                const groups = storeItems.filter(i => !i.checked).reduce((acc, i) => { 
-                    const a = i.aisle || 'Other';
-                    (acc[a] = acc[a] || []).push(i); return acc; 
-                }, {});
-                return Object.entries(groups)
-                    .sort((a, b) => getAisleWeight(a[0]) - getAisleWeight(b[0]))
-                    .map(([n, items]) => [n, [...items].sort((x, y) => x.name.localeCompare(y.name))]);
-            }, [storeItems]);
+/* ---------------- Drag / swipe to spin ---------------- */
+(() => {
+  let rotation = 0;
+  let dragging = false;
+  let pointerId = null;
+  let lastAngle = 0, lastTime = 0;
+  let startX = 0, startY = 0, moved = false;
+  let velocity = 0; // degrees per ms
+  let rafId = null;
 
-            const groupedPantry = useMemo(() => {
-                const groups = pantryItems.reduce((acc, p) => {
-                    const a = p.aisle || 'Other';
-                    (acc[a] = acc[a] || []).push(p); return acc;
-                }, {});
-                return Object.entries(groups).sort((a, b) => getAisleWeight(a[0]) - getAisleWeight(b[0]))
-                    .map(([name, pItems]) => [name, [...pItems].sort((x, y) => x.name.localeCompare(y.name))]);
-            }, [pantryItems]);
+  function angleAt(clientX, clientY) {
+    const rect = svg.getBoundingClientRect();
+    const scale = 1120 / rect.width;
+    const x = (clientX - rect.left) * scale;
+    const y = (clientY - rect.top) * scale;
+    return Math.atan2(y - CY, x - CX) * 180 / Math.PI;
+  }
+  function applyRotation() {
+    wheelGroup.setAttribute("transform", `rotate(${rotation} ${CX} ${CY})`);
+  }
 
-            const pantryResults = searchQuery.length > 0 ? pantryItems.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())) : [];
+  svg.addEventListener("pointerdown", e => {
+    dragging = true; moved = false;
+    pointerId = e.pointerId;
+    lastAngle = angleAt(e.clientX, e.clientY);
+    lastTime = performance.now();
+    startX = e.clientX; startY = e.clientY;
+    velocity = 0;
+    cancelAnimationFrame(rafId);
+    svg.classList.add("is-dragging");
+  });
 
-            return (
-                <div className="min-h-screen pb-32">
-                    <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4 text-slate-900">
-                        
-                        {/* Auto-Close Backdrops */}
-                        {(showMenu || showPantry || showSyncModal || editingItem) && (
-                            <div className="fixed inset-0 z-[55] bg-black/10 backdrop-blur-[2px]" onClick={() => { setShowMenu(false); setShowPantry(false); setShowSyncModal(false); setEditingItem(null); }} />
-                        )}
+  window.addEventListener("pointermove", e => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    const now = performance.now();
+    const angle = angleAt(e.clientX, e.clientY);
+    let delta = angle - lastAngle;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    rotation += delta;
+    applyRotation();
+    const dt = Math.max(now - lastTime, 1);
+    velocity = delta / dt;
+    lastAngle = angle; lastTime = now;
+    if (!moved && Math.hypot(e.clientX - startX, e.clientY - startY) > 6) moved = true;
+    if (moved) e.preventDefault();
+  }, { passive: false });
 
-                        <header className="relative rounded-lg profound-shadow px-4 sm:px-6 py-4 text-white bg-gradient-to-br from-emerald-600 to-teal-800 mb-3 z-[60]">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <button onClick={(e) => { e.stopPropagation(); setShowSyncModal(true); setTempSyncCode(syncCode); }} className="bg-white/20 p-2 rounded-md active:scale-90 transition-all shadow-inner"><Icon name="ShoppingCart" /></button>
-                                    <h1 className="text-lg font-black uppercase tracking-tight" onClick={() => setShowSyncModal(true)}>Mi Lista 🇵🇷</h1>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <button onClick={(e) => { e.stopPropagation(); setShowPantry(!showPantry); }} className={`p-2 rounded-md transition-all active:scale-90 ${showPantry ? 'bg-white text-emerald-700 shadow-inner' : 'hover:bg-white/10 text-white/80'}`}><Icon name="Package" /></button>
-                                    <button onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }} className="p-2 hover:bg-white/10 rounded-md active:scale-90 transition-all"><Icon name={showMenu ? "X" : "Menu"} /></button>
-                                </div>
-                            </div>
-                        </header>
+  function endDrag(e) {
+    if (!dragging || e.pointerId !== pointerId) return;
+    dragging = false;
+    svg.classList.remove("is-dragging");
+    if (moved) {
+      justDragged = true;
+      setTimeout(() => { justDragged = false; }, 300);
+      spinWithInertia();
+    }
+  }
+  window.addEventListener("pointerup", endDrag);
+  window.addEventListener("pointercancel", endDrag);
 
-                        {showMenu && (
-                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none">
-                                <div className="bg-white rounded-lg profound-shadow w-full max-w-sm overflow-hidden scale-in pointer-events-auto" onClick={(e) => e.stopPropagation()}>
-                                    <h2 className="p-4 bg-slate-50 border-b text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Options</h2>
-                                    <button onClick={() => {
-                                        const ws = XLSX.utils.json_to_sheet(pantryItems.map(p => ({ Item: p.name, Price: p.price, Aisle: p.aisle })));
-                                        const wb = XLSX.utils.book_new();
-                                        XLSX.utils.book_append_sheet(wb, ws, "Pantry");
-                                        XLSX.writeFile(wb, "Mi_Pantry_Database.xlsx");
-                                        setShowMenu(false);
-                                    }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-slate-600 transition-colors text-left text-slate-600"><Icon name="Download" /> Export Pantry Database</button>
-                                    <button onClick={() => { storeItems.filter(i => i.checked).forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-slate-50 border-b font-bold text-sm text-emerald-600 transition-colors text-left"><Icon name="Check" /> Clear Purchased ({currentStore})</button>
-                                    <button onClick={() => { if(confirm('Delete all for '+currentStore+'?')) { storeItems.forEach(i => db.ref(`lists/${syncCode}/items/${i.id}`).remove()); setShowMenu(false); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 border-b font-bold text-sm text-red-600 transition-colors text-left"><Icon name="Trash2" /> Reset {currentStore} List</button>
-                                    <button onClick={() => { if(confirm('Factory Reset Entire App?')) { db.ref(`lists/${syncCode}`).remove(); localStorage.clear(); location.reload(); }}} className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-100 font-bold text-sm text-red-700 transition-colors text-left"><Icon name="X" /> Wipe All Data</button>
-                                    <button onClick={() => setShowMenu(false)} className="w-full py-4 text-slate-400 text-xs font-bold uppercase tracking-widest text-center bg-slate-50">Close</button>
-                                </div>
-                            </div>
-                        )}
+  function spinWithInertia() {
+    const friction = 0.94;
+    function step() {
+      rotation += velocity * 16;
+      velocity *= friction;
+      applyRotation();
+      if (Math.abs(velocity) > 0.004) rafId = requestAnimationFrame(step);
+    }
+    rafId = requestAnimationFrame(step);
+  }
+})();
 
-                        <div className="flex gap-2 overflow-x-auto pb-4 px-1 no-scrollbar mb-4 text-slate-900">
-                            {stores.map(s => (
-                                <button key={s.id} onClick={() => setCurrentStore(s.id)} className={`flex items-center gap-2 whitespace-nowrap px-4 py-3 rounded-md font-black text-[10px] uppercase tracking-widest transition-all ${currentStore === s.id ? 'bg-white text-slate-800 shadow-lg profound-shadow ring-2 ring-emerald-500/20' : 'bg-white/50 text-slate-400 opacity-70'}`}>
-                                    {s.isEmoji ? <span className="text-sm">{s.icon}</span> : <Icon name={s.icon} className={`w-4 h-4 ${s.color}`} />}{s.label}
-                                </button>
-                            ))}
-                        </div>
+/* ---------------- Selection + panel ---------------- */
+const panel = document.getElementById("panel");
+const panelCrumb = document.getElementById("panelCrumb");
+const panelEmotion = document.getElementById("panelEmotion");
+const panelHint = document.getElementById("panelHint");
+const noteInput = document.getElementById("noteInput");
+const logBtn = document.getElementById("logBtn");
+const panelClose = document.getElementById("panelClose");
+const centerBtn = document.getElementById("centerBtn");
+const centerLabel = document.getElementById("centerLabel");
 
-                        <div className="relative z-40 mb-8 text-slate-900">
-                            <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                            <input ref={searchRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && addItemManually(searchQuery)} placeholder={isListening ? "Listening..." : "Search or add items..."} className="w-full pl-11 pr-14 py-4 bg-white border border-slate-100 rounded-md profound-shadow text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900" />
-                            <button onClick={toggleVoiceSearch} className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 hover:bg-slate-50 rounded-full active:scale-90 z-50">
-                                {isListening ? <Icon name="Square" className="w-5 h-5 text-red-600 pulse-red" /> : <Icon name="Mic" className="w-5 h-5 text-slate-400" />}
-                            </button>
-                            {searchQuery.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-md shadow-2xl border border-slate-100 z-50 max-h-64 overflow-y-auto scale-in">
-                                    <button onClick={() => addItemManually(searchQuery)} className="w-full flex items-center gap-4 p-4 hover:bg-emerald-50 border-b text-emerald-600 font-black text-sm text-left"><div className="p-1.5 bg-emerald-100 rounded-md"><Icon name="Plus" /></div>Add "{searchQuery}"</button>
-                                    {pantryResults.map(p => (<button key={p.id} onClick={() => addItemFromPantry(p)} className="w-full flex justify-between items-center p-4 hover:bg-slate-50 border-b last:border-0 text-left"><div><span className="font-bold text-sm block text-slate-900">{p.name}</span><span className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{p.aisle}</span></div><div className="p-1.5 bg-slate-100 text-slate-400 rounded-md"><Icon name="Plus" /></div></button>))}
-                                </div>
-                            )}
-                        </div>
+let current = null;
 
-                        {showPantry && (
-                            <div className="fixed top-20 left-2 right-2 max-w-2xl mx-auto z-[70] bg-white rounded-lg profound-shadow p-5 border border-emerald-50 scale-in" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex justify-between items-center mb-5 border-b pb-3 text-slate-900 text-left">
-                                    <h2 className="font-black text-slate-700 text-[10px] uppercase tracking-[0.2em] flex items-center gap-2"><Icon name="Package" className="text-emerald-500" /> Pantry</h2>
-                                    <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-[10px] font-black cursor-pointer shadow-md active:scale-95 transition-all"><Icon name="Upload" className="w-3 h-3 inline mr-1" /> IMPORT<input type="file" className="hidden" onChange={handleFileUpload} /></label>
-                                </div>
-                                <div className="max-h-[60vh] overflow-y-auto space-y-2 custom-scrollbar pr-2 text-slate-900">
-                                    {groupedPantry.map(([aisle, pItems]) => (
-                                        <div key={aisle} className="border-b last:border-0 text-slate-900 text-left">
-                                            <button onClick={() => setExpandedAisles(prev => ({ ...prev, [aisle]: !prev[aisle] }))} className="w-full flex items-center justify-between py-3 focus:outline-none">
-                                                <div className="flex items-center gap-3"><Icon name={expandedAisles[aisle] ? "ChevronDown" : "ChevronRight"} className="w-4 h-4 text-slate-400" /><span className="text-[10px] font-black uppercase text-slate-600 tracking-widest">{aisle} ({pItems.length})</span></div>
-                                            </button>
-                                            {expandedAisles[aisle] && (
-                                                <div className="space-y-4 pb-4 animate-in fade-in duration-200">
-                                                    {pItems.map(p => (
-                                                        <SwipeableRow key={p.id} onSwipeLeft={() => db.ref(`lists/${syncCode}/pantry/${p.id}`).remove()} onSwipeRight={() => addItemFromPantry(p)} rightIcon="Plus">
-                                                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-md">
-                                                                <div className="flex-1 mr-4 text-left"><p className="text-xs font-bold text-slate-700">{p.name}</p></div>
-                                                                <div className="flex items-center gap-4 text-slate-900">
-                                                                    <input type="number" step="0.01" value={p.price} onClick={(e) => e.stopPropagation()} onChange={(e) => updatePantryPriceAndSyncList(p.id, p.name, e.target.value)} className="w-16 p-2 text-[11px] font-black border rounded-lg bg-white outline-none focus:ring-1 focus:ring-emerald-400" />
-                                                                    <button onClick={(e) => { e.stopPropagation(); addItemFromPantry(p); }} className="p-2 text-emerald-600 active:scale-90"><Icon name="Plus" className="w-5 h-5"/></button>
-                                                                </div>
-                                                            </div>
-                                                        </SwipeableRow>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                <button onClick={() => setShowPantry(false)} className="w-full py-4 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest border-t text-center text-slate-400">Close Pantry</button>
-                            </div>
-                        )}
+function selectSegment(rec) {
+  current = rec;
+  segments.forEach(s => {
+    const same = s.coreLabel === rec.coreLabel;
+    s.el.classList.toggle("is-active", s === rec);
+    s.el.classList.toggle("is-dim", !same);
+  });
+  const crumb = [rec.coreLabel];
+  if (rec.midLabel && rec.midLabel !== rec.name) crumb.push(rec.midLabel);
+  if (rec.ring === "outer") crumb.push(rec.name);
+  panelCrumb.textContent = crumb.join(" › ");
+  panelEmotion.textContent = rec.name;
+  panelHint.textContent = rec.hint;
+  noteInput.value = "";
+  panel.hidden = false;
+  centerLabel.textContent = rec.name;
+  panel.scrollIntoView({ behavior:"smooth", block:"nearest" });
+}
+function clearSelection() {
+  current = null;
+  segments.forEach(s => s.el.classList.remove("is-active","is-dim"));
+  panel.hidden = true;
+  centerLabel.textContent = "Tap a feeling";
+}
+centerBtn.addEventListener("click", clearSelection);
+panelClose.addEventListener("click", clearSelection);
 
-                        <div className="space-y-12">
-                            {sortedAisles.map(([aisle, aisleItems]) => (
-                                <div key={aisle} className="scale-in">
-                                    <div className="flex justify-between items-end px-2 mb-3">
-                                        <div className="space-y-1 flex-1 text-left text-slate-900 text-slate-900">
-                                            <h3 className="text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">{aisle}</h3>
-                                            <div className="h-1 bg-slate-300/30 rounded-full w-24 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-700 shadow-md shadow-emerald-200" style={{ width: `${(aisleStats[aisle]?.checked / aisleStats[aisle]?.total) * 100}%` }} /></div>
-                                        </div>
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-white/50 px-2 py-0.5 rounded-full">{aisleStats[aisle]?.checked}/{aisleStats[aisle]?.total} Done</span>
-                                    </div>
+/* ---------------- Journal (localStorage) ---------------- */
+const STORAGE_KEY = "emotion-wheel-journal";
+const journalList = document.getElementById("journalList");
+const journalEmpty = document.getElementById("journalEmpty");
+const clearBtn = document.getElementById("clearBtn");
+const toast = document.getElementById("toast");
 
-                                    <div className="bg-white rounded-lg profound-shadow border border-slate-50 overflow-hidden divide-y divide-slate-50">
-                                        {aisleItems.map(item => (
-                                            <SwipeableRow key={item.id} onSwipeLeft={() => deleteItem(item.id)} onSwipeRight={() => toggleCheck(item.id, item.checked)}>
-                                                <div className="flex items-center p-5 gap-5 active:bg-slate-50 transition-colors">
-                                                    <button onClick={(e) => { e.stopPropagation(); toggleCheck(item.id, item.checked); }} className={`w-7 h-7 rounded-lg border-2 shrink-0 hidden sm:flex items-center justify-center transition-all ${item.checked ? 'bg-emerald-500 border-emerald-500 shadow-emerald-200 shadow-lg' : 'border-slate-100'}`}>{item.checked && <Icon name="Check" className="text-white" />}</button>
-                                                    <div className="flex-1 min-w-0 text-left text-slate-900" onClick={() => setEditingItem({...item})}>
-                                                        <p className="font-bold text-slate-700 text-sm truncate">{item.name}</p>
-                                                        <div className="flex items-center gap-3 mt-1 text-slate-900"><span className="text-sm font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md uppercase">x{item.quantity}</span>{item.price && <span className="text-sm font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md tracking-wider">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>}</div>
-                                                    </div>
-                                                </div>
-                                            </SwipeableRow>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+function loadEntries() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+function saveEntries(entries) { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+function fmtTime(ts) {
+  const d = new Date(ts), now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString([], { hour:"numeric", minute:"2-digit" });
+  return sameDay ? time : d.toLocaleDateString([], { month:"short", day:"numeric" }) + " · " + time;
+}
+function escapeHtml(str) { const div = document.createElement("div"); div.textContent = str; return div.innerHTML; }
 
-                        {storeItems.some(i => i.checked) && (
-                            <div className="mt-16 opacity-50 text-center scale-in text-slate-900"><h3 className="text-[10px] font-black mb-4 uppercase text-slate-600 tracking-[0.3em] px-2 italic">In {currentStore} Cart</h3><div className="bg-white/40 rounded-lg border border-dashed border-slate-300 divide-y overflow-hidden mx-1 text-slate-900">
-                                {storeItems.filter(i => i.checked).map(item => (
-                                    <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-white/50 transition-colors text-left text-slate-900">
-                                        <button onClick={() => toggleCheck(item.id, true)} className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-white shrink-0 active:scale-90"><Icon name="Check" /></button>
-                                        <span className="line-through text-xs font-semibold text-slate-500 truncate flex-1">{item.name}</span>
-                                        <button onClick={() => deleteItem(item.id)} className="p-2 text-slate-300 hover:text-red-400 transition-colors"><Icon name="Trash2" /></button>
-                                    </div>
-                                ))}
-                            </div></div>
-                        )}
-                    </div>
-
-                    {/* Sync Settings Modal */}
-                    {showSyncModal && (
-                        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[120] flex items-center justify-center p-6 text-slate-900" onClick={() => setShowSyncModal(false)}>
-                            <div className="bg-white rounded-lg p-6 w-[92vw] max-w-sm profound-shadow scale-in text-slate-900" onClick={(e) => e.stopPropagation()}>
-                                <h2 className="text-lg font-black text-slate-800 mb-6 tracking-tight text-center uppercase tracking-widest">Sync Settings</h2>
-                                <div className="space-y-4">
-                                    <label className="text-[9px] font-black text-slate-400 uppercase ml-1 block text-left">Sync Code</label>
-                                    <div className="flex flex-col gap-3">
-                                        <input type="text" value={tempSyncCode} onChange={(e) => setTempSyncCode(e.target.value)} onFocus={(e) => e.target.select()} autoComplete="off" spellCheck="false" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-md text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900" />
-                                        <button onClick={updateSyncCode} className="w-full bg-emerald-600 text-white p-4 rounded-md font-black text-[10px] uppercase shadow-lg shadow-emerald-100 active:scale-95 transition-all">Link Devices</button>
-                                    </div>
-                                    <button onClick={() => setShowSyncModal(false)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase text-center tracking-widest">Cancel</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {storeItems.length > 0 && (
-                        <div className="fixed bottom-0 inset-x-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-4 px-4 sm:px-8 z-40 shadow-2xl text-slate-900"><div className="max-w-2xl mx-auto flex justify-between items-center text-slate-900"><div><p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">{currentStore} Total</p><p className="text-base font-black text-slate-800 leading-none">${cartTotal.toFixed(2)}</p></div><div className="text-right text-slate-900"><div className="h-2 w-24 bg-slate-200 rounded-full mb-1.5 overflow-hidden text-slate-900"><div className="h-full bg-emerald-500 transition-all duration-1000 shadow-md shadow-emerald-200" style={{width: `${(storeItems.filter(i => i.checked).length / storeItems.length) * 100}%`}}></div></div><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{storeItems.filter(i => i.checked).length}/{storeItems.length} Done</p></div></div></div>
-                    )}
-
-                    {editingItem && (
-                        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[110] flex items-center justify-center p-4 text-slate-900" onClick={() => setEditingItem(null)}>
-                            <div className="bg-white rounded-lg p-8 w-[92vw] max-w-sm profound-shadow scale-in text-slate-900" onClick={(e) => e.stopPropagation()}>
-                                <h2 className="text-sm font-black text-slate-800 mb-6 uppercase border-b pb-2 tracking-widest text-center">Edit Details</h2>
-                                <div className="space-y-6 text-left">
-                                    <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Name</label><input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-md text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900" /></div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Qty</label><div className="flex items-center bg-slate-50 rounded-md border p-1"><button onClick={() => setEditingItem({...editingItem, quantity: Math.max(1, editingItem.quantity - 1)})} className="p-3 text-slate-400"><Icon name="Minus" /></button><span className="flex-1 text-center font-black text-sm text-lg">{editingItem.quantity}</span><button onClick={() => setEditingItem({...editingItem, quantity: editingItem.quantity + 1})} className="p-3 text-slate-400"><Icon name="Plus" /></button></div></div>
-                                        <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Price ($)</label><input type="number" step="0.01" value={editingItem.price} onChange={e => setEditingItem({...editingItem, price: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-md text-sm font-black focus:ring-2 focus:ring-emerald-500 outline-none text-lg text-slate-900" /></div>
-                                    </div>
-                                    <div><label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Store</label><select value={editingItem.store} onChange={e => setEditingItem({...editingItem, store: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-md text-sm font-bold appearance-none transition-all text-slate-900">{stores.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></div>
-                                    <div>
-                                        <label className="text-[9px] font-black text-slate-500 uppercase block ml-1 mb-1">Aisle</label>
-                                        <select value={editingItem.aisle} onChange={e => setEditingItem({...editingItem, aisle: e.target.value})} className="w-full p-4 bg-slate-50 border rounded-md text-sm font-bold appearance-none transition-all text-slate-900">
-                                            {AISLE_ORDER.map(a => <option key={a} value={a}>{a}</option>)}
-                                        </select>
-                                    </div>
-                                    <button onClick={saveModalChanges} className="w-full bg-emerald-600 text-white font-black py-4 rounded-xl uppercase text-[10px] active:scale-95 transition-all shadow-lg shadow-emerald-100">Save Changes</button>
-                                    <button onClick={() => setEditingItem(null)} className="w-full py-2 text-slate-400 text-[10px] font-black uppercase tracking-widest text-center">Cancel</button>
-                                    <button onClick={() => {deleteItem(editingItem.id); setEditingItem(null);}} className="w-full py-2 text-red-500 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity text-center text-red-500">Delete Item</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<GroceryListApp />);
-    </script>
+function renderJournal() {
+  const entries = loadEntries();
+  journalList.innerHTML = "";
+  journalEmpty.hidden = entries.length > 0;
+  entries.slice().reverse().forEach(entry => {
+    const li = document.createElement("li");
+    li.className = "journal-item";
+    li.innerHTML = `
+      <span class="journal-dot" style="background:hsl(${entry.hue} 58% 74%)"></span>
+      <div class="journal-body">
+        <div class="journal-row">
+          <span class="journal-emotion">${escapeHtml(entry.name)}</span>
+          <span class="journal-time">${fmtTime(entry.ts)}</span>
+        </div>
+        <div class="journal-crumb">${escapeHtml(entry.crumb)}</div>
+        ${entry.note ? `<p class="journal-note">${escapeHtml(entry.note)}</p>` : ""}
+      </div>
+      <button class="journal-del" data-id="${entry.id}" aria-label="Delete entry">✕</button>`;
+    journalList.appendChild(li);
+  });
+}
+journalList.addEventListener("click", e => {
+  const btn = e.target.closest(".journal-del");
+  if (!btn) return;
+  saveEntries(loadEntries().filter(en => String(en.id) !== btn.dataset.id));
+  renderJournal();
+});
+clearBtn.addEventListener("click", () => {
+  if (loadEntries().length === 0) return;
+  if (confirm("Clear your whole journal? This can't be undone.")) { saveEntries([]); renderJournal(); showToast("Journal cleared"); }
+});
+logBtn.addEventListener("click", () => {
+  if (!current) return;
+  const entries = loadEntries();
+  entries.push({
+    id: Date.now(), ts: Date.now(), name: current.name,
+    crumb: panelCrumb.textContent, hue: current.hue,
+    note: noteInput.value.trim()
+  });
+  saveEntries(entries);
+  renderJournal();
+  showToast(`Logged "${current.name}"`);
+  clearSelection();
+});
+let toastTimer;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+}
+renderJournal();
+})();
+</script>
 </body>
 </html>
