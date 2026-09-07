@@ -89,6 +89,34 @@ h1{font-family:var(--font-display);font-weight:500;font-size:38px;line-height:1.
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @media (max-width:460px){h1{font-size:30px;}.app{padding:34px 16px 48px;}}
 @media (prefers-reduced-motion:reduce){.panel{animation:none;}.wheel-seg{transition:none;}}
+
+/* ---- Mobile drop-down style nav (replaces the wheel on small screens) ---- */
+.hero-sub-list{display:none;}
+.mobile-nav{display:none;}
+@media (max-width:680px){
+  .wheel-stage{display:none;}
+  .hero-sub-wheel{display:none;}
+  .hero-sub-list{display:block;}
+  .mobile-nav{display:block;margin:32px 0 6px;}
+}
+.mnav-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:28px;}
+.mnav-back{background:none;border:none;color:var(--accent);font-family:var(--font-body);font-weight:600;font-size:14px;cursor:pointer;padding:4px 2px;flex-shrink:0;}
+.mnav-back:hover{opacity:.8;}
+.mnav-crumb{font-family:var(--font-display);font-size:18px;font-style:italic;color:var(--text-soft);margin:0;}
+.mnav-pick{display:block;width:100%;text-align:left;background:var(--surface-soft);border:1px dashed var(--border);border-radius:10px;color:var(--text-soft);font-family:var(--font-body);font-size:13.5px;padding:11px 14px;margin-bottom:12px;cursor:pointer;}
+.mnav-pick[hidden]{display:none;}
+.mnav-pick:hover{border-color:var(--accent);color:var(--text);}
+.mnav-pick span{font-weight:600;}
+.mnav-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;border-radius:var(--radius);overflow:hidden;box-shadow:0 1px 3px rgba(58,53,47,.06);}
+.mnav-row{background:var(--surface);border:1px solid var(--border);padding:14px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.mnav-row+.mnav-row{border-top:none;}
+.mnav-row:first-child{border-radius:var(--radius) var(--radius) 0 0;}
+.mnav-row:last-child{border-radius:0 0 var(--radius) var(--radius);}
+.mnav-row:only-child{border-radius:var(--radius);}
+.mnav-row:active{background:var(--surface-soft);}
+.mnav-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;}
+.mnav-label{flex:1;font-size:15px;font-weight:500;}
+.mnav-chev{color:var(--text-faint);font-size:18px;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -97,7 +125,8 @@ h1{font-family:var(--font-display);font-weight:500;font-size:38px;line-height:1.
   <header>
     <p class="eyebrow">A private mood journal</p>
     <h1>What's moving<br>through you?</h1>
-    <p class="hero-sub">Start in the center, then work outward — general, then specific. Tap whichever ring feels closest.</p>
+    <p class="hero-sub hero-sub-wheel">Start in the center, then work outward — general, then specific. Tap whichever ring feels closest.</p>
+    <p class="hero-sub hero-sub-list">Pick whichever feeling is closest, then narrow it down — general to specific.</p>
   </header>
 
   <div class="wheel-stage">
@@ -109,6 +138,15 @@ h1{font-family:var(--font-display);font-weight:500;font-size:38px;line-height:1.
     </div>
     <p class="scroll-hint">Click and drag — or swipe with a finger — to spin the wheel.</p>
   </div>
+
+  <section id="mobileNav" class="mobile-nav">
+    <div class="mnav-header">
+      <button id="mnavBack" class="mnav-back" type="button" hidden>‹ Back</button>
+      <p class="mnav-crumb" id="mnavCrumb">Choose a feeling</p>
+    </div>
+    <button id="mnavPickBtn" class="mnav-pick" type="button" hidden>Log “<span id="mnavPickName"></span>” as it is</button>
+    <ul id="mnavList" class="mnav-list"></ul>
+  </section>
 
   <section id="panel" class="panel" hidden>
     <div class="panel-inner">
@@ -451,9 +489,80 @@ function clearSelection() {
   segments.forEach(s => s.el.classList.remove("is-active","is-dim"));
   panel.hidden = true;
   centerLabel.textContent = "Tap a feeling";
+  if (typeof mnavPath !== "undefined") { mnavPath = []; if (typeof renderMobileNav === "function") renderMobileNav(); }
 }
 centerBtn.addEventListener("click", clearSelection);
 panelClose.addEventListener("click", clearSelection);
+
+/* ---------------- Mobile drop-down nav (same data + selectSegment as the wheel) ---------------- */
+let mnavPath = [];
+const mnavList = document.getElementById("mnavList");
+const mnavBack = document.getElementById("mnavBack");
+const mnavCrumb = document.getElementById("mnavCrumb");
+const mnavPickBtn = document.getElementById("mnavPickBtn");
+const mnavPickName = document.getElementById("mnavPickName");
+
+function pickRec(core, mid, leafName) {
+  return {
+    ring: leafName ? "outer" : mid ? "mid" : "core",
+    coreLabel: core.label,
+    midLabel: mid ? mid.label : null,
+    name: leafName || (mid ? mid.label : core.label),
+    hint: core.hint,
+    hue: core.hue
+  };
+}
+
+function renderMobileNav() {
+  mnavList.innerHTML = "";
+  let rows = [], core = null, mid = null;
+
+  if (mnavPath.length === 0) {
+    rows = WHEEL.map((c, i) => ({ label: c.label, hue: c.hue, drill: true, idx: i }));
+    mnavCrumb.textContent = "Choose a feeling";
+    mnavBack.hidden = true;
+    mnavPickBtn.hidden = true;
+  } else if (mnavPath.length === 1) {
+    core = WHEEL[mnavPath[0]];
+    rows = core.mids.map((m, i) => ({ label: m.label, hue: core.hue, drill: true, idx: i }));
+    mnavCrumb.textContent = core.label;
+    mnavBack.hidden = false;
+    mnavPickBtn.hidden = false;
+    mnavPickName.textContent = core.label;
+  } else {
+    core = WHEEL[mnavPath[0]];
+    mid = core.mids[mnavPath[1]];
+    rows = mid.leaves.map(name => ({ label: name, hue: core.hue, drill: false }));
+    mnavCrumb.textContent = core.label + " › " + mid.label;
+    mnavBack.hidden = false;
+    mnavPickBtn.hidden = false;
+    mnavPickName.textContent = mid.label;
+  }
+
+  rows.forEach(row => {
+    const li = document.createElement("li");
+    li.className = "mnav-row";
+    li.setAttribute("role", "button");
+    li.setAttribute("tabindex", "0");
+    li.innerHTML = `<span class="mnav-dot" style="background:hsl(${row.hue} 58% 76%)"></span>` +
+                   `<span class="mnav-label">${escapeHtml(row.label)}</span>` +
+                   (row.drill ? `<span class="mnav-chev" aria-hidden="true">›</span>` : "");
+    const activate = () => {
+      if (row.drill) { mnavPath = [...mnavPath, row.idx]; renderMobileNav(); }
+      else { selectSegment(pickRec(core, mid, row.label)); }
+    };
+    li.addEventListener("click", activate);
+    li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+    mnavList.appendChild(li);
+  });
+}
+mnavBack.addEventListener("click", () => { mnavPath = mnavPath.slice(0, -1); renderMobileNav(); });
+mnavPickBtn.addEventListener("click", () => {
+  const core = WHEEL[mnavPath[0]];
+  const mid = mnavPath.length > 1 ? core.mids[mnavPath[1]] : null;
+  selectSegment(pickRec(core, mid, null));
+});
+renderMobileNav();
 
 /* ---------------- Journal (localStorage) ---------------- */
 const STORAGE_KEY = "emotion-wheel-journal";
